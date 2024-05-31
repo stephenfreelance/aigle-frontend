@@ -1,0 +1,21 @@
+@import '@/constants.scss';
+
+.content-container {
+    padding: $content-padding;
+    padding-top: calc($header-height + $content-padding);
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+
+    &.has-subheader {
+        padding-top: calc($content-padding + 2*$header-height);
+    }
+
+    .content {
+        height: 100%;
+
+        width: 100%;
+        max-width: var(--mantine-breakpoint-xl);
+    }
+}

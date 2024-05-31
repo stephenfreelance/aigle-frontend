@@ -1,0 +1,11 @@
+.collectivity-type-selection {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 16px;
+
+    .collectivity-type-selection-button {
+        text-transform: capitalize;
+    }
+}

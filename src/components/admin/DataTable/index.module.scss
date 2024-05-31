@@ -1,0 +1,32 @@
+$space-between-elements: 16px;
+
+.filters-section {
+    margin-bottom: $space-between-elements;
+}
+
+.error-card {
+    margin-bottom: $space-between-elements;
+}
+
+.table-container {
+    position: relative;
+    margin-bottom: $space-between-elements;
+
+    .empty-results-cell {
+        text-align: center;
+    }
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.items-clickable {
+    tbody {
+        tr {
+            cursor: pointer;
+        }
+    }
+}

@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm, UseFormReturnType } from '@mantine/form';
 import { Button, TextInput } from '@mantine/core';
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 
 import classes from './index.module.scss';
 import { AUTH_LOGIN_ENDPOINT } from '@/api-endpoints';
 import { useMutation, UseMutationResult } from '@tanstack/react-query';
+import { useAuth } from '@/utils/auth';
+import api from '@/utils/api';
+import ErrorCard from '@/components/ErrorCard';
 
 interface JwtAuthResponse {
   access: string;
@@ -18,11 +21,14 @@ interface FormValues {
 }
 
 const login = async (user: FormValues) => {
-  const response = await axios.post<JwtAuthResponse>(AUTH_LOGIN_ENDPOINT, user);
+  const response = await api.post<JwtAuthResponse>(AUTH_LOGIN_ENDPOINT, user);
   return response.data;
 };
 
 const Component: React.FC = () => {
+  const { setAccessToken, setRefreshToken } = useAuth();
+  const [error, setError] = useState<AxiosError>();
+
   const form: UseFormReturnType<FormValues> = useForm({
     mode: 'uncontrolled',
     initialValues: {
@@ -39,15 +45,13 @@ const Component: React.FC = () => {
     useMutation({
       mutationFn: login,
       onSuccess: (data) => {
-        // Handle successful login (e.g., store token, redirect, etc.)
-        console.log('Login successful:', data);
+        setAccessToken(data.access);
+        setRefreshToken(data.refresh);
       },
       onError: (error) => {
-        // Handle login error
-        console.error('Login failed:', error);
+        setError(error);
       },
     });
-
 
   const handleSubmit = (values: FormValues) => {
     mutation.mutate(values);
@@ -56,6 +60,7 @@ const Component: React.FC = () => {
   return (
     <div className={classes.container}>
       <form onSubmit={form.onSubmit(handleSubmit)}>
+        {error ? <ErrorCard>Identifiants invalides</ErrorCard> : null}
         <TextInput
           withAsterisk
           label="Email"
