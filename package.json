@@ -9,7 +9,7 @@
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "lint:scss": "stylelint \"./src/**/*.scss\"",
         "preview": "vite preview",
-        "precommit": "pretty-quick --staged",
+        "precommit": "lint && lint:scss && pretty-quick --staged",
         "prepare": "husky install .husky",
         "format": "prettier --write ."
     },
