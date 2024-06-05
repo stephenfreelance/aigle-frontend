@@ -1,4 +1,4 @@
-import { PaginationOffsetLimit, PaginationPage } from "@/models/table";
+import { PaginationOffsetLimit, PaginationPage } from '@/models/table';
 
 export const getPaginationPage = (paginationOffsetLimit: PaginationOffsetLimit): PaginationPage | undefined => {
     if (!paginationOffsetLimit.total) {
@@ -10,6 +10,6 @@ export const getPaginationPage = (paginationOffsetLimit: PaginationOffsetLimit):
 
     return {
         currentPage,
-        totalPages
+        totalPages,
     };
-}
+};

@@ -8,8 +8,11 @@
     align-items: flex-start;
     justify-content: center;
 
+    min-height: 100vh;
+    height: 100vh;
+
     &.has-subheader {
-        padding-top: calc($content-padding + 2*$header-height);
+        padding-top: calc($content-padding + 2 * $header-height);
     }
 
     .content {

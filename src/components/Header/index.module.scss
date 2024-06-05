@@ -2,14 +2,17 @@
 
 .container {
     top: 0;
-    
+
+    &.has-subheader {
+        border: none;
+    }
+
     .avatar-button {
         border: 0;
 
         cursor: pointer;
     }
 }
-
 
 .menu-email {
     font-size: 1.2rem;

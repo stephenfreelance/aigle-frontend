@@ -1,0 +1,10 @@
+.color-cell {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+}
+
+.categories-cell {
+    flex-wrap: nowrap;
+}

@@ -4,24 +4,21 @@ import React, { PropsWithChildren } from 'react';
 import { Navigate } from 'react-router-dom';
 
 interface ComponentProps {
-  roles?: UserRole[];
+    roles?: UserRole[];
 }
 
-const Component: React.FC<PropsWithChildren<ComponentProps>> = ({
-  children,
-  roles,
-}) => {
-  const { isAuthenticated, userMe } = useAuth();
+const Component: React.FC<PropsWithChildren<ComponentProps>> = ({ children, roles }) => {
+    const { isAuthenticated, userMe } = useAuth();
 
-  if (!isAuthenticated()) {
-    return <Navigate to="/login" />;
-  }
+    if (!isAuthenticated()) {
+        return <Navigate to="/login" />;
+    }
 
-  if (roles && userMe && !roles.includes(userMe.userRole)) {
-    return <Navigate to="/" />;
-  }
+    if (roles && userMe && !roles.includes(userMe.userRole)) {
+        return <Navigate to="/" />;
+    }
 
-  return <>{children}</>;
+    return <>{children}</>;
 };
 
 export default Component;
