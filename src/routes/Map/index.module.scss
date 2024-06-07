@@ -1,3 +1,6 @@
-.container {
-    height: 100%;
+@import '@/constants.scss';
+
+.map-container {
+    padding-top: $header-height;
+    height: 100vh;
 }

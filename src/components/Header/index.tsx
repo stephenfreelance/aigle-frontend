@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useAuth } from '@/utils/auth';
+import { useAuth } from '@/utils/auth-context';
 import { DEFAULT_ROUTE, ROLES_NAMES_MAP } from '@/utils/constants';
 import { Avatar, Divider, Menu, NavLink } from '@mantine/core';
 import { IconLogout } from '@tabler/icons-react';

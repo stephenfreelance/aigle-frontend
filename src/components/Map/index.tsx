@@ -1,39 +1,13 @@
-import React, { useEffect, useRef } from 'react';
-import Map from 'react-map-gl';
+import React, { useCallback } from 'react';
+import Map, { Layer, Source, ViewStateChangeEvent } from 'react-map-gl';
 
+import { MapLayer } from '@/models/map-layer';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import mapboxgl from 'mapbox-gl';
-import type { MapStyle } from 'react-map-gl';
 import classes from './index.module.scss';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
-
-const getMapStyle = (urls: string[]) => {
-    const style: MapStyle = {
-        layers: [],
-        sources: {},
-        version: 8,
-    };
-
-    urls.forEach((url, index) => {
-        const rasterId = `raster_${index}`;
-
-        style.layers.push({
-            source: rasterId,
-            type: 'raster',
-            id: rasterId,
-        });
-        style.sources[rasterId] = {
-            type: 'raster',
-            // tiles: ['https://aigle-tiles-210324.s3.fr-par.scw.cloud/{z}/{x}/{y}.png'],
-            tiles: [url],
-            tileSize: 256,
-        };
-    });
-
-    return style;
-};
 
 const MAP_INITIAL_VIEW_STATE = {
     longitude: 3.8767337,
@@ -70,35 +44,59 @@ const MAP_CONTROLS: {
     },
 ];
 
+const getSourceId = (layer: MapLayer) => `source-${layer.tileSet.uuid}`;
+const getLayerId = (layer: MapLayer) => `layer-${layer.tileSet.uuid}`;
+
 interface ComponentProps {
-    urls: string[];
+    layers: MapLayer[];
 }
 
-const Component: React.FC<ComponentProps> = ({ urls }) => {
-    const ref = useRef<mapboxgl.Map | null>(null);
+const Component: React.FC<ComponentProps> = ({ layers }) => {
+    const handleMapRef = useCallback((node?: mapboxgl.Map) => {
+        if (!node) {
+            return;
+        }
 
-    useEffect(() => {
         MAP_CONTROLS.forEach(({ control, position }) => {
-            if (!ref.current) {
-                return;
-            }
-
-            if (!ref.current.hasControl(control)) {
-                ref.current.addControl(control, position);
+            if (!node.hasControl(control)) {
+                node.addControl(control, position);
             }
         });
-    }, [ref.current]);
-
-    const styles: MapStyle = getMapStyle(urls);
+    }, []);
 
     return (
         <div className={classes.container}>
             <Map
-                ref={ref}
+                reuseMaps={true}
+                ref={handleMapRef}
                 mapboxAccessToken={MAPBOX_TOKEN}
-                mapStyle={styles}
                 initialViewState={MAP_INITIAL_VIEW_STATE}
-            />
+                onMoveEnd={(e: ViewStateChangeEvent) => {
+                    const map = e.target;
+                    const bounds = map.getBounds();
+                    console.log({bounds});
+                }}
+            >
+                {layers
+                    .filter((layer) => layer.displayed)
+                    .map((layer, index) => (
+                        <Source
+                            key={layer.tileSet.uuid}
+                            id={getSourceId(layer)}
+                            type="raster"
+                            tiles={[layer.tileSet.url]}
+                            tileSize={256}
+                        >
+                            <Layer
+                                beforeId={index ? getLayerId(layers[index - 1]) : undefined}
+                                metadata={layer.tileSet}
+                                id={getLayerId(layer)}
+                                type="raster"
+                                source={getSourceId(layer)}
+                            />
+                        </Source>
+                    ))}
+            </Map>
         </div>
     );
 };

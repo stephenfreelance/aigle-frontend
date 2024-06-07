@@ -14,7 +14,7 @@ import UserForm from '@/routes/admin/user/UserForm';
 import UserList from '@/routes/admin/user/UserList';
 import ProtectedRoute from '@/utils/ProtectedRoute';
 import api from '@/utils/api';
-import { useAuth } from '@/utils/auth';
+import { useAuth } from '@/utils/auth-context';
 import { DEFAULT_ROUTE } from '@/utils/constants';
 import React, { useCallback, useEffect } from 'react';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';

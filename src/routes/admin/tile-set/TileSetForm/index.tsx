@@ -14,7 +14,7 @@ import { UseFormReturnType, isNotEmpty, useForm } from '@mantine/form';
 import { IconMapPlus } from '@tabler/icons-react';
 import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
-import { parse } from 'date-fns';
+import { formatISO, parse } from 'date-fns';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import classes from './index.module.scss';
 
@@ -25,13 +25,30 @@ interface MapPreviewProps {
 }
 
 const MapPreview: React.FC<MapPreviewProps> = ({ url }) => {
+    const fakeDate = formatISO(new Date());
+
     return (
         <Card withBorder className={classes['map-preview-container']}>
             <h2>Aperçu du fond de carte</h2>
             <div>
                 {url ? (
                     <div className={classes['map-preview-content']}>
-                        <Map urls={[url]} />
+                        <Map
+                            layers={[
+                                {
+                                    displayed: true,
+                                    tileSet: {
+                                        createdAt: fakeDate,
+                                        updatedAt: fakeDate,
+                                        uuid: 'fake-uuid',
+                                        date: fakeDate,
+                                        name: 'Mon fond de carte',
+                                        url,
+                                        tileSetStatus: 'VISIBLE',
+                                    },
+                                },
+                            ]}
+                        />
                     </div>
                 ) : (
                     <p>L&apos;aperçu du fond de carte apparaîtra ici quand un url valide sera spécifié</p>
@@ -68,7 +85,7 @@ interface FormProps {
 const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
     const [error, setError] = useState<AxiosError>();
     const navigate = useNavigate();
-    const [mapPreviewUrl, setMapPreviewUrl] = useState<string | undefined>();
+    const [mapPreviewUrl, setMapPreviewUrl] = useState<string | undefined>(initialValues.url || undefined);
 
     const form: UseFormReturnType<FormValues> = useForm({
         mode: 'uncontrolled',

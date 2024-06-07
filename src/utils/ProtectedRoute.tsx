@@ -1,5 +1,5 @@
 import { UserRole } from '@/models/user';
-import { useAuth } from '@/utils/auth';
+import { useAuth } from '@/utils/auth-context';
 import React, { PropsWithChildren } from 'react';
 import { Navigate } from 'react-router-dom';
 

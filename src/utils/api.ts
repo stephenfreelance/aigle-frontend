@@ -1,5 +1,5 @@
 import { AUTH_REFRESH_TOKEN_ENDPOINT } from '@/api-endpoints';
-import { useAuth } from '@/utils/auth';
+import { useAuth } from '@/utils/auth-context';
 import axios from 'axios';
 
 const api = axios.create({

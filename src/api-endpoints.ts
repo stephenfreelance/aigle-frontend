@@ -35,3 +35,5 @@ const BASE_TILE_SET = `${BASE_API}tile-set/`;
 export const TILE_SET_LIST_ENDPOINT = `${BASE_TILE_SET}`;
 export const TILE_SET_POST_ENDPOINT = `${BASE_TILE_SET}`;
 export const getTileSetDetailEndpoint = (uuid: string) => `${BASE_TILE_SET}${uuid}/`;
+
+export const MAP_SETTINGS_ENDPOINT = `${BASE_API}map-settings/`;
