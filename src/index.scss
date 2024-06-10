@@ -62,6 +62,7 @@ select {
     html:focus-within {
         scroll-behavior: auto;
     }
+
     *,
     *::before,
     *::after {
@@ -141,4 +142,43 @@ header {
 
 .mantine-MultiSelect-dropdown {
     z-index: 500 !important;
+}
+
+// mapbox
+
+.mapboxgl-ctrl-geocoder {
+    border-radius: 24px;
+    min-width: 300px !important;
+    max-width: 100%;
+
+    .suggestions {
+        border-radius: 24px;
+    }
+
+    .mapboxgl-ctrl-geocoder--input {
+        height: 48px;
+        padding: 14px 42px;
+    }
+
+    .mapboxgl-ctrl-geocoder--powered-by {
+        display: none !important;
+    }
+
+    .mapboxgl-ctrl-geocoder--icon {
+        top: 14px;
+        left: 14px;
+
+
+        .mapboxgl-ctrl-geocoder--icon-loading {
+            top: 14px;
+            left: 14px;
+
+            background: white;
+        }
+    }
+
+    .mapboxgl-ctrl-geocoder--button {
+        top: 14px;
+        right: 14px;
+    }
 }

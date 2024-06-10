@@ -26,6 +26,7 @@ const MAP_CONTROLS: {
             mapboxgl: mapboxgl,
             placeholder: 'Rechercher par adresse',
         }),
+
         position: 'top-left',
     },
     // scale
@@ -74,7 +75,7 @@ const Component: React.FC<ComponentProps> = ({ layers }) => {
                 onMoveEnd={(e: ViewStateChangeEvent) => {
                     const map = e.target;
                     const bounds = map.getBounds();
-                    console.log({bounds});
+                    console.log({ bounds });
                 }}
             >
                 {layers
