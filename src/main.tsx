@@ -5,7 +5,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.scss';
 
-const colors: MantineColorsTuple = [
+const aigleColors: MantineColorsTuple = [
     '#e1fff5',
     '#cffbeb',
     '#a5f4d5',
@@ -19,8 +19,9 @@ const colors: MantineColorsTuple = [
 ];
 
 const theme = createTheme({
+    primaryColor: 'aigleColors',
     colors: {
-        colors,
+        aigleColors,
     },
 });
 

@@ -1,11 +1,12 @@
 import React from 'react';
 
+import logoSmallImg from '@/assets/logo_small.png';
 import { useAuth } from '@/utils/auth-context';
 import { DEFAULT_ROUTE, ROLES_NAMES_MAP } from '@/utils/constants';
-import { Avatar, Divider, Menu, NavLink } from '@mantine/core';
-import { IconLogout } from '@tabler/icons-react';
+import { Avatar, Divider, Image, Menu, NavLink } from '@mantine/core';
+import { IconAdjustments, IconLogout, IconMap } from '@tabler/icons-react';
 import clsx from 'clsx';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import classes from './index.module.scss';
 
 interface ComponentProps {
@@ -23,13 +24,25 @@ const Component: React.FC<ComponentProps> = ({ hasSubHeader }) => {
             })}
         >
             <div className="navigation-items">
-                <NavLink href={DEFAULT_ROUTE} label="Aigle" />
+                <Link to={DEFAULT_ROUTE} className={classes['logo-container']}>
+                    <Image src={logoSmallImg} alt="Logo Aigle" h="100%" fit="contain" />
+                </Link>
 
                 <Divider className="navigation-items-divider" orientation="vertical" />
 
-                <NavLink href="/map" label="Carte" active={pathname.includes('/map')} />
+                <NavLink
+                    leftSection={<IconMap size={16} />}
+                    href="/map"
+                    label="Carte"
+                    active={pathname.includes('/map')}
+                />
                 {userMe?.userRole && ['ADMIN', 'SUPER_ADMIN'].includes(userMe.userRole) ? (
-                    <NavLink href="/admin" label="Admin" active={pathname.includes('/admin')} />
+                    <NavLink
+                        leftSection={<IconAdjustments size={16} />}
+                        href="/admin"
+                        label="Admin"
+                        active={pathname.includes('/admin')}
+                    />
                 ) : null}
             </div>
 

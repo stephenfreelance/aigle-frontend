@@ -1,9 +1,13 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import Map, { Layer, Source, ViewStateChangeEvent } from 'react-map-gl';
 
+import { getDetectionListEndpoint } from '@/api-endpoints';
+import { DetectionGeojsonData, DetectionProperties } from '@/models/detection';
 import { MapLayer } from '@/models/map-layer';
+import api from '@/utils/api';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import mapboxgl from 'mapbox-gl';
 import classes from './index.module.scss';
 
@@ -48,11 +52,26 @@ const MAP_CONTROLS: {
 const getSourceId = (layer: MapLayer) => `source-${layer.tileSet.uuid}`;
 const getLayerId = (layer: MapLayer) => `layer-${layer.tileSet.uuid}`;
 
-interface ComponentProps {
-    layers: MapLayer[];
+const DETECTION_ENDPOINT = getDetectionListEndpoint();
+
+const GEOJSON_LAYER_ID = 'geojson-layer';
+
+interface DetectionFilter {
+    neLat: number;
+    neLng: number;
+    swLat: number;
+    swLng: number;
 }
 
-const Component: React.FC<ComponentProps> = ({ layers }) => {
+interface ComponentProps {
+    layers: MapLayer[];
+    displayDetections?: boolean;
+}
+
+const Component: React.FC<ComponentProps> = ({ layers, displayDetections = true }) => {
+    const [detectionsFilter, setDetectionsFilter] = useState<DetectionFilter>();
+    const [cursor, setCursor] = useState<string>('auto');
+
     const handleMapRef = useCallback((node?: mapboxgl.Map) => {
         if (!node) {
             return;
@@ -65,6 +84,45 @@ const Component: React.FC<ComponentProps> = ({ layers }) => {
         });
     }, []);
 
+    const fetchDetections = async (detectionsFilter: DetectionFilter) => {
+        const res = await api.get<DetectionGeojsonData>(DETECTION_ENDPOINT, {
+            params: detectionsFilter,
+        });
+        return res.data;
+    };
+
+    const { data } = useQuery({
+        queryKey: [DETECTION_ENDPOINT, ...Object.values(detectionsFilter || {})],
+        queryFn: () => (detectionsFilter ? fetchDetections(detectionsFilter) : undefined),
+        placeholderData: keepPreviousData,
+        enabled: displayDetections && !!detectionsFilter,
+    });
+
+    const loadDataFromBounds = (e: mapboxgl.MapboxEvent | ViewStateChangeEvent) => {
+        const map = e.target;
+        const bounds = map.getBounds();
+
+        setDetectionsFilter({
+            neLat: bounds._ne.lat,
+            neLng: bounds._ne.lng,
+            swLat: bounds._sw.lat,
+            swLng: bounds._sw.lng,
+        });
+    };
+
+    const onPolygonClick = (e: mapboxgl.MapLayerMouseEvent) => {
+        const features = e.features;
+
+        if (features && features.length > 0) {
+            const clickedFeature = features[0];
+            const detectionProperties = clickedFeature.properties as DetectionProperties;
+            console.log('CLICKED DETECTION', detectionProperties);
+        }
+    };
+
+    const onPolygonMouseEnter = useCallback(() => setCursor('pointer'), []);
+    const onPolygonMouseLeave = useCallback(() => setCursor('auto'), []);
+
     return (
         <div className={classes.container}>
             <Map
@@ -72,11 +130,13 @@ const Component: React.FC<ComponentProps> = ({ layers }) => {
                 ref={handleMapRef}
                 mapboxAccessToken={MAPBOX_TOKEN}
                 initialViewState={MAP_INITIAL_VIEW_STATE}
-                onMoveEnd={(e: ViewStateChangeEvent) => {
-                    const map = e.target;
-                    const bounds = map.getBounds();
-                    console.log({ bounds });
-                }}
+                onLoad={loadDataFromBounds}
+                onMoveEnd={loadDataFromBounds}
+                interactiveLayerIds={[GEOJSON_LAYER_ID]}
+                onClick={onPolygonClick}
+                onMouseEnter={onPolygonMouseEnter}
+                onMouseLeave={onPolygonMouseLeave}
+                cursor={cursor}
             >
                 {layers
                     .filter((layer) => layer.displayed)
@@ -97,6 +157,26 @@ const Component: React.FC<ComponentProps> = ({ layers }) => {
                             />
                         </Source>
                     ))}
+
+                {data && (
+                    <Source id="geojson-data" type="geojson" data={data}>
+                        <Layer
+                            id={GEOJSON_LAYER_ID}
+                            type="fill"
+                            paint={{
+                                'fill-opacity': 0,
+                            }}
+                        />
+                        <Layer
+                            id="geojson-layer-outline"
+                            type="line"
+                            paint={{
+                                'line-color': ['get', 'objectTypeColor'],
+                                'line-width': 2,
+                            }}
+                        />
+                    </Source>
+                )}
             </Map>
         </div>
     );

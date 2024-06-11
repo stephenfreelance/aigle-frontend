@@ -34,6 +34,7 @@ const MapPreview: React.FC<MapPreviewProps> = ({ url }) => {
                 {url ? (
                     <div className={classes['map-preview-content']}>
                         <Map
+                            displayDetections={false}
                             layers={[
                                 {
                                     displayed: true,

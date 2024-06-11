@@ -12,6 +12,12 @@
 
         cursor: pointer;
     }
+
+    .logo-container {
+        display: flex;
+        align-items: center;
+        height: 100%;
+    }
 }
 
 .menu-email {
