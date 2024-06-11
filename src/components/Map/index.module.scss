@@ -1,3 +1,23 @@
+@import '@/constants.scss';
+
+$panel-position-from-borders: 10px;
+
 .container {
     height: 100%;
+
+    .map-detection-detail-panel-container {
+        position: absolute;
+
+        box-shadow: $shadow;
+
+        top: $panel-position-from-borders;
+        right: $panel-position-from-borders;
+        bottom: $panel-position-from-borders;
+
+        width: 400px;
+        border-radius: $map-elements-border-radius;
+
+        z-index: 100;
+        background: #ffffff;
+    }
 }

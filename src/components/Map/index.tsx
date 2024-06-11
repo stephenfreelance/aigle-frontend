@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import Map, { Layer, Source, ViewStateChangeEvent } from 'react-map-gl';
 
 import { getDetectionListEndpoint } from '@/api-endpoints';
+import DetectionDetail from '@/components/DetectionDetail';
 import { DetectionGeojsonData, DetectionProperties } from '@/models/detection';
 import { MapLayer } from '@/models/map-layer';
 import api from '@/utils/api';
@@ -70,6 +71,8 @@ interface ComponentProps {
 
 const Component: React.FC<ComponentProps> = ({ layers, displayDetections = true }) => {
     const [detectionsFilter, setDetectionsFilter] = useState<DetectionFilter>();
+    const [detectionDetailUuidShowed, setDetectionDetailUuidShowed] = useState<string>();
+
     const [cursor, setCursor] = useState<string>('auto');
 
     const handleMapRef = useCallback((node?: mapboxgl.Map) => {
@@ -110,14 +113,16 @@ const Component: React.FC<ComponentProps> = ({ layers, displayDetections = true 
         });
     };
 
-    const onPolygonClick = (e: mapboxgl.MapLayerMouseEvent) => {
-        const features = e.features;
-
-        if (features && features.length > 0) {
-            const clickedFeature = features[0];
-            const detectionProperties = clickedFeature.properties as DetectionProperties;
-            console.log('CLICKED DETECTION', detectionProperties);
+    const onMapClick = ({ features }: mapboxgl.MapLayerMouseEvent) => {
+        if (!features || !features.length) {
+            setDetectionDetailUuidShowed(undefined);
+            return;
         }
+
+        const clickedFeature = features[0];
+        const detectionProperties = clickedFeature.properties as DetectionProperties;
+        console.log('CLICKED DETECTION', detectionProperties);
+        setDetectionDetailUuidShowed(detectionProperties.uuid);
     };
 
     const onPolygonMouseEnter = useCallback(() => setCursor('pointer'), []);
@@ -133,7 +138,7 @@ const Component: React.FC<ComponentProps> = ({ layers, displayDetections = true 
                 onLoad={loadDataFromBounds}
                 onMoveEnd={loadDataFromBounds}
                 interactiveLayerIds={[GEOJSON_LAYER_ID]}
-                onClick={onPolygonClick}
+                onClick={onMapClick}
                 onMouseEnter={onPolygonMouseEnter}
                 onMouseLeave={onPolygonMouseLeave}
                 cursor={cursor}
@@ -177,6 +182,12 @@ const Component: React.FC<ComponentProps> = ({ layers, displayDetections = true 
                         />
                     </Source>
                 )}
+
+                {detectionDetailUuidShowed ? (
+                    <div className={classes['map-detection-detail-panel-container']}>
+                        <DetectionDetail detectionUuid={detectionDetailUuidShowed} />
+                    </div>
+                ) : undefined}
             </Map>
         </div>
     );
