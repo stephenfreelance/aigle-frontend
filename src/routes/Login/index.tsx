@@ -1,9 +1,10 @@
-import { Button, TextInput } from '@mantine/core';
+import { Button, Image, TextInput } from '@mantine/core';
 import { isEmail, useForm, UseFormReturnType } from '@mantine/form';
 import { AxiosError } from 'axios';
 import React, { useState } from 'react';
 
 import { AUTH_LOGIN_ENDPOINT } from '@/api-endpoints';
+import logoImg from '@/assets/logo.png';
 import ErrorCard from '@/components/ErrorCard';
 import api from '@/utils/api';
 import { useAuth } from '@/utils/auth-context';
@@ -58,9 +59,12 @@ const Component: React.FC = () => {
 
     return (
         <div className={classes.container}>
-            <form onSubmit={form.onSubmit(handleSubmit)}>
-                {error ? <ErrorCard>Identifiants invalides</ErrorCard> : null}
+            <Image src={logoImg} className={classes.logo} alt="Logo Aigle" h="100%" fit="contain" />
+
+            <form className={classes.form} onSubmit={form.onSubmit(handleSubmit)}>
+                {error ? <ErrorCard className={classes['error-card']}>Identifiants invalides</ErrorCard> : null}
                 <TextInput
+                    mt="md"
                     withAsterisk
                     label="Email"
                     placeholder="jean.dupont@email.com"
@@ -68,6 +72,7 @@ const Component: React.FC = () => {
                     {...form.getInputProps('email')}
                 />
                 <TextInput
+                    mt="md"
                     withAsterisk
                     type="password"
                     label="Mot de passe"
@@ -75,7 +80,9 @@ const Component: React.FC = () => {
                     key={form.key('password')}
                     {...form.getInputProps('password')}
                 />
-                <Button type="submit">Connexion</Button>
+                <div className="form-actions">
+                    <Button type="submit">Connexion</Button>
+                </div>
             </form>
         </div>
     );

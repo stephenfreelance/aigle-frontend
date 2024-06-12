@@ -9,7 +9,7 @@ interface ComponentProps {
     hideTooltip?: boolean;
 }
 const Component: React.FC<ComponentProps> = ({ date, hideTooltip }) => {
-    const content = <div>{format(date, DEFAULT_DATE_FORMAT)}</div>;
+    const content = <span>{format(date, DEFAULT_DATE_FORMAT)}</span>;
 
     if (hideTooltip) {
         return content;

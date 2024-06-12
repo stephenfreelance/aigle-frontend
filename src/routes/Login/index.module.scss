@@ -1,2 +1,25 @@
 .container {
+    height: 100vh;
+    padding: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+
+    .logo, .form {
+        width: 100%;
+    }
+
+    .logo {
+        max-width: 24em;
+    }
+
+    .form {
+        max-width: var(--mantine-breakpoint-sm);
+    }
+
+    .error-card {
+        margin-top: 32px;
+    }
 }

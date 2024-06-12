@@ -175,15 +175,16 @@ header {
         top: 14px;
         left: 14px;
 
-        .mapboxgl-ctrl-geocoder--icon-loading {
+        &.mapboxgl-ctrl-geocoder--icon-loading {
             top: 14px;
-            left: 14px;
-
-            background: white;
+            right: 14px;
+            left: unset;
         }
     }
 
     .mapboxgl-ctrl-geocoder--button {
+        display: none !important;
+
         top: 14px;
         right: 14px;
     }

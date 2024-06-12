@@ -30,6 +30,7 @@
         "clsx": "^2.1.1",
         "date-fns": "^3.6.0",
         "dayjs": "^1.11.11",
+        "eventemitter3": "^5.0.1",
         "localforage": "^1.10.0",
         "lodash": "^4.17.21",
         "mapbox-gl": "^3.4.0",

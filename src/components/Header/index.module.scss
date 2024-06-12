@@ -28,10 +28,20 @@
     }
 }
 
-.menu-email {
-    font-size: 1.2rem;
-}
+.menu {
+    padding: 16px !important;
 
-.menu-role {
-    color: var(--menu-item-color, var(--mantine-color-text));
+    .menu-email {
+        font-size: 1rem;
+        font-weight: 700;
+    }
+    
+    .menu-role {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+    }
+    
+    .menu-role {
+        color: var(--menu-item-color, var(--mantine-color-text));
+    }
 }

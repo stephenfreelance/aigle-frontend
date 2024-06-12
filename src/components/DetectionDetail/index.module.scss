@@ -1,0 +1,47 @@
+.container {
+    padding: 24px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .general-informations {
+        .general-informations-item {
+        }
+
+        .mantine-Accordion-panel {
+        }
+        .general-informations-content {
+            .general-informations-content-item {
+                display: flex;
+                gap: 8px;
+                font-size: 0.85rem;
+                align-items: center;
+                justify-content: flex-start;
+
+                &:not(:last-of-type) {
+                    margin-bottom: 8px;
+                }
+            }
+
+            .general-informations-content-item-text {
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+            }
+        }
+    }
+
+    .top-section {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+
+        align-items: center;
+    }
+}
+
+
+.loader {
+    height: 100%;
+}

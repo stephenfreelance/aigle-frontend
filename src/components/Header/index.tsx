@@ -3,7 +3,7 @@ import React from 'react';
 import logoSmallImg from '@/assets/logo_small.png';
 import { useAuth } from '@/utils/auth-context';
 import { DEFAULT_ROUTE, ROLES_NAMES_MAP } from '@/utils/constants';
-import { Avatar, Divider, Image, Menu, NavLink } from '@mantine/core';
+import { Avatar, Button, Divider, Image, Menu, NavLink } from '@mantine/core';
 import { IconAdjustments, IconLogout, IconMap } from '@tabler/icons-react';
 import clsx from 'clsx';
 import { Link, useLocation } from 'react-router-dom';
@@ -53,11 +53,11 @@ const Component: React.FC<ComponentProps> = ({ hasSubHeader }) => {
 
                 {userMe ? (
                     <Menu.Dropdown className={classes.menu}>
-                        <Menu.Label className={classes['menu-email']}>{userMe.email}</Menu.Label>
-                        <Menu.Label className={classes['menu-role']}>{ROLES_NAMES_MAP[userMe.userRole]}</Menu.Label>
-                        <Menu.Item leftSection={<IconLogout />} onClick={() => logout()}>
+                        <p className={classes['menu-email']}>{userMe.email}</p>
+                        <p className={classes['menu-role']}>{ROLES_NAMES_MAP[userMe.userRole]}</p>
+                        <Button mt="sm" variant="outline" leftSection={<IconLogout />} onClick={() => logout()}>
                             Déconnexion
-                        </Menu.Item>
+                        </Button>
                     </Menu.Dropdown>
                 ) : null}
             </Menu>

@@ -39,6 +39,7 @@ export const getTileSetDetailEndpoint = (uuid: string) => `${BASE_TILE_SET}${uui
 export const MAP_SETTINGS_ENDPOINT = `${BASE_API}map-settings/`;
 
 const BASE_DETECTION = `${BASE_API}detection/`;
+export const DETECTION_POST_ENDPOINT = `${BASE_DETECTION}`;
 export const getDetectionListEndpoint = (detail: boolean = false) => {
     const searchParams = new URLSearchParams();
 
