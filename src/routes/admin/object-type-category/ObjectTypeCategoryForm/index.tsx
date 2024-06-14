@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import {
     OBJECT_TYPE_CATEGORY_POST_ENDPOINT,
@@ -13,7 +13,7 @@ import { ObjectTypeCategory, ObjectTypeCategoryDetail } from '@/models/object-ty
 import api from '@/utils/api';
 import { Button, ColorSwatch, MultiSelect, TextInput } from '@mantine/core';
 import { UseFormReturnType, isNotEmpty, useForm } from '@mantine/form';
-import { IconCubePlus } from '@tabler/icons-react';
+import { IconCheck, IconCubePlus } from '@tabler/icons-react';
 import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -75,14 +75,17 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, objectTypes }) => {
 
     const label = uuid ? 'Modifier une thématique' : 'Ajouter une thématique';
 
-    const objectTypesUuidsColorsMap: Record<string, string> =
-        objectTypes?.reduce(
-            (prev, curr) => ({
-                ...prev,
-                [curr.uuid]: curr.color,
-            }),
-            {},
-        ) || {};
+    const objectTypesUuidsColorsMap: Record<string, string> = useMemo(() => {
+        return (
+            objectTypes?.reduce(
+                (prev, curr) => ({
+                    ...prev,
+                    [curr.uuid]: curr.color,
+                }),
+                {},
+            ) || {}
+        );
+    }, [objectTypes]);
 
     return (
         <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -111,10 +114,13 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, objectTypes }) => {
                     label: name,
                 }))}
                 renderOption={(item) => (
-                    <>
-                        <ColorSwatch color={objectTypesUuidsColorsMap[item.option.value]} size={24} />
-                        {item.option.label}
-                    </>
+                    <div className="multi-select-item">
+                        <div className="multi-select-item-label">
+                            <ColorSwatch color={objectTypesUuidsColorsMap[item.option.value]} size={24} />
+                            {item.option.label}
+                        </div>
+                        {item.checked ? <IconCheck className="multi-select-item-icon" color="grey" /> : null}
+                    </div>
                 )}
                 key={form.key('objectTypesUuids')}
                 {...form.getInputProps('objectTypesUuids')}
@@ -136,7 +142,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, objectTypes }) => {
 const EMPTY_FORM_VALUES: FormValues = {
     name: '',
     objectTypesUuids: [],
-};
+} as const;
 
 const ComponentInner: React.FC = () => {
     const { uuid } = useParams();

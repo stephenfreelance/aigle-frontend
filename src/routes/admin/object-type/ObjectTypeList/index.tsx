@@ -8,7 +8,7 @@ import LayoutAdminBase from '@/components/admin/LayoutAdminBase';
 import { ObjectType, ObjectTypeDetail } from '@/models/object-type';
 import api from '@/utils/api';
 import { Button, ColorSwatch, Group, Input, MultiSelect, ScrollArea, Table } from '@mantine/core';
-import { IconCubePlus, IconSearch } from '@tabler/icons-react';
+import { IconCheck, IconCubePlus, IconSearch } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import isEqual from 'lodash/isEqual';
 import { Link, useNavigate } from 'react-router-dom';
@@ -74,6 +74,14 @@ const Component: React.FC = () => {
                                 value: uuid,
                                 label: name,
                             }))}
+                            renderOption={(item) => (
+                                <div className="multi-select-item">
+                                    <div className="multi-select-item-label">{item.option.label}</div>
+                                    {item.checked ? (
+                                        <IconCheck className="multi-select-item-icon" color="grey" />
+                                    ) : null}
+                                </div>
+                            )}
                             value={filter.objectTypeCategoriesUuids}
                             onChange={(objectTypeCategoriesUuids: string[]) =>
                                 setFilter((prev) => ({

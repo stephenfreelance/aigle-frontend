@@ -13,7 +13,7 @@ import { ObjectTypeCategory } from '@/models/object-type-category';
 import api from '@/utils/api';
 import { Button, ColorInput, MultiSelect, TextInput } from '@mantine/core';
 import { UseFormReturnType, isNotEmpty, useForm } from '@mantine/form';
-import { IconCubePlus } from '@tabler/icons-react';
+import { IconCheck, IconCubePlus } from '@tabler/icons-react';
 import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -111,6 +111,12 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, categories }) => {
                     value: uuid,
                     label: name,
                 }))}
+                renderOption={(item) => (
+                    <div className="multi-select-item">
+                        <div className="multi-select-item-label">{item.option.label}</div>
+                        {item.checked ? <IconCheck className="multi-select-item-icon" color="grey" /> : null}
+                    </div>
+                )}
                 key={form.key('categoriesUuids')}
                 {...form.getInputProps('categoriesUuids')}
             />

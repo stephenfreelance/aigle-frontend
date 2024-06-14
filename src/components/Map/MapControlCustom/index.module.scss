@@ -1,0 +1,25 @@
+
+@import "@/constants.scss";
+
+.button {
+    border-radius: $map-elements-border-radius-small !important;
+}
+
+.content {
+    box-shadow: $shadow;
+
+    position: absolute;
+    z-index: 100;
+
+    border-radius: $map-elements-border-radius;
+
+    background: #ffffff;
+
+    padding: 24px;
+
+    display: none;
+
+    &.showed {
+        display: block;
+    }
+}

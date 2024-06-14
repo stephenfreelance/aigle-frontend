@@ -41,7 +41,6 @@ const Component = <T_DATA extends Uuided, T_FILTER extends object>({
                 ...pagination,
                 ...filter,
             },
-            paramsSerializer: { indexes: null },
         });
         setPagination((pagination) => ({
             ...pagination,

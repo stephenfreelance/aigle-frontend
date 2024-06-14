@@ -1,0 +1,25 @@
+@import "@/constants.scss";
+
+.content {
+    width: 400px;
+
+    top: 58px; // 10px margin of searchar bar + 48px total size of search bar
+    
+    margin-left: 10px;
+    margin-top: 10px;
+
+    .empty-filter-text {
+        margin-top: var(--mantine-spacing-sm);
+    }
+
+    .form {
+        padding-bottom: 0;
+    }
+}
+
+
+.container {
+    box-shadow: $shadow;
+    background: #ffffff;
+    border-radius: $map-elements-border-radius-small;
+}

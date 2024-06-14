@@ -1,6 +1,6 @@
 import { GEO_COMMUNE_LIST_ENDPOINT, GEO_DEPARTMENT_LIST_ENDPOINT, GEO_REGION_LIST_ENDPOINT } from '@/api-endpoints';
 import { CollectivityType } from '@/models/geo/_common';
-import { TileSetStatus } from '@/models/tile-set';
+import { TileSetStatus, TileSetType } from '@/models/tile-set';
 import { UserRole } from '@/models/user';
 
 export const DEFAULT_ROUTE = '/';
@@ -26,6 +26,13 @@ export const TILE_SET_STATUSES_NAMES_MAP: {
     VISIBLE: 'visible',
     HIDDEN: 'caché',
     DEACTIVATED: 'désactivé',
+} as const;
+export const TILE_SET_TYPES_NAMES_MAP: {
+    [role in TileSetType]: string;
+} = {
+    BACKGROUND: 'Arrière-plan',
+    PARTIAL: 'Partiel',
+    INDICATIVE: 'Indicative',
 } as const;
 
 export const COLLECTIVITY_TYPES_ENDPOINTS_MAP: {

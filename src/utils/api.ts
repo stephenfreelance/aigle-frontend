@@ -4,6 +4,18 @@ import axios from 'axios';
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
+    paramsSerializer: (params) => {
+        const queryString = Object.keys(params)
+            .map((key) => {
+                const value = params[key];
+                if (Array.isArray(value)) {
+                    return `${key}=${value.join(',')}`;
+                }
+                return `${key}=${value}`;
+            })
+            .join('&');
+        return queryString;
+    },
 });
 
 api.interceptors.request.use(
@@ -33,7 +45,7 @@ api.interceptors.response.use(
 
             if (refreshToken) {
                 try {
-                    const { data } = await axios.post(AUTH_REFRESH_TOKEN_ENDPOINT, {
+                    const { data } = await api.post(AUTH_REFRESH_TOKEN_ENDPOINT, {
                         token: refreshToken,
                     });
 

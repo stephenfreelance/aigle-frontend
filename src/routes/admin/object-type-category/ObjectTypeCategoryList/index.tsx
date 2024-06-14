@@ -9,7 +9,7 @@ import { ObjectType } from '@/models/object-type';
 import { ObjectTypeCategoryDetail } from '@/models/object-type-category';
 import api from '@/utils/api';
 import { Button, ColorSwatch, Group, Input, MultiSelect, ScrollArea, Table } from '@mantine/core';
-import { IconCategoryPlus, IconSearch } from '@tabler/icons-react';
+import { IconCategoryPlus, IconCheck, IconSearch } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import isEqual from 'lodash/isEqual';
 import { Link, useNavigate } from 'react-router-dom';
@@ -84,10 +84,15 @@ const Component: React.FC = () => {
                                 label: name,
                             }))}
                             renderOption={(item) => (
-                                <>
-                                    <ColorSwatch color={objectTypesUuidsColorsMap[item.option.value]} size={24} />
-                                    {item.option.label}
-                                </>
+                                <div className="multi-select-item">
+                                    <div className="multi-select-item-label">
+                                        <ColorSwatch color={objectTypesUuidsColorsMap[item.option.value]} size={24} />
+                                        {item.option.label}
+                                    </div>
+                                    {item.checked ? (
+                                        <IconCheck className="multi-select-item-icon" color="grey" />
+                                    ) : null}
+                                </div>
                             )}
                             value={filter.objectTypesUuids}
                             onChange={(objectTypesUuids: string[]) =>

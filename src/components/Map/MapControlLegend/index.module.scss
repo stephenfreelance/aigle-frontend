@@ -1,0 +1,51 @@
+@import "@/constants.scss";
+
+.content {
+    bottom: 75px; // 19px (mapbox logo) + 10px (mapbox margin) + 20px (switch height) + 10px (switch margin) + 16px (switch padding)
+    left: 0;
+
+    margin-left: 10px;
+    margin-bottom: 10px;
+
+    .empty-filter-text {
+        margin-top: var(--mantine-spacing-sm);
+    }
+
+    .form {
+        padding-bottom: 0;
+    }
+}
+
+.object-type-legends {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+
+    margin-top: var(--mantine-spacing-sm);
+
+    .object-type-legend-item {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+
+        &:not(:last-of-type) {
+            margin-bottom: var(--mantine-spacing-xs);
+        }
+
+        .object-type-legend-item-square {
+            border: 2px solid;
+
+            width: 16px;
+            height: 16px;
+        }
+    }
+}
+
+.container {
+    padding: 8px 12px;
+
+    box-shadow: $shadow;
+    background: #ffffff;
+    border-radius: $map-elements-border-radius;
+}
