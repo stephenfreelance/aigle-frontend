@@ -1,10 +1,10 @@
-@import "@/constants.scss";
+@import '@/constants.scss';
 
 .content {
     width: 400px;
 
     top: 58px; // 10px margin of searchar bar + 48px total size of search bar
-    
+
     margin-left: 10px;
     margin-top: 10px;
 
@@ -17,9 +17,8 @@
     }
 }
 
-
 .container {
     box-shadow: $shadow;
     background: #ffffff;
-    border-radius: $map-elements-border-radius-small;
+    border-radius: $border-radius-small;
 }

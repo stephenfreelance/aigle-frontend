@@ -24,7 +24,7 @@ const useMap = create<MapState>()((set, get) => ({
         set(() => ({
             layers: settings.tileSets.map((tileSet) => ({
                 tileSet,
-                displayed: true,
+                displayed: tileSet.tileSetStatus === 'VISIBLE',
             })),
             objectTypes: settings.objectTypes,
             detectionFilter: {

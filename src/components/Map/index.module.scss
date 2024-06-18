@@ -15,8 +15,8 @@ $panel-position-from-borders: 10px;
         bottom: $panel-position-from-borders;
 
         width: 400px;
-        max-width: calc(100% - 2*$panel-position-from-borders);
-        border-radius: $map-elements-border-radius;
+        max-width: calc(100% - 2 * $panel-position-from-borders);
+        border-radius: $border-radius-medium;
 
         z-index: 100;
         background: #ffffff;

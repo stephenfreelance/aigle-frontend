@@ -124,6 +124,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
                 {...form.getInputProps('password')}
             />
             <Select
+                allowDeselect={false}
                 label="Rôle"
                 withAsterisk
                 mt="md"

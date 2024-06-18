@@ -1,8 +1,9 @@
-@import url("@mantine/core/styles.css");
-@import url("@mantine/dates/styles.css");
+@import url('@mantine/core/styles.css');
+@import url('@mantine/dates/styles.css');
+@import url('@mantine/notifications/styles.css');
 
-@import url("mapbox-gl/dist/mapbox-gl.css");
-@import "@/constants.scss";
+@import url('mapbox-gl/dist/mapbox-gl.css');
+@import '@/constants.scss';
 
 // css reset
 
@@ -25,8 +26,8 @@ h2 {
     font-size: 1.2rem;
 }
 
-ul[role="list"],
-ol[role="list"] {
+ul[role='list'],
+ol[role='list'] {
     list-style: none;
 }
 
@@ -74,6 +75,10 @@ select {
     }
 }
 
+body {
+    overflow-x: hidden;
+}
+
 body,
 html {
     height: 100%;
@@ -83,7 +88,24 @@ html {
 // custom css
 
 form {
-    padding-bottom: 32px;
+    padding-bottom: var(--mantine-spacing-xl);
+
+    .form-actions {
+        margin-top: var(--mantine-spacing-xl);
+
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: var(--mantine-spacing-md);
+    }
+
+    &.compact {
+        padding-bottom: 0;
+
+        .form-actions {
+            margin-top: var(--mantine-spacing-md);
+        }
+    }
 }
 
 a:focus {
@@ -129,16 +151,6 @@ header {
 .admin-subheader {
     top: $header-height;
 }
-
-.form-actions {
-    margin-top: var(--mantine-spacing-xl);
-
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: var(--mantine-spacing-md);
-}
-
 .multi-select-item {
     display: flex;
     flex-direction: row;
@@ -180,19 +192,28 @@ header {
     }
 }
 
+.mantine-Notifications-notification {
+    box-shadow: $shadow;
+    border-radius: $border-radius-small;
+}
+
 // mapbox
 
+.mapboxgl-canvas {
+    width: 100% !important;
+}
+
 .mapboxgl-ctrl-geocoder {
-    border-radius: $map-elements-border-radius;
+    border-radius: $border-radius-medium;
     min-width: 300px !important;
     max-width: 100%;
 
     .suggestions {
-        border-radius: $map-elements-border-radius;
+        border-radius: $border-radius-medium;
     }
 
     .mapboxgl-ctrl-geocoder--input {
-        border-radius: $map-elements-border-radius;
+        border-radius: $border-radius-medium;
         height: 48px;
         padding: 14px 42px;
     }
@@ -221,7 +242,7 @@ header {
 }
 
 .mapboxgl-ctrl:not(.mapboxgl-ctrl-geocoder):not(.mapboxgl-ctrl-scale) {
-    border-radius: $map-elements-border-radius-small;
+    border-radius: $border-radius-small;
 
     .mapboxgl-ctrl-icon {
         opacity: 0.7;
@@ -237,4 +258,11 @@ header {
     display: flex;
     flex-direction: row;
     align-items: center;
+}
+
+.mapbox-gl-draw_ctrl-draw-btn {
+    height: 36px !important;
+    width: 36px !important;
+
+    opacity: 0.7;
 }

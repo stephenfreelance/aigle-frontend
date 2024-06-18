@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 
 import { TILE_SET_LIST_ENDPOINT } from '@/api-endpoints';
 import DateInfo from '@/components/DateInfo';
+import InfoCard from '@/components/InfoCard';
 import DataTable from '@/components/admin/DataTable';
 import FiltersSection from '@/components/admin/FiltersSection';
 import LayoutAdminBase from '@/components/admin/LayoutAdminBase';
 import { TileSet, TileSetScheme, TileSetStatus, tileSetSchemes, tileSetStatuses } from '@/models/tile-set';
 import { TILE_SET_STATUSES_NAMES_MAP, TILE_SET_TYPES_NAMES_MAP } from '@/utils/constants';
-import { Alert, Button, Checkbox, Input, Stack, Table, Tooltip } from '@mantine/core';
-import { IconInfoCircle, IconLink, IconMapPlus, IconSearch } from '@tabler/icons-react';
+import { Button, Checkbox, Input, Stack, Table, Tooltip } from '@mantine/core';
+import { IconLink, IconMapPlus, IconSearch } from '@tabler/icons-react';
 import isEqual from 'lodash/isEqual';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -28,8 +29,6 @@ const Component: React.FC = () => {
     const navigate = useNavigate();
     const [filter, setFilter] = useState<DataFilter>(DATA_FILTER_INITIAL_VALUE);
 
-    const [orderAlertShowed, setOrderAlertShowed] = useState(true);
-
     return (
         <LayoutAdminBase
             actions={
@@ -40,27 +39,17 @@ const Component: React.FC = () => {
                 </>
             }
         >
-            {orderAlertShowed ? (
-                <Alert
-                    mb="md"
-                    variant="light"
-                    color="blue"
-                    title="Ordre d'affichage des fonds de carte"
-                    icon={<IconInfoCircle />}
-                    withCloseButton
-                    onClose={() => setOrderAlertShowed(false)}
-                >
-                    <p>
-                        Les fonds de carte sont ordonnés selon leur types dans l&apos;ordre suivant (de plus au fond au
-                        premier plan): {TILE_SET_TYPES_NAMES_MAP.BACKGROUND}, {TILE_SET_TYPES_NAMES_MAP.PARTIAL},{' '}
-                        {TILE_SET_TYPES_NAMES_MAP.INDICATIVE}
-                    </p>
-                    <p>
-                        Les couches du même type sont ensuite ordonnées du plus ancien (au fond) au plus récent (au
-                        premier plan).
-                    </p>
-                </Alert>
-            ) : null}
+            <InfoCard>
+                <p>
+                    Les fonds de carte sont ordonnés selon leur types dans l&apos;ordre suivant (de plus au fond au
+                    premier plan): {TILE_SET_TYPES_NAMES_MAP.BACKGROUND}, {TILE_SET_TYPES_NAMES_MAP.PARTIAL},{' '}
+                    {TILE_SET_TYPES_NAMES_MAP.INDICATIVE}
+                </p>
+                <p>
+                    Les couches du même type sont ensuite ordonnées du plus ancien (au fond) au plus récent (au premier
+                    plan).
+                </p>
+            </InfoCard>
             <DataTable<TileSet, DataFilter>
                 endpoint={TILE_SET_LIST_ENDPOINT}
                 filter={filter}

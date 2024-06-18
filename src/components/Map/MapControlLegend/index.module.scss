@@ -1,4 +1,4 @@
-@import "@/constants.scss";
+@import '@/constants.scss';
 
 .content {
     bottom: 75px; // 19px (mapbox logo) + 10px (mapbox margin) + 20px (switch height) + 10px (switch margin) + 16px (switch padding)
@@ -47,5 +47,5 @@
 
     box-shadow: $shadow;
     background: #ffffff;
-    border-radius: $map-elements-border-radius;
+    border-radius: $border-radius-medium;
 }

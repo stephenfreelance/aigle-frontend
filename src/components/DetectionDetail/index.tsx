@@ -4,11 +4,15 @@ import DetectionDetailDetectionObject from '@/components/DetectionDetail/Detecti
 import Loader from '@/components/Loader';
 import { DetectionDetail } from '@/models/detection';
 import api from '@/utils/api';
+import { getCenterPoint } from '@/utils/geojson';
 import { Accordion, ActionIcon } from '@mantine/core';
-import { IconCalendarClock, IconMap, IconX } from '@tabler/icons-react';
+import { IconCalendarClock, IconMap, IconMapPin, IconX } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import React from 'react';
+import { Link } from 'react-router-dom';
 import classes from './index.module.scss';
+
+const getGoogleMapLink = (point: [number, number]) => `https://www.google.com/maps/place/${point[1]},${point[0]}`;
 
 interface ComponentProps {
     detectionUuid: string;
@@ -29,6 +33,8 @@ const Component: React.FC<ComponentProps> = ({ detectionUuid, onClose }: Compone
     if (!data) {
         return <Loader className={classes.loader} />;
     }
+
+    const centerPoint = getCenterPoint(data.geometry);
 
     return (
         <div className={classes.container}>
@@ -53,6 +59,17 @@ const Component: React.FC<ComponentProps> = ({ detectionUuid, onClose }: Compone
                                 Dernière mise à jour :&nbsp;
                                 <DateInfo date={data.detectionObject.updatedAt} />
                             </span>
+                        </p>
+                        <p className={classes['general-informations-content-item']}>
+                            <IconMapPin size={16} />{' '}
+                            <Link
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={classes['general-informations-content-item-text']}
+                                to={getGoogleMapLink(centerPoint)}
+                            >
+                                {`${centerPoint[1].toFixed(5)}, ${centerPoint[0].toFixed(5)}`}
+                            </Link>
                         </p>
                     </Accordion.Panel>
                 </Accordion.Item>

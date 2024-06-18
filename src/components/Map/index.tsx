@@ -1,21 +1,25 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Map, { Layer, Source, ViewStateChangeEvent } from 'react-map-gl';
 
 import { getDetectionListEndpoint } from '@/api-endpoints';
 import DetectionDetail from '@/components/DetectionDetail';
+import MapAddAnnotationModal from '@/components/Map/MapAddAnnotationModal';
 import MapControlFilterDetection from '@/components/Map/MapControlFilterDetection';
 import MapControlLayerDisplay from '@/components/Map/MapControlLayerDisplay';
 import MapControlLegend from '@/components/Map/MapControlLegend';
 import { DetectionGeojsonData, DetectionProperties } from '@/models/detection';
 import { MapLayer } from '@/models/map-layer';
 import api from '@/utils/api';
-import { getCenterPoint } from '@/utils/geojson';
+import { boundingBoxToPolygon, getBoundingBox, getCenterPoint } from '@/utils/geojson';
 import { useMap } from '@/utils/map-context';
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
+import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { FeatureCollection, Polygon } from 'geojson';
 import mapboxgl from 'mapbox-gl';
+import DrawRectangle, { DrawStyles } from 'mapbox-gl-draw-rectangle-restrict-area';
 import classes from './index.module.scss';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
@@ -26,6 +30,17 @@ const MAP_INITIAL_VIEW_STATE = {
     zoom: 16,
 } as const;
 
+const MAPBOX_DRAW_CONTROL = new MapboxDraw({
+    userProperties: true,
+    displayControlsDefault: false,
+    styles: DrawStyles,
+    modes: Object.assign(MapboxDraw.modes, {
+        draw_rectangle: DrawRectangle,
+    }),
+    controls: {
+        polygon: true,
+    },
+});
 const MAPBOX_GEOCODER = new MapboxGeocoder({
     accessToken: MAPBOX_TOKEN,
     mapboxgl: mapboxgl,
@@ -34,6 +49,7 @@ const MAPBOX_GEOCODER = new MapboxGeocoder({
 const MAP_CONTROLS: {
     control: mapboxgl.Control | mapboxgl.IControl;
     position: 'top-left' | 'bottom-right' | 'top-right' | 'bottom-left';
+    hideWhenNoDetection?: boolean;
 }[] = [
     // search bar
     {
@@ -52,8 +68,16 @@ const MAP_CONTROLS: {
     {
         control: new mapboxgl.NavigationControl({
             showCompass: true,
+            showZoom: true,
+            visualizePitch: true,
         }),
         position: 'bottom-right',
+    },
+    // draw
+    {
+        control: MAPBOX_DRAW_CONTROL,
+        position: 'top-right',
+        hideWhenNoDetection: true,
     },
 ] as const;
 
@@ -64,6 +88,10 @@ const DETECTION_ENDPOINT = getDetectionListEndpoint();
 
 const GEOJSON_LAYER_ID = 'geojson-layer';
 const GEOJSON_LAYER_OUTLINE_ID = 'geojson-layer-outline';
+const GEOJSON_LAYER_EXTRA_ID = 'geojson-layer-data-extra';
+const GEOJSON_LAYER_EXTRA_BOUNDINGS_ID = 'geojson-layer-data-extra-boundings';
+
+const GEOJSON_LAYER_EXTRA_COLOR = '#FF0000';
 
 const LEFT_PANEL_SIZE_PX = 410;
 
@@ -84,12 +112,21 @@ interface MapBounds {
 interface ComponentProps {
     layers: MapLayer[];
     displayDetections?: boolean;
+    displayLayersGeometry?: boolean;
+    boundLayers?: boolean;
 }
 
-const Component: React.FC<ComponentProps> = ({ layers, displayDetections = true }) => {
+const Component: React.FC<ComponentProps> = ({
+    layers,
+    displayLayersGeometry,
+    displayDetections = true,
+    boundLayers = true,
+}) => {
     const [mapBounds, setMapBounds] = useState<MapBounds>();
     const [detectionDetailUuidShowed, setDetectionDetailUuidShowed] = useState<string | null>(null);
     const [sectionShowed, leftSectionShowed] = useState<LeftSection>();
+
+    const [addAnnotationPolygon, setAddAnnotationPolygon] = useState<Polygon>();
 
     const { eventEmitter, detectionFilter } = useMap();
 
@@ -100,10 +137,44 @@ const Component: React.FC<ComponentProps> = ({ layers, displayDetections = true 
             return;
         }
 
-        MAP_CONTROLS.forEach(({ control, position }) => {
+        MAP_CONTROLS.forEach(({ control, position, hideWhenNoDetection }) => {
+            if (!displayDetections && hideWhenNoDetection) {
+                return;
+            }
+
             if (!node.hasControl(control)) {
                 node.addControl(control, position);
             }
+        });
+
+        // draw control callbacks
+
+        node.on('draw.modechange', ({ mode }: { mode: keyof MapboxDraw.Modes }) => {
+            if (mode === 'draw_polygon') {
+                MAPBOX_DRAW_CONTROL.changeMode('draw_rectangle', {
+                    areaLimit: 5 * 1_000_000, // 5 km2, optional
+                    escapeKeyStopsDrawing: true, // default true
+                    allowCreateExceeded: false, // default false
+                    exceedCallsOnEachMove: false, // default false
+                    exceedCallback: (area) => console.log('exceeded!', area), // optional
+                    areaChangedCallback: (area) => console.log('updated', area), // optional
+                });
+            }
+        });
+
+        node.on('draw.create', ({ features }) => {
+            if (!features.length) {
+                return;
+            }
+
+            const polygon: Polygon = features[0].geometry;
+
+            // drawing returns one extra point not needed
+            if (polygon.coordinates[0].length >= 6) {
+                polygon.coordinates[0] = polygon.coordinates[0].slice(0, 5);
+            }
+
+            setAddAnnotationPolygon(polygon);
         });
     }, []);
 
@@ -192,6 +263,10 @@ const Component: React.FC<ComponentProps> = ({ layers, displayDetections = true 
             return GEOJSON_LAYER_OUTLINE_ID;
         }
 
+        if (displayLayersGeometry) {
+            return GEOJSON_LAYER_EXTRA_ID;
+        }
+
         return undefined;
     };
 
@@ -240,11 +315,71 @@ const Component: React.FC<ComponentProps> = ({ layers, displayDetections = true 
                                 leftSectionShowed(state ? 'LAYER_DISPLAY' : undefined);
                             }}
                         />
+                        <MapAddAnnotationModal
+                            isShowed={!!addAnnotationPolygon}
+                            hide={() => setAddAnnotationPolygon(undefined)}
+                            polygon={addAnnotationPolygon}
+                        />
+                    </>
+                ) : null}
+                {displayLayersGeometry ? (
+                    <>
+                        <Source
+                            type="geojson"
+                            id="geojson-data-extra-boundings"
+                            data={{
+                                type: 'FeatureCollection',
+                                features: layers.map((layer) => ({
+                                    type: 'Feature',
+                                    properties: {
+                                        uuid: layer.tileSet.uuid,
+                                        color: GEOJSON_LAYER_EXTRA_COLOR,
+                                    },
+                                    geometry: boundingBoxToPolygon(getBoundingBox(layer.tileSet.geometry)),
+                                })),
+                            }}
+                        >
+                            <Layer
+                                id={GEOJSON_LAYER_EXTRA_BOUNDINGS_ID}
+                                type="line"
+                                paint={{
+                                    'line-color': ['get', 'color'],
+                                    'line-width': 2,
+                                }}
+                            />
+                        </Source>
+                        <Source
+                            type="geojson"
+                            id="geojson-data-extra"
+                            data={{
+                                type: 'FeatureCollection',
+                                features: layers.map((layer) => ({
+                                    type: 'Feature',
+                                    properties: {
+                                        uuid: layer.tileSet.uuid,
+                                        color: GEOJSON_LAYER_EXTRA_COLOR,
+                                    },
+                                    geometry: layer.tileSet.geometry,
+                                })),
+                            }}
+                        >
+                            <Layer
+                                id={GEOJSON_LAYER_EXTRA_ID}
+                                beforeId={GEOJSON_LAYER_EXTRA_BOUNDINGS_ID}
+                                type="fill"
+                                paint={{
+                                    'fill-color': ['get', 'color'],
+                                    'fill-opacity': 0.25,
+                                    'fill-outline-color': ['get', 'color'],
+                                }}
+                            />
+                        </Source>
                     </>
                 ) : null}
                 <Source id="geojson-data" type="geojson" data={data || EMPTY_GEOJSON_FEATURE_COLLECTION}>
                     <Layer
                         id={GEOJSON_LAYER_ID}
+                        beforeId={displayLayersGeometry ? GEOJSON_LAYER_EXTRA_ID : undefined}
                         type="fill"
                         paint={{
                             'fill-opacity': 0,
@@ -273,6 +408,11 @@ const Component: React.FC<ComponentProps> = ({ layers, displayDetections = true 
                         scheme={layer.tileSet.tileSetScheme}
                         tiles={[layer.tileSet.url]}
                         tileSize={256}
+                        {...(boundLayers
+                            ? {
+                                  bounds: getBoundingBox(layer.tileSet.geometry),
+                              }
+                            : {})}
                     >
                         <Layer
                             beforeId={getLayerBeforeId(index)}

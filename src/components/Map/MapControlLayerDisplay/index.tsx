@@ -4,7 +4,7 @@ import MapControlCustom from '@/components/Map/MapControlCustom';
 import { MapLayer } from '@/models/map-layer';
 import { TileSetType } from '@/models/tile-set';
 import { useMap } from '@/utils/map-context';
-import { Checkbox, Group, Stack } from '@mantine/core';
+import { Checkbox, Stack } from '@mantine/core';
 import { IconBoxMultiple } from '@tabler/icons-react';
 import classes from './index.module.scss';
 
@@ -37,8 +37,8 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ layers }) => {
         <>
             <h2>Affichage des couches</h2>
             <div className={classes['layers-section']}>
-                <h3 className={classes["layers-section-title"]}>Couches indicatives</h3>
-                <Stack className={classes["layers-section-group"]}>
+                <h3 className={classes['layers-section-title']}>Couches indicatives</h3>
+                <Stack className={classes['layers-section-group']}>
                     {layersMap.INDICATIVE.map((layer) => (
                         <Checkbox
                             key={layer.tileSet.uuid}

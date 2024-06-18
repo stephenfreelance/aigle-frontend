@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 
 import { TILE_SET_POST_ENDPOINT, getTileSetDetailEndpoint } from '@/api-endpoints';
 import ErrorCard from '@/components/ErrorCard';
+import InfoCard from '@/components/InfoCard';
 import Loader from '@/components/Loader';
 import Map from '@/components/Map';
 import LayoutAdminForm from '@/components/admin/LayoutAdminForm';
+import { MapLayer } from '@/models/map-layer';
 import {
     TileSet,
     TileSetScheme,
@@ -16,13 +18,15 @@ import {
 } from '@/models/tile-set';
 import api from '@/utils/api';
 import { TILE_SET_STATUSES_NAMES_MAP, TILE_SET_TYPES_NAMES_MAP } from '@/utils/constants';
-import { Button, Card, Select, TextInput } from '@mantine/core';
+import { isPolygon } from '@/utils/geojson';
+import { Button, Card, JsonInput, Select, TextInput } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { UseFormReturnType, isNotEmpty, useForm } from '@mantine/form';
 import { IconMapPlus } from '@tabler/icons-react';
 import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
 import { formatISO, parse } from 'date-fns';
+import { Polygon } from 'geojson';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import classes from './index.module.scss';
 
@@ -33,36 +37,47 @@ interface MapPreviewProps {
     type: TileSetType;
     scheme: TileSetScheme;
     name: string;
+    geometry: Polygon;
 }
 
-const MapPreview: React.FC<MapPreviewProps> = ({ url, scheme, name, type }) => {
+const MapPreview: React.FC<MapPreviewProps> = ({ url, scheme, name, type, geometry }) => {
     const fakeDate = formatISO(new Date());
+    const layers: MapLayer[] = [
+        {
+            displayed: true,
+            tileSet: {
+                createdAt: fakeDate,
+                updatedAt: fakeDate,
+                uuid: 'fake-uuid',
+                date: fakeDate,
+                name: name,
+                url: url || '',
+                tileSetStatus: 'VISIBLE',
+                tileSetScheme: scheme,
+                tileSetType: type,
+                geometry,
+            },
+        },
+    ];
 
     return (
         <Card withBorder className={classes['map-preview-container']}>
             <h2>Aperçu du fond de carte</h2>
-            <p>La carte est centrée sur la préfecture de l&apos;Hérault par défault</p>
+            <InfoCard>
+                <p>La carte est centrée sur la préfecture de l&apos;Hérault avec un zoom 16 par défault</p>
+                <p>
+                    Le carré autour de la zone de limite définie la zone dans laquelle les tuiles seront chargées pour
+                    l&apos;affichage de la carte
+                </p>
+            </InfoCard>
             <div>
                 {url ? (
                     <div className={classes['map-preview-content']}>
                         <Map
                             displayDetections={false}
-                            layers={[
-                                {
-                                    displayed: true,
-                                    tileSet: {
-                                        createdAt: fakeDate,
-                                        updatedAt: fakeDate,
-                                        uuid: 'fake-uuid',
-                                        date: fakeDate,
-                                        name: name,
-                                        url,
-                                        tileSetStatus: 'VISIBLE',
-                                        tileSetScheme: scheme,
-                                        tileSetType: type,
-                                    },
-                                },
-                            ]}
+                            layers={layers}
+                            displayLayersGeometry={true}
+                            boundLayers={false}
                         />
                     </div>
                 ) : (
@@ -79,16 +94,20 @@ interface FormValues {
     tileSetScheme: TileSetScheme;
     tileSetType: TileSetType;
     date?: Date;
+    geometry: string;
 }
 
 const postForm = async (values: FormValues, uuid?: string) => {
     let response: AxiosResponse<TileSet>;
+    const values_ = {
+        ...values,
+        geometry: JSON.parse(values.geometry),
+    };
 
-    console.log({ values });
     if (uuid) {
-        response = await api.patch(getTileSetDetailEndpoint(uuid), values);
+        response = await api.patch(getTileSetDetailEndpoint(uuid), values_);
     } else {
-        response = await api.post(TILE_SET_POST_ENDPOINT, values);
+        response = await api.post(TILE_SET_POST_ENDPOINT, values_);
     }
 
     return response.data;
@@ -107,6 +126,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
         scheme: initialValues.tileSetScheme,
         name: initialValues.name,
         type: initialValues.tileSetType,
+        geometry: JSON.parse(initialValues.geometry),
     });
 
     const form: UseFormReturnType<FormValues> = useForm({
@@ -133,6 +153,21 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
             tileSetStatus: isNotEmpty('Le status du fond de carte est requis'),
             tileSetScheme: isNotEmpty('Le scheme du fond de carte est requis'),
             tileSetType: isNotEmpty('Le type du fond de carte est requis'),
+            geometry: (value) => {
+                const error = 'Le format de la geométrie est invalide';
+
+                try {
+                    const isValid = isPolygon(JSON.parse(value));
+
+                    if (isValid) {
+                        return null;
+                    }
+
+                    return error;
+                } catch {
+                    return error;
+                }
+            },
         },
         validateInputOnChange: ['url'],
     });
@@ -158,6 +193,12 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
         setMapPreviewProps((prev) => ({
             ...prev,
             type: value,
+        })),
+    );
+    form.watch('geometry', ({ value }) =>
+        setMapPreviewProps((prev) => ({
+            ...prev,
+            geometry: form.isValid('geometry') ? JSON.parse(value) : EMPTY_GEOMETRY,
         })),
     );
 
@@ -220,6 +261,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
                 {...form.getInputProps('date')}
             />
             <Select
+                allowDeselect={false}
                 label="Status"
                 withAsterisk
                 mt="md"
@@ -232,6 +274,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
                 {...form.getInputProps('tileSetStatus')}
             />
             <Select
+                allowDeselect={false}
                 label="Scheme"
                 withAsterisk
                 mt="md"
@@ -244,6 +287,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
                 {...form.getInputProps('tileSetScheme')}
             />
             <Select
+                allowDeselect={false}
                 label="Type"
                 withAsterisk
                 mt="md"
@@ -254,6 +298,19 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
                 }))}
                 key={form.key('tileSetType')}
                 {...form.getInputProps('tileSetType')}
+            />
+            <JsonInput
+                label="Géométrie des limite"
+                description="GeoJson de type 'Polygon' correspondant aux limites du fond de carte"
+                formatOnBlur
+                autosize
+                resize="vertical"
+                minRows={4}
+                maxRows={8}
+                mb="md"
+                validationError="Le format de la geométrie est invalide"
+                key={form.key('geometry')}
+                {...form.getInputProps('geometry')}
             />
 
             <MapPreview {...mapPreviewProps} key={mapPreviewProps.scheme} />
@@ -271,6 +328,14 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
     );
 };
 
+const EMPTY_GEOMETRY = JSON.stringify(
+    {
+        type: 'Polygon',
+        coordinates: [],
+    },
+    null,
+    2,
+);
 const EMPTY_FORM_VALUES: FormValues = {
     name: '',
     url: '',
@@ -278,6 +343,7 @@ const EMPTY_FORM_VALUES: FormValues = {
     tileSetScheme: 'xyz',
     tileSetType: 'BACKGROUND',
     date: undefined,
+    geometry: EMPTY_GEOMETRY,
 };
 
 const ComponentInner: React.FC = () => {
@@ -291,6 +357,7 @@ const ComponentInner: React.FC = () => {
         const res = await api.get<TileSet>(getTileSetDetailEndpoint(uuid));
         const initialValues: FormValues = {
             ...res.data,
+            geometry: JSON.stringify(res.data.geometry, null, 2),
             date: new Date(res.data.date),
         };
 
