@@ -7,7 +7,7 @@ import LayoutAdminForm from '@/components/admin/LayoutAdminForm';
 import { ObjectType } from '@/models/object-type';
 import { User, UserRole, userRoles } from '@/models/user';
 import api from '@/utils/api';
-import { ROLES_NAMES_MAP } from '@/utils/constants';
+import { PASSWORD_MIN_LENGTH, ROLES_NAMES_MAP } from '@/utils/constants';
 import { Button, Select, TextInput } from '@mantine/core';
 import { UseFormReturnType, isEmail, isNotEmpty, useForm } from '@mantine/form';
 import { IconUserPlus } from '@tabler/icons-react';
@@ -17,7 +17,6 @@ import omit from 'lodash/omit';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 const BACK_URL = '/admin/users';
-const PASSWORD_MIN_LENGTH = 8;
 
 interface FormValues {
     email: string;
@@ -137,11 +136,17 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
             />
 
             <div className="form-actions">
-                <Button type="button" variant="outline" component={Link} to={BACK_URL}>
+                <Button
+                    disabled={mutation.status === 'pending'}
+                    type="button"
+                    variant="outline"
+                    component={Link}
+                    to={BACK_URL}
+                >
                     Annuler
                 </Button>
 
-                <Button type="submit" leftSection={<IconUserPlus />}>
+                <Button disabled={mutation.status === 'pending'} type="submit" leftSection={<IconUserPlus />}>
                     {label}
                 </Button>
             </div>

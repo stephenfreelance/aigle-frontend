@@ -1,7 +1,8 @@
-@import '@/constants.scss';
+@import "@/constants.scss";
 
 .container {
     top: 0;
+    padding-right: 0;
 
     &.has-subheader {
         border: none;
@@ -30,18 +31,35 @@
 
 .menu {
     padding: 16px !important;
+}
 
-    .menu-email {
-        font-size: 1rem;
-        font-weight: 700;
+.user-infos {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    padding-right: $content-padding;
+    padding-left: $content-padding;
+
+    cursor: pointer;
+
+    &:hover {
+        background-color: var(--mantine-color-gray-0);
     }
 
-    .menu-role {
-        font-size: 0.8rem;
-        text-transform: uppercase;
-    }
+    .user-infos-details {
+        margin-right: var(--mantine-spacing-md);
 
-    .menu-role {
-        color: var(--menu-item-color, var(--mantine-color-text));
+        .user-infos-details-email,
+        .user-infos-details-role {
+            text-align: end;
+        }
+
+        .user-infos-details-email {
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .user-infos-details-role {
+            font-size: 0.75rem;
+        }
     }
 }

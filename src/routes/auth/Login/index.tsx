@@ -8,7 +8,9 @@ import logoImg from '@/assets/logo.png';
 import ErrorCard from '@/components/ErrorCard';
 import api from '@/utils/api';
 import { useAuth } from '@/utils/auth-context';
+import { DEFAULT_ROUTE } from '@/utils/constants';
 import { useMutation, UseMutationResult } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import classes from './index.module.scss';
 
 interface JwtAuthResponse {
@@ -31,7 +33,6 @@ const Component: React.FC = () => {
     const [error, setError] = useState<AxiosError>();
 
     const form: UseFormReturnType<FormValues> = useForm({
-        mode: 'uncontrolled',
         initialValues: {
             email: '',
             password: '',
@@ -50,6 +51,10 @@ const Component: React.FC = () => {
         },
         onError: (error) => {
             setError(error);
+            if (error.response?.data) {
+                // @ts-expect-error types do not match
+                form.setErrors(error.response?.data);
+            }
         },
     });
 
@@ -59,7 +64,9 @@ const Component: React.FC = () => {
 
     return (
         <div className={classes.container}>
-            <Image src={logoImg} className={classes.logo} alt="Logo Aigle" h="100%" fit="contain" />
+            <Link to={DEFAULT_ROUTE}>
+                <Image src={logoImg} className={classes.logo} alt="Logo Aigle" h="100%" fit="contain" />
+            </Link>
 
             <form className={classes.form} onSubmit={form.onSubmit(handleSubmit)}>
                 {error ? <ErrorCard className={classes['error-card']}>Identifiants invalides</ErrorCard> : null}
@@ -76,12 +83,22 @@ const Component: React.FC = () => {
                     withAsterisk
                     type="password"
                     label="Mot de passe"
-                    placeholder="your@email.com"
+                    placeholder="••••••••"
                     key={form.key('password')}
                     {...form.getInputProps('password')}
                 />
+                <div className={classes['reset-password-link-container']}>
+                    <Link
+                        className={classes['reset-password-link']}
+                        to={`/reset-password?email=${form.getValues().email}`}
+                    >
+                        Mot de passe oublié ?
+                    </Link>
+                </div>
                 <div className="form-actions">
-                    <Button type="submit">Connexion</Button>
+                    <Button type="submit" disabled={mutation.status === 'pending'}>
+                        Connexion
+                    </Button>
                 </div>
             </form>
         </div>

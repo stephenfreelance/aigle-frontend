@@ -10,6 +10,7 @@ import MapControlLegend from '@/components/Map/MapControlLegend';
 import { DetectionGeojsonData, DetectionProperties } from '@/models/detection';
 import { MapLayer } from '@/models/map-layer';
 import api from '@/utils/api';
+import { MAPBOX_TOKEN } from '@/utils/constants';
 import { boundingBoxToPolygon, getBoundingBox, getCenterPoint } from '@/utils/geojson';
 import { useMap } from '@/utils/map-context';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
@@ -21,8 +22,6 @@ import { FeatureCollection, Polygon } from 'geojson';
 import mapboxgl from 'mapbox-gl';
 import DrawRectangle, { DrawStyles } from 'mapbox-gl-draw-rectangle-restrict-area';
 import classes from './index.module.scss';
-
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
 const MAP_INITIAL_VIEW_STATE = {
     longitude: 3.8767337,
@@ -152,12 +151,9 @@ const Component: React.FC<ComponentProps> = ({
         node.on('draw.modechange', ({ mode }: { mode: keyof MapboxDraw.Modes }) => {
             if (mode === 'draw_polygon') {
                 MAPBOX_DRAW_CONTROL.changeMode('draw_rectangle', {
-                    areaLimit: 5 * 1_000_000, // 5 km2, optional
                     escapeKeyStopsDrawing: true, // default true
                     allowCreateExceeded: false, // default false
                     exceedCallsOnEachMove: false, // default false
-                    exceedCallback: (area) => console.log('exceeded!', area), // optional
-                    areaChangedCallback: (area) => console.log('updated', area), // optional
                 });
             }
         });
@@ -175,26 +171,34 @@ const Component: React.FC<ComponentProps> = ({
             }
 
             setAddAnnotationPolygon(polygon);
+            MAPBOX_DRAW_CONTROL.deleteAll();
         });
     }, []);
+
+    const layersDisplayed = layers.filter((layer) => layer.displayed);
+    const tileSetsUuids = layersDisplayed.map((layer) => layer.tileSet.uuid);
 
     const fetchDetections = async (mapBounds?: MapBounds) => {
         const res = await api.get<DetectionGeojsonData>(DETECTION_ENDPOINT, {
             params: {
                 ...mapBounds,
                 ...detectionFilter,
+                tileSetsUuids: tileSetsUuids,
             },
         });
         return res.data;
     };
     const { data, refetch } = useQuery({
-        queryKey: [DETECTION_ENDPOINT, ...Object.values(mapBounds || {}), ...Object.values(detectionFilter || {})],
+        queryKey: [
+            DETECTION_ENDPOINT,
+            ...Object.values(mapBounds || {}),
+            ...Object.values(detectionFilter || {}),
+            ...tileSetsUuids,
+        ],
         queryFn: () => fetchDetections(mapBounds),
         placeholderData: keepPreviousData,
         enabled: displayDetections && !!mapBounds,
     });
-
-    const layersDisplayed = layers.filter((layer) => layer.displayed);
 
     // event that makes detections to be reloaded
     useEffect(() => {
@@ -329,14 +333,16 @@ const Component: React.FC<ComponentProps> = ({
                             id="geojson-data-extra-boundings"
                             data={{
                                 type: 'FeatureCollection',
-                                features: layers.map((layer) => ({
-                                    type: 'Feature',
-                                    properties: {
-                                        uuid: layer.tileSet.uuid,
-                                        color: GEOJSON_LAYER_EXTRA_COLOR,
-                                    },
-                                    geometry: boundingBoxToPolygon(getBoundingBox(layer.tileSet.geometry)),
-                                })),
+                                features: layers
+                                    .filter((layer) => layer.tileSet.geometry)
+                                    .map((layer) => ({
+                                        type: 'Feature',
+                                        properties: {
+                                            uuid: layer.tileSet.uuid,
+                                            color: GEOJSON_LAYER_EXTRA_COLOR,
+                                        },
+                                        geometry: boundingBoxToPolygon(getBoundingBox(layer.tileSet.geometry)),
+                                    })),
                             }}
                         >
                             <Layer
@@ -353,14 +359,16 @@ const Component: React.FC<ComponentProps> = ({
                             id="geojson-data-extra"
                             data={{
                                 type: 'FeatureCollection',
-                                features: layers.map((layer) => ({
-                                    type: 'Feature',
-                                    properties: {
-                                        uuid: layer.tileSet.uuid,
-                                        color: GEOJSON_LAYER_EXTRA_COLOR,
-                                    },
-                                    geometry: layer.tileSet.geometry,
-                                })),
+                                features: layers
+                                    .filter((layer) => layer.tileSet.geometry)
+                                    .map((layer) => ({
+                                        type: 'Feature',
+                                        properties: {
+                                            uuid: layer.tileSet.uuid,
+                                            color: GEOJSON_LAYER_EXTRA_COLOR,
+                                        },
+                                        geometry: layer.tileSet.geometry,
+                                    })),
                             }}
                         >
                             <Layer
@@ -408,7 +416,7 @@ const Component: React.FC<ComponentProps> = ({
                         scheme={layer.tileSet.tileSetScheme}
                         tiles={[layer.tileSet.url]}
                         tileSize={256}
-                        {...(boundLayers
+                        {...(boundLayers && layer.tileSet.geometry
                             ? {
                                   bounds: getBoundingBox(layer.tileSet.geometry),
                               }

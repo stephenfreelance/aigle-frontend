@@ -46,21 +46,25 @@ const Component: React.FC<ComponentProps> = ({ hasSubHeader }) => {
                 ) : null}
             </div>
 
-            <Menu>
-                <Menu.Target>
-                    <Avatar className={classes['avatar-button']} component="button" disabled={!userMe} />
-                </Menu.Target>
+            {userMe ? (
+                <Menu>
+                    <Menu.Target>
+                        <div className={classes['user-infos']}>
+                            <div className={classes['user-infos-details']}>
+                                <p className={classes['user-infos-details-email']}>{userMe.email}</p>
+                                <p className={classes['user-infos-details-role']}>{ROLES_NAMES_MAP[userMe.userRole]}</p>
+                            </div>
+                            <Avatar className={classes['avatar-button']} />
+                        </div>
+                    </Menu.Target>
 
-                {userMe ? (
                     <Menu.Dropdown className={classes.menu}>
-                        <p className={classes['menu-email']}>{userMe.email}</p>
-                        <p className={classes['menu-role']}>{ROLES_NAMES_MAP[userMe.userRole]}</p>
-                        <Button mt="sm" variant="outline" leftSection={<IconLogout />} onClick={() => logout()}>
+                        <Button variant="outline" leftSection={<IconLogout />} onClick={() => logout()}>
                             Déconnexion
                         </Button>
                     </Menu.Dropdown>
-                ) : null}
-            </Menu>
+                </Menu>
+            ) : null}
         </header>
     );
 };

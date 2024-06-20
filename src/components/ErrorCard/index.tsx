@@ -5,14 +5,22 @@ import { IconAlertCircleFilled } from '@tabler/icons-react';
 
 interface ComponentProps {
     className?: string;
+    title?: string;
 }
 
 const Component: React.FC<PropsWithChildren<ComponentProps>> = ({
+    title,
     children,
     className,
 }: PropsWithChildren<ComponentProps>) => {
     return (
-        <Alert className={className} variant="light" color="red" icon={<IconAlertCircleFilled />} title="Erreur">
+        <Alert
+            className={className}
+            variant="light"
+            color="red"
+            icon={<IconAlertCircleFilled />}
+            title={title ? title : 'Erreur'}
+        >
             {children}
         </Alert>
     );

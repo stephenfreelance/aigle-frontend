@@ -8,6 +8,10 @@ export const DEFAULT_ROUTE = '/';
 export const AUTH_ACCESS_TOKEN_STORAGE_KEY = 'auth_access_token';
 export const AUTH_REFRESH_TOKEN_STORAGE_KEY = 'auth_refresh_token';
 
+export const PASSWORD_MIN_LENGTH = 8;
+
+export const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
+
 export const ROLES_NAMES_MAP: { [role in UserRole]: string } = {
     SUPER_ADMIN: 'super admin',
     ADMIN: 'admin',
@@ -24,7 +28,7 @@ export const TILE_SET_STATUSES_NAMES_MAP: {
     [role in TileSetStatus]: string;
 } = {
     VISIBLE: 'visible',
-    HIDDEN: 'caché',
+    HIDDEN: 'caché par défaut',
     DEACTIVATED: 'désactivé',
 } as const;
 export const TILE_SET_TYPES_NAMES_MAP: {

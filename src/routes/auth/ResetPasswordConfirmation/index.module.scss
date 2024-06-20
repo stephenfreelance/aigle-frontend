@@ -1,0 +1,36 @@
+.container {
+    height: 100vh;
+    padding: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+
+    .success-card,
+    .info-card {
+        max-width: var(--mantine-breakpoint-sm);
+        width: 100%;
+    }
+
+    .info-card {
+        margin-top: var(--mantine-spacing-md);
+    }
+
+    .logo,
+    .form {
+        width: 100%;
+    }
+
+    .logo {
+        max-width: 24em;
+    }
+
+    .form {
+        max-width: var(--mantine-breakpoint-sm);
+    }
+
+    .error-card {
+        margin-top: 32px;
+    }
+}

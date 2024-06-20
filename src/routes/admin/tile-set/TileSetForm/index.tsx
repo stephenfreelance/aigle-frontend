@@ -37,7 +37,7 @@ interface MapPreviewProps {
     type: TileSetType;
     scheme: TileSetScheme;
     name: string;
-    geometry: Polygon;
+    geometry?: Polygon;
 }
 
 const MapPreview: React.FC<MapPreviewProps> = ({ url, scheme, name, type, geometry }) => {
@@ -63,7 +63,7 @@ const MapPreview: React.FC<MapPreviewProps> = ({ url, scheme, name, type, geomet
     return (
         <Card withBorder className={classes['map-preview-container']}>
             <h2>Aperçu du fond de carte</h2>
-            <InfoCard>
+            <InfoCard title="Paramètres de l'apperçu">
                 <p>La carte est centrée sur la préfecture de l&apos;Hérault avec un zoom 16 par défault</p>
                 <p>
                     Le carré autour de la zone de limite définie la zone dans laquelle les tuiles seront chargées pour
@@ -94,14 +94,14 @@ interface FormValues {
     tileSetScheme: TileSetScheme;
     tileSetType: TileSetType;
     date?: Date;
-    geometry: string;
+    geometry?: string;
 }
 
 const postForm = async (values: FormValues, uuid?: string) => {
     let response: AxiosResponse<TileSet>;
     const values_ = {
         ...values,
-        geometry: JSON.parse(values.geometry),
+        geometry: values.geometry ? JSON.parse(values.geometry) : null,
     };
 
     if (uuid) {
@@ -126,7 +126,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
         scheme: initialValues.tileSetScheme,
         name: initialValues.name,
         type: initialValues.tileSetType,
-        geometry: JSON.parse(initialValues.geometry),
+        geometry: initialValues.geometry ? JSON.parse(initialValues.geometry) : null,
     });
 
     const form: UseFormReturnType<FormValues> = useForm({
@@ -137,7 +137,6 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
                 try {
                     new URL(value);
 
-                    console.log({ value, include: value.includes('{bbox-epsg-3857}') });
                     if (
                         (!value.includes('{x}') || !value.includes('{y}') || !value.includes('{z}')) &&
                         !value.includes('{bbox-epsg-3857}')
@@ -155,6 +154,10 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
             tileSetType: isNotEmpty('Le type du fond de carte est requis'),
             geometry: (value) => {
                 const error = 'Le format de la geométrie est invalide';
+
+                if (!value) {
+                    return null;
+                }
 
                 try {
                     const isValid = isPolygon(JSON.parse(value));
@@ -198,7 +201,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
     form.watch('geometry', ({ value }) =>
         setMapPreviewProps((prev) => ({
             ...prev,
-            geometry: form.isValid('geometry') ? JSON.parse(value) : EMPTY_GEOMETRY,
+            geometry: form.isValid('geometry') && value ? JSON.parse(value) : null,
         })),
     );
 
@@ -249,30 +252,6 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
                 key={form.key('url')}
                 {...form.getInputProps('url')}
             />
-            <DateInput
-                mt="md"
-                withAsterisk
-                label="Date du fond de carte"
-                dateParser={(value: string) => parse(value, 'dd/MM/yyyy', new Date())}
-                valueFormat="DD/MM/YYYY"
-                placeholder="26/02/2023"
-                description="La date est utilisée pour l'ordre d'affichage sur la carte"
-                key={form.key('date')}
-                {...form.getInputProps('date')}
-            />
-            <Select
-                allowDeselect={false}
-                label="Status"
-                withAsterisk
-                mt="md"
-                mb="md"
-                data={tileSetStatuses.map((status) => ({
-                    value: status,
-                    label: TILE_SET_STATUSES_NAMES_MAP[status],
-                }))}
-                key={form.key('tileSetStatus')}
-                {...form.getInputProps('tileSetStatus')}
-            />
             <Select
                 allowDeselect={false}
                 label="Scheme"
@@ -299,9 +278,33 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
                 key={form.key('tileSetType')}
                 {...form.getInputProps('tileSetType')}
             />
+            <DateInput
+                mt="md"
+                withAsterisk
+                label="Date du fond de carte"
+                dateParser={(value: string) => parse(value, 'dd/MM/yyyy', new Date())}
+                valueFormat="DD/MM/YYYY"
+                placeholder="26/02/2023"
+                description="La date est utilisée pour l'ordre d'affichage sur la carte"
+                key={form.key('date')}
+                {...form.getInputProps('date')}
+            />
+            <Select
+                allowDeselect={false}
+                label="Status"
+                withAsterisk
+                mt="md"
+                mb="md"
+                data={tileSetStatuses.map((status) => ({
+                    value: status,
+                    label: TILE_SET_STATUSES_NAMES_MAP[status],
+                }))}
+                key={form.key('tileSetStatus')}
+                {...form.getInputProps('tileSetStatus')}
+            />
             <JsonInput
                 label="Géométrie des limite"
-                description="GeoJson de type 'Polygon' correspondant aux limites du fond de carte"
+                description="GeoJson de type 'Polygon' correspondant aux limites du fond de carte. Laisser vide s'il n'y a pas de limite d'affichage."
                 formatOnBlur
                 autosize
                 resize="vertical"
@@ -316,11 +319,17 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
             <MapPreview {...mapPreviewProps} key={mapPreviewProps.scheme} />
 
             <div className="form-actions">
-                <Button type="button" variant="outline" component={Link} to={BACK_URL}>
+                <Button
+                    disabled={mutation.status === 'pending'}
+                    type="button"
+                    variant="outline"
+                    component={Link}
+                    to={BACK_URL}
+                >
                     Annuler
                 </Button>
 
-                <Button type="submit" leftSection={<IconMapPlus />}>
+                <Button disabled={mutation.status === 'pending'} type="submit" leftSection={<IconMapPlus />}>
                     {label}
                 </Button>
             </div>
@@ -328,14 +337,6 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
     );
 };
 
-const EMPTY_GEOMETRY = JSON.stringify(
-    {
-        type: 'Polygon',
-        coordinates: [],
-    },
-    null,
-    2,
-);
 const EMPTY_FORM_VALUES: FormValues = {
     name: '',
     url: '',
@@ -343,7 +344,7 @@ const EMPTY_FORM_VALUES: FormValues = {
     tileSetScheme: 'xyz',
     tileSetType: 'BACKGROUND',
     date: undefined,
-    geometry: EMPTY_GEOMETRY,
+    geometry: undefined,
 };
 
 const ComponentInner: React.FC = () => {
@@ -357,7 +358,7 @@ const ComponentInner: React.FC = () => {
         const res = await api.get<TileSet>(getTileSetDetailEndpoint(uuid));
         const initialValues: FormValues = {
             ...res.data,
-            geometry: JSON.stringify(res.data.geometry, null, 2),
+            geometry: res.data.geometry ? JSON.stringify(res.data.geometry, null, 2) : undefined,
             date: new Date(res.data.date),
         };
 

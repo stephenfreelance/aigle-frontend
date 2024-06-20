@@ -74,7 +74,6 @@ const Component: React.FC<ComponentProps> = ({ detectionUuid, onClose }: Compone
                     </Accordion.Panel>
                 </Accordion.Item>
             </Accordion>
-
             <DetectionDetailDetectionObject detection={data} />
         </div>
     );

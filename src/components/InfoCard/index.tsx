@@ -4,12 +4,14 @@ import { Alert } from '@mantine/core';
 import { IconInfoCircle } from '@tabler/icons-react';
 
 interface ComponentProps {
+    title?: string;
     className?: string;
     withCloseButton?: boolean;
 }
 
 const Component: React.FC<PropsWithChildren<ComponentProps>> = ({
     children,
+    title,
     className,
     withCloseButton = true,
 }: PropsWithChildren<ComponentProps>) => {
@@ -22,7 +24,7 @@ const Component: React.FC<PropsWithChildren<ComponentProps>> = ({
                     mb="md"
                     variant="light"
                     color="blue"
-                    title="Paramètres de l'apperçu"
+                    title={title}
                     className={className}
                     icon={<IconInfoCircle />}
                     withCloseButton={withCloseButton}

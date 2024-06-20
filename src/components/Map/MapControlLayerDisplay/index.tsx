@@ -2,7 +2,8 @@ import React, { useMemo } from 'react';
 
 import MapControlCustom from '@/components/Map/MapControlCustom';
 import { MapLayer } from '@/models/map-layer';
-import { TileSetType } from '@/models/tile-set';
+import { TileSetType, tileSetTypes } from '@/models/tile-set';
+import { TILE_SET_TYPES_NAMES_MAP } from '@/utils/constants';
 import { useMap } from '@/utils/map-context';
 import { Checkbox, Stack } from '@mantine/core';
 import { IconBoxMultiple } from '@tabler/icons-react';
@@ -36,19 +37,25 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ layers }) => {
     return (
         <>
             <h2>Affichage des couches</h2>
-            <div className={classes['layers-section']}>
-                <h3 className={classes['layers-section-title']}>Couches indicatives</h3>
-                <Stack className={classes['layers-section-group']}>
-                    {layersMap.INDICATIVE.map((layer) => (
-                        <Checkbox
-                            key={layer.tileSet.uuid}
-                            checked={layer.displayed}
-                            label={layer.tileSet.name}
-                            onChange={(event) => setTileSetVisibility(layer.tileSet.uuid, event.currentTarget.checked)}
-                        />
-                    ))}
-                </Stack>
-            </div>
+            {tileSetTypes.map((type) =>
+                layersMap[type].length ? (
+                    <div key={type} className={classes['layers-section']}>
+                        <h3 className={classes['layers-section-title']}>{TILE_SET_TYPES_NAMES_MAP[type]}</h3>
+                        <Stack className={classes['layers-section-group']}>
+                            {layersMap[type].map((layer) => (
+                                <Checkbox
+                                    key={layer.tileSet.uuid}
+                                    checked={layer.displayed}
+                                    label={layer.tileSet.name}
+                                    onChange={(event) =>
+                                        setTileSetVisibility(layer.tileSet.uuid, event.currentTarget.checked)
+                                    }
+                                />
+                            ))}
+                        </Stack>
+                    </div>
+                ) : null,
+            )}
         </>
     );
 };

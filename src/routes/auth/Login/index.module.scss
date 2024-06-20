@@ -1,0 +1,46 @@
+.container {
+    height: 100vh;
+    padding: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+
+    .logo,
+    .form {
+        width: 100%;
+    }
+
+    .logo {
+        max-width: 24em;
+    }
+
+    .form {
+        max-width: var(--mantine-breakpoint-sm);
+    }
+
+    .error-card {
+        margin-top: 32px;
+    }
+
+    .reset-password-link-container {
+        display: flex;
+        justify-content: flex-end;
+
+        .reset-password-link {
+            margin-top: var(--mantine-spacing-xs);
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--mantine-primary-color-filled);
+
+            text-decoration: none;
+
+            cursor: pointer;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+}

@@ -1,6 +1,8 @@
 import { Polygon } from 'geojson';
 
-export const getCenterPoint = (polygon: Polygon): [number, number] => {
+export type LngLat = [number, number];
+
+export const getCenterPoint = (polygon: Polygon): LngLat => {
     const coordinates = polygon.coordinates[0];
 
     let minx = 1000;
@@ -30,31 +32,24 @@ const arePositionsEqual = (pos1: number[], pos2: number[]): boolean => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const isPolygon = (obj: any): obj is Polygon => {
-    // Check that obj is an object
     if (typeof obj !== 'object' || obj === null) {
         return false;
     }
 
-    // Check that type is "Polygon"
     if (obj.type !== 'Polygon') {
         return false;
     }
 
-    // Check that coordinates is an array
     if (!Array.isArray(obj.coordinates)) {
         return false;
     }
 
-    // Check each linear ring in coordinates
     for (const ring of obj.coordinates) {
-        // Check that ring is an array
         if (!Array.isArray(ring)) {
             return false;
         }
 
-        // Check each position in the ring
         for (const position of ring) {
-            // Check that position is an array of numbers
             if (
                 !Array.isArray(position) ||
                 position.length < 2 ||
@@ -64,7 +59,6 @@ export const isPolygon = (obj: any): obj is Polygon => {
             }
         }
 
-        // Check that the ring has at least 4 positions and is closed
         if (ring.length < 4 || !arePositionsEqual(ring[0], ring[ring.length - 1])) {
             return false;
         }
@@ -106,4 +100,21 @@ export const boundingBoxToPolygon = ([minX, minY, maxX, maxY]: BoundingBox): Pol
             ],
         ],
     };
+};
+
+export const pointInPolygon = (polygon: Polygon, point: LngLat): boolean => {
+    const [lng, lat] = point;
+    let inside = false;
+
+    for (const ring of polygon.coordinates) {
+        for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+            const [xi, yi] = ring[i];
+            const [xj, yj] = ring[j];
+
+            const intersect = yi > lat !== yj > lat && lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi;
+            if (intersect) inside = !inside;
+        }
+    }
+
+    return inside;
 };

@@ -122,11 +122,17 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, categories }) => {
             />
 
             <div className="form-actions">
-                <Button type="button" variant="outline" component={Link} to={BACK_URL}>
+                <Button
+                    disabled={mutation.status === 'pending'}
+                    type="button"
+                    variant="outline"
+                    component={Link}
+                    to={BACK_URL}
+                >
                     Annuler
                 </Button>
 
-                <Button type="submit" leftSection={<IconCubePlus />}>
+                <Button disabled={mutation.status === 'pending'} type="submit" leftSection={<IconCubePlus />}>
                     {label}
                 </Button>
             </div>

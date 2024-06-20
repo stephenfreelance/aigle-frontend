@@ -1,7 +1,6 @@
 // App.tsx
 import { AUTH_ME_ENDPOINT } from '@/api-endpoints';
 import { User } from '@/models/user';
-import Login from '@/routes/Login/index.tsx';
 import Map from '@/routes/Map/index.tsx';
 import CollectiviteList from '@/routes/admin/collectivite/CollectiviteList';
 import ObjectTypeCategoryForm from '@/routes/admin/object-type-category/ObjectTypeCategoryForm';
@@ -12,6 +11,9 @@ import TileSetForm from '@/routes/admin/tile-set/TileSetForm';
 import TileSetList from '@/routes/admin/tile-set/TileSetList';
 import UserForm from '@/routes/admin/user/UserForm';
 import UserList from '@/routes/admin/user/UserList';
+import Login from '@/routes/auth/Login';
+import ResetPassword from '@/routes/auth/ResetPassword';
+import ResetPasswordConfirmation from '@/routes/auth/ResetPasswordConfirmation';
 import ProtectedRoute from '@/utils/ProtectedRoute';
 import api from '@/utils/api';
 import { useAuth } from '@/utils/auth-context';
@@ -44,6 +46,14 @@ const App: React.FC = () => {
             <Routes>
                 <Route index element={<Navigate to="/map" replace />} />
                 <Route path="/login" element={isAuthenticated_ ? <Navigate to={DEFAULT_ROUTE} /> : <Login />} />
+                <Route
+                    path="/reset-password/:uid/:token"
+                    element={isAuthenticated_ ? <Navigate to={DEFAULT_ROUTE} /> : <ResetPasswordConfirmation />}
+                />
+                <Route
+                    path="/reset-password"
+                    element={isAuthenticated_ ? <Navigate to={DEFAULT_ROUTE} /> : <ResetPassword />}
+                />
                 <Route
                     path="/map"
                     element={

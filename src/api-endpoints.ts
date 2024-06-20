@@ -3,6 +3,8 @@ export const AUTH_REGISTER_ENDPOINT = `${BASE_AUTH}users/`;
 export const AUTH_LOGIN_ENDPOINT = `${BASE_AUTH}jwt/create/`;
 export const AUTH_REFRESH_TOKEN_ENDPOINT = `${BASE_AUTH}jwt/refresh/`;
 export const AUTH_ME_ENDPOINT = `${BASE_AUTH}users/me/`;
+export const AUTH_RESET_PASSWORD_ENDPOINT = `${BASE_AUTH}users/reset_password/`;
+export const AUTH_RESET_PASSWORD_CONFIRM_ENDPOINT = `${BASE_AUTH}users/reset_password_confirm/`;
 
 const BASE_API = '/api/';
 

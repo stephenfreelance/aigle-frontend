@@ -17,5 +17,5 @@ export interface TileSet extends Uuided, Timestamped {
     tileSetStatus: TileSetStatus;
     tileSetScheme: TileSetScheme;
     tileSetType: TileSetType;
-    geometry: Polygon;
+    geometry?: Polygon;
 }
