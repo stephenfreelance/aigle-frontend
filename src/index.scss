@@ -1,9 +1,9 @@
-@import url("@mantine/core/styles.css");
-@import url("@mantine/dates/styles.css");
-@import url("@mantine/notifications/styles.css");
+@import url('@mantine/core/styles.css');
+@import url('@mantine/dates/styles.css');
+@import url('@mantine/notifications/styles.css');
 
-@import url("mapbox-gl/dist/mapbox-gl.css");
-@import "@/constants.scss";
+@import url('mapbox-gl/dist/mapbox-gl.css');
+@import '@/constants.scss';
 
 // css reset
 
@@ -26,8 +26,8 @@ h2 {
     font-size: 1.2rem;
 }
 
-ul[role="list"],
-ol[role="list"] {
+ul[role='list'],
+ol[role='list'] {
     list-style: none;
 }
 

@@ -6,13 +6,13 @@ import DataTable from '@/components/admin/DataTable';
 import FiltersSection from '@/components/admin/FiltersSection';
 import LayoutAdminBase from '@/components/admin/LayoutAdminBase';
 import PillsDataCells from '@/components/admin/data-cells/PillsDataCells';
+import { GeoCollectivity } from '@/models/geo/_common';
 import { ObjectTypeCategory } from '@/models/object-type-category';
 import { UserGroup } from '@/models/user-group';
 import { Button, Input, Table } from '@mantine/core';
 import { IconSearch, IconUserPlus } from '@tabler/icons-react';
 import isEqual from 'lodash/isEqual';
 import { Link, useNavigate } from 'react-router-dom';
-import { GeoCollectivity } from '@/models/geo/_common';
 
 interface DataFilter {
     q: string;

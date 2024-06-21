@@ -96,7 +96,7 @@ const Form: React.FC<FormProps> = ({ objectTypes, layers, polygon, hide }) => {
 
     const mutation: UseMutationResult<DetectionObject, AxiosError, FormValues> = useMutation({
         mutationFn: (values: FormValues) => postForm(values, tileSet?.uuid || '', polygon, address || null),
-        onSuccess: (data) => {
+        onSuccess: () => {
             eventEmitter.emit('UPDATE_DETECTIONS');
             notifications.show({
                 title: "Ajout d'une annotation",

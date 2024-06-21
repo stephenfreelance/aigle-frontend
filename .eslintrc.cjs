@@ -5,7 +5,7 @@ module.exports = {
         'plugin:react/recommended', // Uses the recommended rules from @eslint-plugin-react
         'plugin:@typescript-eslint/recommended', // Uses the recommended rules from @typescript-eslint/eslint-plugin
         'plugin:prettier/recommended', // Enables eslint-plugin-prettier and displays prettier errors as ESLint errors. Make sure this is always the last configuration in the extends array.
-        "plugin:react/recommended"
+        'plugin:react/recommended',
     ],
     ignorePatterns: ['dist', '.eslintrc.cjs'],
     parser: '@typescript-eslint/parser',
@@ -24,7 +24,7 @@ module.exports = {
     plugins: ['react-refresh'],
     rules: {
         'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-        "react/jsx-uses-react": "off",
-        "react/react-in-jsx-scope": "off",
+        'react/jsx-uses-react': 'off',
+        'react/react-in-jsx-scope': 'off',
     },
 };
