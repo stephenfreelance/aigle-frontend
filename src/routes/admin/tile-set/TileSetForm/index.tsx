@@ -230,7 +230,6 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
             <h1>{label}</h1>
             {error ? (
                 <ErrorCard>
-                    <p>Erreur lors de l&apos;ajout du fond de carte</p>
                     <p>Voir les indications ci-dessous pour plus d&apos;info</p>
                 </ErrorCard>
             ) : null}

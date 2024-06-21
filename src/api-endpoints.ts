@@ -1,3 +1,5 @@
+import { CollectivityType } from '@/models/geo/_common';
+
 const BASE_AUTH = '/auth/';
 export const AUTH_REGISTER_ENDPOINT = `${BASE_AUTH}users/`;
 export const AUTH_LOGIN_ENDPOINT = `${BASE_AUTH}jwt/create/`;
@@ -12,6 +14,13 @@ const BASE_USERS = `${BASE_API}users/`;
 export const USERS_LIST_ENDPOINT = `${BASE_USERS}`;
 export const getUserDetailEndpoint = (uuid: string) => `${USERS_LIST_ENDPOINT}${uuid}/`;
 
+const BASE_USER_GROUP = `${BASE_API}user-group/`;
+export const USER_GROUP_LIST_ENDPOINT = `${BASE_USER_GROUP}`;
+export const USER_GROUP_POST_ENDPOINT = `${BASE_USER_GROUP}`;
+export const getUserGroupDetailEndpoint = (uuid: string) => `${USER_GROUP_LIST_ENDPOINT}${uuid}/`;
+
+// geo
+
 const BASE_GEO = `${BASE_API}geo/`;
 
 const BASE_GEO_REGION = `${BASE_GEO}region/`;
@@ -22,6 +31,22 @@ export const GEO_DEPARTMENT_LIST_ENDPOINT = `${BASE_GEO_DEPARTMENT}`;
 
 const BASE_GEO_COMMUNE = `${BASE_GEO}commune/`;
 export const GEO_COMMUNE_LIST_ENDPOINT = `${BASE_GEO_COMMUNE}`;
+
+export const getGeoListEndpoint = (collectivityType: CollectivityType) => {
+    if (collectivityType === 'region') {
+        return GEO_REGION_LIST_ENDPOINT;
+    }
+
+    if (collectivityType === 'department') {
+        return GEO_DEPARTMENT_LIST_ENDPOINT;
+    }
+
+    if (collectivityType === 'commune') {
+        return GEO_COMMUNE_LIST_ENDPOINT;
+    }
+
+    throw new Error(`Unknown collectivity type ${collectivityType}`);
+};
 
 const BASE_OBJECT_TYPE = `${BASE_API}object-type/`;
 export const OBJECT_TYPE_LIST_ENDPOINT = `${BASE_OBJECT_TYPE}`;

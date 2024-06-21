@@ -1,18 +1,46 @@
-import { Alert, Button, Image, TextInput } from '@mantine/core';
+import { Alert, Button, TextInput } from '@mantine/core';
 import { UseFormReturnType, isEmail, useForm } from '@mantine/form';
 import { AxiosError } from 'axios';
 import React, { useState } from 'react';
 
 import { AUTH_RESET_PASSWORD_ENDPOINT } from '@/api-endpoints';
-import logoImg from '@/assets/logo.png';
 import ErrorCard from '@/components/ErrorCard';
 import InfoCard from '@/components/InfoCard';
+import LayoutAuth from '@/components/auth/LayoutAuth';
 import api from '@/utils/api';
 import { DEFAULT_ROUTE } from '@/utils/constants';
 import { IconMailCheck } from '@tabler/icons-react';
 import { UseMutationResult, useMutation } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
 import classes from './index.module.scss';
+
+interface SuccessProps {
+    email: string;
+}
+
+const Success: React.FC<SuccessProps> = ({ email }) => {
+    return (
+        <LayoutAuth>
+            <Alert
+                mt="md"
+                variant="light"
+                color="green"
+                title="Email de réinitialisation envoyé"
+                className={classes['success-card']}
+                icon={<IconMailCheck />}
+            >
+                <p>
+                    Un lien de réinitialisation de mot de passe vient d&apos;être envoyé à <b>{email}</b> si votre
+                    addresse est bien associée à un compte
+                </p>
+            </Alert>
+
+            <Button component={Link} to={DEFAULT_ROUTE} mt="md">
+                Retour à la page d&apos;acueuil
+            </Button>
+        </LayoutAuth>
+    );
+};
 
 interface FormValues {
     email: string;
@@ -50,60 +78,33 @@ const Component: React.FC = () => {
         mutation.mutate(values);
     };
 
+    if (mutation.status === 'success') {
+        return <Success email={form.getValues().email} />;
+    }
+
     return (
-        <div className={classes.container}>
-            <Link to={DEFAULT_ROUTE}>
-                <Image src={logoImg} className={classes.logo} alt="Logo Aigle" h="100%" fit="contain" />
-            </Link>
+        <LayoutAuth>
+            <InfoCard withCloseButton={false} className={classes['info-card']}>
+                <p>Entrer votre adresse email pour réinitialiser votre mot de passe</p>
+                <p>Si votre addresse est associée à un compte, vous recevrez un recevoir un mail de réinitialisation</p>
+            </InfoCard>
 
-            {mutation.status === 'success' ? (
-                <>
-                    <Alert
-                        mt="md"
-                        variant="light"
-                        color="green"
-                        title="Email de réinitialisation envoyé"
-                        className={classes['success-card']}
-                        icon={<IconMailCheck />}
-                    >
-                        <p>
-                            Un lien de réinitialisation de mot de passe vient d&apos;être envoyé à{' '}
-                            <b>{form.getValues().email}</b> si votre addresse est bien associée à un compte
-                        </p>
-                    </Alert>
-
-                    <Button component={Link} to={DEFAULT_ROUTE} mt="md">
-                        Retour à la page d&apos;acueuil
+            <form className={classes.form} onSubmit={form.onSubmit(handleSubmit)}>
+                {error ? <ErrorCard className={classes['error-card']}>Identifiants invalides</ErrorCard> : null}
+                <TextInput
+                    withAsterisk
+                    label="Email"
+                    placeholder="jean.dupont@email.com"
+                    key={form.key('email')}
+                    {...form.getInputProps('email')}
+                />
+                <div className="form-actions">
+                    <Button disabled={mutation.status === 'pending'} type="submit">
+                        Réinitialiser le mot de passe
                     </Button>
-                </>
-            ) : (
-                <>
-                    <InfoCard withCloseButton={false} className={classes['info-card']}>
-                        <p>Entrer votre adresse email pour réinitialiser votre mot de passe</p>
-                        <p>
-                            Si votre addresse est associée à un compte, vous recevrez un recevoir un mail de
-                            réinitialisation
-                        </p>
-                    </InfoCard>
-
-                    <form className={classes.form} onSubmit={form.onSubmit(handleSubmit)}>
-                        {error ? <ErrorCard className={classes['error-card']}>Identifiants invalides</ErrorCard> : null}
-                        <TextInput
-                            withAsterisk
-                            label="Email"
-                            placeholder="jean.dupont@email.com"
-                            key={form.key('email')}
-                            {...form.getInputProps('email')}
-                        />
-                        <div className="form-actions">
-                            <Button disabled={mutation.status === 'pending'} type="submit">
-                                Réinitialiser le mot de passe
-                            </Button>
-                        </div>
-                    </form>
-                </>
-            )}
-        </div>
+                </div>
+            </form>
+        </LayoutAuth>
     );
 };
 

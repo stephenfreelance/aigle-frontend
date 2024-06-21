@@ -92,7 +92,6 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, objectTypes }) => {
             <h1>{label}</h1>
             {error ? (
                 <ErrorCard>
-                    <p>Erreur lors de l&apos;ajout de la thématique</p>
                     <p>Voir les indications ci-dessous pour plus d&apos;info</p>
                 </ErrorCard>
             ) : null}

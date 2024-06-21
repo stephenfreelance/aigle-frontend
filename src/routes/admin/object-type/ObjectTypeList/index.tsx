@@ -5,9 +5,11 @@ import DateInfo from '@/components/DateInfo';
 import DataTable from '@/components/admin/DataTable';
 import FiltersSection from '@/components/admin/FiltersSection';
 import LayoutAdminBase from '@/components/admin/LayoutAdminBase';
+import PillsDataCells from '@/components/admin/data-cells/PillsDataCells';
 import { ObjectType, ObjectTypeDetail } from '@/models/object-type';
+import { ObjectTypeCategory } from '@/models/object-type-category';
 import api from '@/utils/api';
-import { Button, ColorSwatch, Group, Input, MultiSelect, ScrollArea, Table } from '@mantine/core';
+import { Button, ColorSwatch, Input, MultiSelect, Table } from '@mantine/core';
 import { IconCheck, IconCubePlus, IconSearch } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import isEqual from 'lodash/isEqual';
@@ -107,25 +109,11 @@ const Component: React.FC = () => {
                     ),
                     (item: ObjectTypeDetail) => item.name,
                     (item: ObjectTypeDetail) => (
-                        <ScrollArea scrollbars="x" offsetScrollbars>
-                            <Group gap="xs" className={classes['categories-cell']}>
-                                {item.categories.map((cat) => (
-                                    <Button
-                                        component={Link}
-                                        autoContrast
-                                        radius={100}
-                                        key={cat.uuid}
-                                        to={`/admin/object-type-categories/form/${cat.uuid}`}
-                                        onClick={(e) => e.stopPropagation()}
-                                        target="_blank"
-                                        size="compact-xs"
-                                        color="gray"
-                                    >
-                                        {cat.name}
-                                    </Button>
-                                ))}
-                            </Group>
-                        </ScrollArea>
+                        <PillsDataCells<ObjectTypeCategory>
+                            items={item.categories}
+                            toLink={(cat) => `/admin/object-type-categories/form/${cat.uuid}`}
+                            getLabel={(cat) => cat.name}
+                        />
                     ),
                 ]}
                 onItemClick={({ uuid }) => navigate(`/admin/object-types/form/${uuid}`)}

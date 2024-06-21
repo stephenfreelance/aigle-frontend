@@ -8,7 +8,7 @@ import { ObjectType } from '@/models/object-type';
 import { User, UserRole, userRoles } from '@/models/user';
 import api from '@/utils/api';
 import { PASSWORD_MIN_LENGTH, ROLES_NAMES_MAP } from '@/utils/constants';
-import { Button, Select, TextInput } from '@mantine/core';
+import { Button, PasswordInput, Select, TextInput } from '@mantine/core';
 import { UseFormReturnType, isEmail, isNotEmpty, useForm } from '@mantine/form';
 import { IconUserPlus } from '@tabler/icons-react';
 import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query';
@@ -98,7 +98,6 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
             <h1>{label}</h1>
             {error ? (
                 <ErrorCard>
-                    <p>Erreur lors de l&apos;ajout de l&apos;utilisateur</p>
                     <p>Voir les indications ci-dessous pour plus d&apos;info</p>
                 </ErrorCard>
             ) : null}
@@ -111,13 +110,12 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
                 key={form.key('email')}
                 {...form.getInputProps('email')}
             />
-            <TextInput
+            <PasswordInput
                 mt="md"
                 withAsterisk={!uuid}
                 label="Mot de passe"
                 description={uuid ? 'Remplir ce champ pour modifier le mot de passe' : undefined}
                 placeholder="••••••••"
-                type="password"
                 autoComplete="new-password"
                 key={form.key('password')}
                 {...form.getInputProps('password')}

@@ -17,6 +17,11 @@ const AdminSubheader: React.FC<AdminSubheaderProps> = ({ actions }) => {
             <div className="navigation-items">
                 <NavLink label="Utilisateurs" href="/admin/users" active={pathname.includes('/admin/users')} />
                 <NavLink
+                    label="Groupes utilisateurs"
+                    href="/admin/user-groups"
+                    active={pathname.includes('/admin/user-groups')}
+                />
+                <NavLink
                     label="Collectivités"
                     href="/admin/collectivites"
                     active={pathname.includes('/admin/collectivites')}

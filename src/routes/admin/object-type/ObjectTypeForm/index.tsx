@@ -23,7 +23,7 @@ const BACK_URL = '/admin/object-types';
 interface FormValues {
     name: string;
     color: string;
-    categoriesUuids: string[];
+    objectTypeCategoriesUuids: string[];
 }
 
 const postForm = async (values: FormValues, uuid?: string) => {
@@ -82,7 +82,6 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, categories }) => {
             <h1>{label}</h1>
             {error ? (
                 <ErrorCard>
-                    <p>Erreur lors de l&apos;ajout du type</p>
                     <p>Voir les indications ci-dessous pour plus d&apos;info</p>
                 </ErrorCard>
             ) : null}
@@ -117,8 +116,8 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, categories }) => {
                         {item.checked ? <IconCheck className="multi-select-item-icon" color="grey" /> : null}
                     </div>
                 )}
-                key={form.key('categoriesUuids')}
-                {...form.getInputProps('categoriesUuids')}
+                key={form.key('objectTypeCategoriesUuids')}
+                {...form.getInputProps('objectTypeCategoriesUuids')}
             />
 
             <div className="form-actions">
@@ -143,7 +142,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, categories }) => {
 const EMPTY_FORM_VALUES: FormValues = {
     name: '',
     color: '',
-    categoriesUuids: [],
+    objectTypeCategoriesUuids: [],
 };
 
 const ComponentInner: React.FC = () => {
@@ -156,7 +155,7 @@ const ComponentInner: React.FC = () => {
 
         const res = await api.get<ObjectTypeDetail>(getObjectTypeDetailEndpoint(uuid));
         const initialValues: FormValues = {
-            categoriesUuids: res.data.categories.map((cat) => cat.uuid),
+            objectTypeCategoriesUuids: res.data.categories.map((cat) => cat.uuid),
             ...res.data,
         };
 
@@ -174,7 +173,7 @@ const ComponentInner: React.FC = () => {
     });
 
     const fetchObjectTypeCategories = async () => {
-        const res = await api.get<ObjectType[]>(OBJECT_TYPE_CATEGORY_LIST_ENDPOINT);
+        const res = await api.get<ObjectTypeCategory[]>(OBJECT_TYPE_CATEGORY_LIST_ENDPOINT);
         return res.data;
     };
 

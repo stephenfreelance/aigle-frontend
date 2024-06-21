@@ -19,7 +19,7 @@ const Component: React.FC<PropsWithChildren<ComponentProps>> = ({
             variant="light"
             color="red"
             icon={<IconAlertCircleFilled />}
-            title={title ? title : 'Erreur'}
+            title={title ? title : 'Une erreur est survenue'}
         >
             {children}
         </Alert>

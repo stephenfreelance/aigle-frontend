@@ -9,6 +9,8 @@ import ObjectTypeForm from '@/routes/admin/object-type/ObjectTypeForm';
 import ObjectTypeList from '@/routes/admin/object-type/ObjectTypeList';
 import TileSetForm from '@/routes/admin/tile-set/TileSetForm';
 import TileSetList from '@/routes/admin/tile-set/TileSetList';
+import UserGroupForm from '@/routes/admin/user-group/UserGroupForm';
+import UserGroupList from '@/routes/admin/user-group/UserGroupList';
 import UserForm from '@/routes/admin/user/UserForm';
 import UserList from '@/routes/admin/user/UserList';
 import Login from '@/routes/auth/Login';
@@ -85,6 +87,31 @@ const App: React.FC = () => {
                     element={
                         <ProtectedRoute roles={['ADMIN', 'SUPER_ADMIN']}>
                             <UserForm />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/admin/user-groups"
+                    element={
+                        <ProtectedRoute roles={['ADMIN', 'SUPER_ADMIN']}>
+                            <UserGroupList />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/user-groups/form"
+                    element={
+                        <ProtectedRoute roles={['ADMIN', 'SUPER_ADMIN']}>
+                            <UserGroupForm />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/user-groups/form/:uuid"
+                    element={
+                        <ProtectedRoute roles={['ADMIN', 'SUPER_ADMIN']}>
+                            <UserGroupForm />
                         </ProtectedRoute>
                     }
                 />

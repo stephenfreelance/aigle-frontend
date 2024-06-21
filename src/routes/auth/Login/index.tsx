@@ -1,14 +1,13 @@
-import { Button, Image, TextInput } from '@mantine/core';
+import { Button, PasswordInput, TextInput } from '@mantine/core';
 import { isEmail, useForm, UseFormReturnType } from '@mantine/form';
 import { AxiosError } from 'axios';
 import React, { useState } from 'react';
 
 import { AUTH_LOGIN_ENDPOINT } from '@/api-endpoints';
-import logoImg from '@/assets/logo.png';
+import LayoutAuth from '@/components/auth/LayoutAuth';
 import ErrorCard from '@/components/ErrorCard';
 import api from '@/utils/api';
 import { useAuth } from '@/utils/auth-context';
-import { DEFAULT_ROUTE } from '@/utils/constants';
 import { useMutation, UseMutationResult } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import classes from './index.module.scss';
@@ -63,11 +62,7 @@ const Component: React.FC = () => {
     };
 
     return (
-        <div className={classes.container}>
-            <Link to={DEFAULT_ROUTE}>
-                <Image src={logoImg} className={classes.logo} alt="Logo Aigle" h="100%" fit="contain" />
-            </Link>
-
+        <LayoutAuth>
             <form className={classes.form} onSubmit={form.onSubmit(handleSubmit)}>
                 {error ? <ErrorCard className={classes['error-card']}>Identifiants invalides</ErrorCard> : null}
                 <TextInput
@@ -78,10 +73,9 @@ const Component: React.FC = () => {
                     key={form.key('email')}
                     {...form.getInputProps('email')}
                 />
-                <TextInput
+                <PasswordInput
                     mt="md"
                     withAsterisk
-                    type="password"
                     label="Mot de passe"
                     placeholder="••••••••"
                     key={form.key('password')}
@@ -101,7 +95,7 @@ const Component: React.FC = () => {
                     </Button>
                 </div>
             </form>
-        </div>
+        </LayoutAuth>
     );
 };
 

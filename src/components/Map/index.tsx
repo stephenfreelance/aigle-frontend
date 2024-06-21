@@ -92,8 +92,6 @@ const GEOJSON_LAYER_EXTRA_BOUNDINGS_ID = 'geojson-layer-data-extra-boundings';
 
 const GEOJSON_LAYER_EXTRA_COLOR = '#FF0000';
 
-const LEFT_PANEL_SIZE_PX = 410;
-
 type LeftSection = 'SEARCH_ADDRESS' | 'FILTER_DETECTION' | 'LEGEND' | 'LAYER_DISPLAY';
 
 const EMPTY_GEOJSON_FEATURE_COLLECTION: FeatureCollection = {
@@ -277,16 +275,6 @@ const Component: React.FC<ComponentProps> = ({
     return (
         <div className={classes.container}>
             <Map
-                padding={
-                    detectionDetailUuidShowed
-                        ? {
-                              top: 0,
-                              right: LEFT_PANEL_SIZE_PX,
-                              bottom: 0,
-                              left: 0,
-                          }
-                        : undefined
-                }
                 reuseMaps={true}
                 ref={handleMapRef}
                 mapboxAccessToken={MAPBOX_TOKEN}

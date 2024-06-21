@@ -1,0 +1,11 @@
+
+.categories-cell {
+    padding: 4px;
+    flex-wrap: nowrap;
+}
+
+.badge {
+    text-transform: none !important;
+    font-size: var(--mantine-font-size-xs) !important;
+    font-weight: 600 !important;
+}
