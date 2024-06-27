@@ -8,7 +8,10 @@ import { COLLECTIVITY_TYPES_ENDPOINTS_MAP, COLLECTIVITY_TYPES_NAMES_MAP } from '
 import { Button, Input, Table } from '@mantine/core';
 import { IconSearch } from '@tabler/icons-react';
 import isEqual from 'lodash/isEqual';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import classes from './index.module.scss';
+
+const COLLECTIVITY_TYPE_SEARCH_PARAM = 'collectivityType';
 
 interface DataFilter {
     q: string;
@@ -20,8 +23,30 @@ const DATA_FILTER_INITIAL_VALUE: DataFilter = {
 
 const Component: React.FC = () => {
     const [filter, setFilter] = useState<DataFilter>(DATA_FILTER_INITIAL_VALUE);
-    const [collectivityTypeSelected, setCollectivityTypeSelected] = useState<CollectivityType>(collectivityTypes[0]);
     const [endpoint, setEndpoint] = useState<string>(COLLECTIVITY_TYPES_ENDPOINTS_MAP[collectivityTypes[0]]);
+
+    const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const getInitialCollectivityType = (): CollectivityType => {
+        const DEFAULT_VALUE = collectivityTypes[0];
+        const initialSearchParamValue = searchParams.get(COLLECTIVITY_TYPE_SEARCH_PARAM) || DEFAULT_VALUE;
+
+        // @ts-expect-error types do not match
+        if (collectivityTypes.includes(initialSearchParamValue)) {
+            // @ts-expect-error types do not match
+            return initialSearchParamValue;
+        }
+
+        return DEFAULT_VALUE;
+    };
+    const [collectivityTypeSelected, setCollectivityTypeSelected] =
+        useState<CollectivityType>(getInitialCollectivityType());
+
+    useEffect(() => {
+        setSearchParams({
+            collectivityType: collectivityTypeSelected,
+        });
+    }, [collectivityTypeSelected]);
 
     useEffect(() => {
         setEndpoint(COLLECTIVITY_TYPES_ENDPOINTS_MAP[collectivityTypeSelected]);
@@ -62,6 +87,7 @@ const Component: React.FC = () => {
                 }
                 tableHeader={[<Table.Th key="code">Code</Table.Th>, <Table.Th key="displayName">Nom</Table.Th>]}
                 tableBodyRenderFns={[(item: GeoCollectivity) => item.code, (item: GeoCollectivity) => item.displayName]}
+                onItemClick={({ uuid }) => navigate(`/admin/collectivites/${collectivityTypeSelected}/form/${uuid}`)}
             />
         </LayoutAdminBase>
     );

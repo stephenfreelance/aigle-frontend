@@ -74,7 +74,7 @@ const Component = <T_DATA extends Uuided, T_FILTER extends object>({
                         <Table
                             striped
                             highlightOnHover
-                            className={clsx({ [classes['items-clickable']]: !!onItemClick })}
+                            className={clsx(classes.table, { [classes['items-clickable']]: !!onItemClick })}
                             layout="fixed"
                         >
                             <Table.Thead>
@@ -84,10 +84,7 @@ const Component = <T_DATA extends Uuided, T_FILTER extends object>({
                             <Table.Tbody>
                                 {data?.length === 0 ? (
                                     <Table.Tr>
-                                        <Table.Td
-                                            className={classes['empty-results-cell']}
-                                            colSpan={tableHeader.length}
-                                        >
+                                        <Table.Td className="empty-results-cell" colSpan={tableHeader.length}>
                                             Aucun résultat
                                         </Table.Td>
                                     </Table.Tr>

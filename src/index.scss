@@ -26,6 +26,10 @@ h2 {
     font-size: 1.2rem;
 }
 
+h3 {
+    font-size: 1.1rem;
+}
+
 ul[role='list'],
 ol[role='list'] {
     list-style: none;
@@ -87,24 +91,31 @@ html {
 
 // custom css
 
+
+.form-actions {
+    margin-top: var(--mantine-spacing-xl);
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--mantine-spacing-md);
+}
+
 form {
     padding-bottom: var(--mantine-spacing-xl);
-
-    .form-actions {
-        margin-top: var(--mantine-spacing-xl);
-
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        gap: var(--mantine-spacing-md);
-    }
-
+    
     &.compact {
         padding-bottom: 0;
 
         .form-actions {
             margin-top: var(--mantine-spacing-md);
         }
+    }
+}
+
+table {
+    .empty-results-cell {
+        text-align: center;
     }
 }
 
@@ -195,6 +206,10 @@ header {
 .mantine-Notifications-notification {
     box-shadow: $shadow;
     border-radius: $border-radius-small;
+}
+
+.mantine-ScrollArea-viewport {
+    padding-bottom: 0;
 }
 
 // mapbox

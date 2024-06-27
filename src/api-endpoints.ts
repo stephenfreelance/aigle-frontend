@@ -12,7 +12,8 @@ const BASE_API = '/api/';
 
 const BASE_USERS = `${BASE_API}users/`;
 export const USERS_LIST_ENDPOINT = `${BASE_USERS}`;
-export const getUserDetailEndpoint = (uuid: string) => `${USERS_LIST_ENDPOINT}${uuid}/`;
+export const USERS_POST_ENDPOINT = `${BASE_USERS}`;
+export const getUserDetailEndpoint = (uuid: string) => `${USERS_POST_ENDPOINT}${uuid}/`;
 
 const BASE_USER_GROUP = `${BASE_API}user-group/`;
 export const USER_GROUP_LIST_ENDPOINT = `${BASE_USER_GROUP}`;
@@ -25,12 +26,18 @@ const BASE_GEO = `${BASE_API}geo/`;
 
 const BASE_GEO_REGION = `${BASE_GEO}region/`;
 export const GEO_REGION_LIST_ENDPOINT = `${BASE_GEO_REGION}`;
+export const GEO_REGION_POST_ENDPOINT = `${BASE_GEO_REGION}`;
+export const getGeoRegionDetailEndpoint = (uuid: string) => `${GEO_REGION_POST_ENDPOINT}${uuid}/`;
 
 const BASE_GEO_DEPARTMENT = `${BASE_GEO}department/`;
 export const GEO_DEPARTMENT_LIST_ENDPOINT = `${BASE_GEO_DEPARTMENT}`;
+export const GEO_DEPARTMENT_POST_ENDPOINT = `${BASE_GEO_DEPARTMENT}`;
+export const getGeoDepartmentDetailEndpoint = (uuid: string) => `${GEO_DEPARTMENT_POST_ENDPOINT}${uuid}/`;
 
 const BASE_GEO_COMMUNE = `${BASE_GEO}commune/`;
 export const GEO_COMMUNE_LIST_ENDPOINT = `${BASE_GEO_COMMUNE}`;
+export const GEO_COMMUNE_POST_ENDPOINT = `${BASE_GEO_COMMUNE}`;
+export const getGeoCommuneDetailEndpoint = (uuid: string) => `${GEO_COMMUNE_POST_ENDPOINT}${uuid}/`;
 
 export const getGeoListEndpoint = (collectivityType: CollectivityType) => {
     if (collectivityType === 'region') {
@@ -43,6 +50,38 @@ export const getGeoListEndpoint = (collectivityType: CollectivityType) => {
 
     if (collectivityType === 'commune') {
         return GEO_COMMUNE_LIST_ENDPOINT;
+    }
+
+    throw new Error(`Unknown collectivity type ${collectivityType}`);
+};
+
+export const getGeoPostEndpoint = (collectivityType: CollectivityType) => {
+    if (collectivityType === 'region') {
+        return GEO_REGION_POST_ENDPOINT;
+    }
+
+    if (collectivityType === 'department') {
+        return GEO_DEPARTMENT_POST_ENDPOINT;
+    }
+
+    if (collectivityType === 'commune') {
+        return GEO_COMMUNE_POST_ENDPOINT;
+    }
+
+    throw new Error(`Unknown collectivity type ${collectivityType}`);
+};
+
+export const getGeoDetailEndpoint = (collectivityType: CollectivityType, uuid: string) => {
+    if (collectivityType === 'region') {
+        return getGeoRegionDetailEndpoint(uuid);
+    }
+
+    if (collectivityType === 'department') {
+        return getGeoDepartmentDetailEndpoint(uuid);
+    }
+
+    if (collectivityType === 'commune') {
+        return getGeoCommuneDetailEndpoint(uuid);
     }
 
     throw new Error(`Unknown collectivity type ${collectivityType}`);

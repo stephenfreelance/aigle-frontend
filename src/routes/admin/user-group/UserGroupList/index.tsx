@@ -5,10 +5,10 @@ import DateInfo from '@/components/DateInfo';
 import DataTable from '@/components/admin/DataTable';
 import FiltersSection from '@/components/admin/FiltersSection';
 import LayoutAdminBase from '@/components/admin/LayoutAdminBase';
-import PillsDataCells from '@/components/admin/data-cells/PillsDataCells';
+import PillsDataCell from '@/components/admin/data-cells/PillsDataCell';
 import { GeoCollectivity } from '@/models/geo/_common';
 import { ObjectTypeCategory } from '@/models/object-type-category';
-import { UserGroup } from '@/models/user-group';
+import { UserGroupDetail } from '@/models/user-group';
 import { Button, Input, Table } from '@mantine/core';
 import { IconSearch, IconUserPlus } from '@tabler/icons-react';
 import isEqual from 'lodash/isEqual';
@@ -36,7 +36,7 @@ const Component: React.FC = () => {
                 </>
             }
         >
-            <DataTable<UserGroup, DataFilter>
+            <DataTable<UserGroupDetail, DataFilter>
                 endpoint={USER_GROUP_LIST_ENDPOINT}
                 filter={filter}
                 filtersSection={
@@ -62,19 +62,19 @@ const Component: React.FC = () => {
                     <Table.Th key="collectivities">Collectivités</Table.Th>,
                 ]}
                 tableBodyRenderFns={[
-                    (item: UserGroup) => <DateInfo date={item.createdAt} />,
-                    (item: UserGroup) => item.name,
-                    (item: UserGroup) => (
-                        <PillsDataCells<ObjectTypeCategory>
+                    (item: UserGroupDetail) => <DateInfo date={item.createdAt} />,
+                    (item: UserGroupDetail) => item.name,
+                    (item: UserGroupDetail) => (
+                        <PillsDataCell<ObjectTypeCategory>
                             items={item.objectTypeCategories}
                             toLink={(cat) => `/admin/object-type-categories/form/${cat.uuid}`}
                             getLabel={(cat) => cat.name}
                         />
                     ),
-                    (item: UserGroup) => (
-                        <PillsDataCells<GeoCollectivity>
+                    (item: UserGroupDetail) => (
+                        <PillsDataCell<GeoCollectivity>
                             items={[...item.regions, ...item.departments, ...item.communes]}
-                            getLabel={(cat) => cat.name}
+                            getLabel={(geo) => geo.displayName}
                         />
                     ),
                 ]}

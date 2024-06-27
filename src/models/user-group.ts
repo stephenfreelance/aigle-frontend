@@ -6,6 +6,9 @@ import { ObjectTypeCategory } from '@/models/object-type-category';
 
 export interface UserGroup extends Uuided, Timestamped {
     name: string;
+}
+
+export interface UserGroupDetail extends UserGroup {
     communes: GeoCommune[];
     departments: GeoDepartment[];
     regions: GeoRegion[];

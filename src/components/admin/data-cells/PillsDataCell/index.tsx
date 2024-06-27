@@ -8,9 +8,10 @@ interface ItemPillProps<T extends Uuided> {
     item: T;
     toLink?: (item: T) => string;
     getLabel: (item: T) => string;
+    getLeftSection?: (item: T) => React.ReactNode;
 }
 
-const ItemPill = <T extends Uuided>({ item, toLink, getLabel }: ItemPillProps<T>) => {
+const ItemPill = <T extends Uuided>({ item, toLink, getLabel, getLeftSection }: ItemPillProps<T>) => {
     if (!toLink) {
         return (
             <Badge className={classes['badge']} color="gray">
@@ -21,6 +22,7 @@ const ItemPill = <T extends Uuided>({ item, toLink, getLabel }: ItemPillProps<T>
 
     return (
         <Button
+            className={classes['pill']}
             component={Link}
             autoContrast
             radius={100}
@@ -30,6 +32,7 @@ const ItemPill = <T extends Uuided>({ item, toLink, getLabel }: ItemPillProps<T>
             target="_blank"
             size="compact-xs"
             color="gray"
+            leftSection={getLeftSection ? getLeftSection(item) : undefined}
         >
             {getLabel(item)}
         </Button>
@@ -40,8 +43,9 @@ interface ComponentProps<T extends Uuided> {
     items: T[];
     toLink?: (item: T) => string;
     getLabel: (item: T) => string;
+    getLeftSection?: (item: T) => React.ReactNode;
 }
-const Component = <T extends Uuided>({ items, toLink, getLabel }: ComponentProps<T>) => {
+const Component = <T extends Uuided>({ items, toLink, getLabel, getLeftSection }: ComponentProps<T>) => {
     return (
         <ScrollArea scrollbars="x" offsetScrollbars>
             <Group
@@ -51,7 +55,13 @@ const Component = <T extends Uuided>({ items, toLink, getLabel }: ComponentProps
                 })}
             >
                 {items.map((item) => (
-                    <ItemPill<T> key={item.uuid} item={item} toLink={toLink} getLabel={getLabel} />
+                    <ItemPill<T>
+                        key={item.uuid}
+                        item={item}
+                        toLink={toLink}
+                        getLabel={getLabel}
+                        getLeftSection={getLeftSection}
+                    />
                 ))}
             </Group>
         </ScrollArea>

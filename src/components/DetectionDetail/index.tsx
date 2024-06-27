@@ -4,15 +4,16 @@ import DetectionDetailDetectionObject from '@/components/DetectionDetail/Detecti
 import Loader from '@/components/Loader';
 import { DetectionDetail } from '@/models/detection';
 import api from '@/utils/api';
-import { getCenterPoint } from '@/utils/geojson';
 import { Accordion, ActionIcon } from '@mantine/core';
 import { IconCalendarClock, IconMap, IconMapPin, IconX } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
+import { centroid } from '@turf/turf';
+import { Position } from 'geojson';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import classes from './index.module.scss';
 
-const getGoogleMapLink = (point: [number, number]) => `https://www.google.com/maps/place/${point[1]},${point[0]}`;
+const getGoogleMapLink = (point: Position) => `https://www.google.com/maps/place/${point[1]},${point[0]}`;
 
 interface ComponentProps {
     detectionUuid: string;
@@ -34,7 +35,9 @@ const Component: React.FC<ComponentProps> = ({ detectionUuid, onClose }: Compone
         return <Loader className={classes.loader} />;
     }
 
-    const centerPoint = getCenterPoint(data.geometry);
+    const {
+        geometry: { coordinates: centerPoint },
+    } = centroid(data.geometry);
 
     return (
         <div className={classes.container}>

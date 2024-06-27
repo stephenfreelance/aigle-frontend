@@ -6,13 +6,14 @@ import { MapLayer } from '@/models/map-layer';
 import { ObjectType } from '@/models/object-type';
 import api from '@/utils/api';
 import { MAPBOX_TOKEN } from '@/utils/constants';
-import { LngLat, getCenterPoint, pointInPolygon } from '@/utils/geojson';
+import { LngLat } from '@/utils/geojson';
 import { useMap } from '@/utils/map-context';
 import { Button, Modal, Select } from '@mantine/core';
 import { UseFormReturnType, useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconShape } from '@tabler/icons-react';
 import { UseMutationResult, useMutation } from '@tanstack/react-query';
+import { booleanWithin, centroid, getCoord } from '@turf/turf';
 import { AxiosError } from 'axios';
 import clsx from 'clsx';
 import { Polygon } from 'geojson';
@@ -66,7 +67,7 @@ const Form: React.FC<FormProps> = ({ objectTypes, layers, polygon, hide }) => {
     const [address, setAddress] = useState<string | null | undefined>();
     useEffect(() => {
         const getAddress = async () => {
-            const polygonCenter = getCenterPoint(polygon);
+            const polygonCenter = getCoord(centroid(polygon)) as LngLat;
             const address = await getAddressFromLatLng(polygonCenter);
             setAddress(address);
         };
@@ -75,11 +76,11 @@ const Form: React.FC<FormProps> = ({ objectTypes, layers, polygon, hide }) => {
     }, [polygon]);
 
     const tileSet = useMemo(() => {
-        const polygonCenter = getCenterPoint(polygon);
+        const polygonCenter = centroid(polygon);
         // get the first displayed layer that contains the annotation
         const layer = layers
             .filter((layer) => ['BACKGROUND', 'PARTIAL'].includes(layer.tileSet.tileSetType) && layer.displayed)
-            .find((layer) => !layer.tileSet.geometry || pointInPolygon(layer.tileSet.geometry, polygonCenter));
+            .find((layer) => !layer.tileSet.geometry || booleanWithin(layer.tileSet.geometry, polygonCenter));
 
         if (!layer) {
             notifications.show({

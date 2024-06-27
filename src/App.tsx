@@ -2,6 +2,7 @@
 import { AUTH_ME_ENDPOINT } from '@/api-endpoints';
 import { User } from '@/models/user';
 import Map from '@/routes/Map/index.tsx';
+import CollectiviteForm from '@/routes/admin/collectivite/CollectiviteForm';
 import CollectiviteList from '@/routes/admin/collectivite/CollectiviteList';
 import ObjectTypeCategoryForm from '@/routes/admin/object-type-category/ObjectTypeCategoryForm';
 import ObjectTypeCategoryList from '@/routes/admin/object-type-category/ObjectTypeCategoryList';
@@ -121,6 +122,14 @@ const App: React.FC = () => {
                     element={
                         <ProtectedRoute roles={['ADMIN', 'SUPER_ADMIN']}>
                             <CollectiviteList />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/collectivites/:collectivityType/form/:uuid"
+                    element={
+                        <ProtectedRoute roles={['ADMIN', 'SUPER_ADMIN']}>
+                            <CollectiviteForm />
                         </ProtectedRoute>
                     }
                 />

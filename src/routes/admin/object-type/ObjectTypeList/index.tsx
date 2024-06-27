@@ -5,7 +5,7 @@ import DateInfo from '@/components/DateInfo';
 import DataTable from '@/components/admin/DataTable';
 import FiltersSection from '@/components/admin/FiltersSection';
 import LayoutAdminBase from '@/components/admin/LayoutAdminBase';
-import PillsDataCells from '@/components/admin/data-cells/PillsDataCells';
+import PillsDataCell from '@/components/admin/data-cells/PillsDataCell';
 import { ObjectType, ObjectTypeDetail } from '@/models/object-type';
 import { ObjectTypeCategory } from '@/models/object-type-category';
 import api from '@/utils/api';
@@ -109,7 +109,7 @@ const Component: React.FC = () => {
                     ),
                     (item: ObjectTypeDetail) => item.name,
                     (item: ObjectTypeDetail) => (
-                        <PillsDataCells<ObjectTypeCategory>
+                        <PillsDataCell<ObjectTypeCategory>
                             items={item.categories}
                             toLink={(cat) => `/admin/object-type-categories/form/${cat.uuid}`}
                             getLabel={(cat) => cat.name}

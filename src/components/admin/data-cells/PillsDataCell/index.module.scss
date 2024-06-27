@@ -8,3 +8,9 @@
     font-size: var(--mantine-font-size-xs) !important;
     font-weight: 600 !important;
 }
+
+.pill {
+    .mantine-Button-section {
+        margin-inline-end: 4px;
+    }
+}

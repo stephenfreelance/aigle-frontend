@@ -1,12 +1,14 @@
 import { GEO_COMMUNE_LIST_ENDPOINT, GEO_DEPARTMENT_LIST_ENDPOINT, GEO_REGION_LIST_ENDPOINT } from '@/api-endpoints';
 import { CollectivityType } from '@/models/geo/_common';
 import { TileSetStatus, TileSetType } from '@/models/tile-set';
-import { UserRole } from '@/models/user';
+import { UserGroupRight, UserRole } from '@/models/user';
 
 export const DEFAULT_ROUTE = '/';
 
 export const AUTH_ACCESS_TOKEN_STORAGE_KEY = 'auth_access_token';
 export const AUTH_REFRESH_TOKEN_STORAGE_KEY = 'auth_refresh_token';
+
+export const TILES_URL_FALLBACK = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 
 export const PASSWORD_MIN_LENGTH = 8;
 
@@ -37,6 +39,15 @@ export const TILE_SET_TYPES_NAMES_MAP: {
     BACKGROUND: 'Arrière-plan',
     PARTIAL: 'Partiel',
     INDICATIVE: 'Indicative',
+} as const;
+
+export const USER_GROUP_RIGHTS_ORDERED: UserGroupRight[] = ['WRITE', 'ANNOTATE', 'READ'] as const;
+export const USER_GROUP_RIGHTS_NAMES_MAP: {
+    [role in UserGroupRight]: string;
+} = {
+    WRITE: 'Ecriture',
+    ANNOTATE: 'Annotation',
+    READ: 'Lecture',
 } as const;
 
 export const COLLECTIVITY_TYPES_ENDPOINTS_MAP: {

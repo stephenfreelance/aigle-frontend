@@ -1,5 +1,5 @@
 import { Timestamped, Uuided } from '@/models/data';
-import { Polygon } from 'geojson';
+import { GeoJsonObject, GeometryObject } from 'geojson';
 
 export const tileSetStatuses = ['VISIBLE', 'HIDDEN', 'DEACTIVATED'] as const;
 export type TileSetStatus = (typeof tileSetStatuses)[number];
@@ -17,5 +17,5 @@ export interface TileSet extends Uuided, Timestamped {
     tileSetStatus: TileSetStatus;
     tileSetScheme: TileSetScheme;
     tileSetType: TileSetType;
-    geometry?: Polygon;
+    geometry?: GeometryObject;
 }

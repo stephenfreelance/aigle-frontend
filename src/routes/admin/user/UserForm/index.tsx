@@ -1,20 +1,33 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
-import { AUTH_REGISTER_ENDPOINT, getUserDetailEndpoint } from '@/api-endpoints';
+import { USERS_POST_ENDPOINT, USER_GROUP_LIST_ENDPOINT, getUserDetailEndpoint } from '@/api-endpoints';
 import ErrorCard from '@/components/ErrorCard';
 import Loader from '@/components/Loader';
 import LayoutAdminForm from '@/components/admin/LayoutAdminForm';
 import { ObjectType } from '@/models/object-type';
-import { User, UserRole, userRoles } from '@/models/user';
+import { SelectOption } from '@/models/ui/select-option';
+import { User, UserRole, UserUserGroupInput, userGroupRights, userRoles } from '@/models/user';
+import { UserGroup, UserGroupDetail } from '@/models/user-group';
 import api from '@/utils/api';
-import { PASSWORD_MIN_LENGTH, ROLES_NAMES_MAP } from '@/utils/constants';
-import { Button, PasswordInput, Select, TextInput } from '@mantine/core';
+import { PASSWORD_MIN_LENGTH, ROLES_NAMES_MAP, USER_GROUP_RIGHTS_NAMES_MAP } from '@/utils/constants';
+import {
+    ActionIcon,
+    Autocomplete,
+    Button,
+    Group,
+    MultiSelect,
+    PasswordInput,
+    Select,
+    Table,
+    TextInput,
+} from '@mantine/core';
 import { UseFormReturnType, isEmail, isNotEmpty, useForm } from '@mantine/form';
-import { IconUserPlus } from '@tabler/icons-react';
+import { IconCheck, IconTrash, IconUserPlus } from '@tabler/icons-react';
 import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
 import omit from 'lodash/omit';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import classes from './index.module.scss';
 
 const BACK_URL = '/admin/users';
 
@@ -22,6 +35,7 @@ interface FormValues {
     email: string;
     userRole: UserRole;
     password: string;
+    userUserGroups: UserUserGroupInput[];
 }
 
 const postForm = async (values: FormValues, uuid?: string) => {
@@ -38,7 +52,7 @@ const postForm = async (values: FormValues, uuid?: string) => {
 
         response = await api.patch(getUserDetailEndpoint(uuid), values_);
     } else {
-        response = await api.post(AUTH_REGISTER_ENDPOINT, values);
+        response = await api.post(USERS_POST_ENDPOINT, values);
     }
 
     return response.data;
@@ -47,11 +61,19 @@ const postForm = async (values: FormValues, uuid?: string) => {
 interface FormProps {
     uuid?: string;
     initialValues: FormValues;
+    userGroups: UserGroup[];
 }
 
-const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
+const Form: React.FC<FormProps> = ({ uuid, initialValues, userGroups }) => {
     const [error, setError] = useState<AxiosError>();
     const navigate = useNavigate();
+
+    console.log({
+        userGroups,
+        values: initialValues.userUserGroups,
+    });
+
+    const [searchGroupValue, setSearchGroupValue] = useState('');
 
     const form: UseFormReturnType<FormValues> = useForm({
         mode: 'uncontrolled',
@@ -69,6 +91,15 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
                 }
 
                 return null;
+            },
+            userUserGroups: {
+                userGroupRights: (value) => {
+                    if (!value.length) {
+                        return 'Le groupe doit être associé à un droit minimum';
+                    }
+
+                    return null;
+                },
             },
         },
     });
@@ -92,6 +123,34 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
     };
 
     const label = uuid ? 'Modifier un utilisateur' : 'Ajouter un utilisateur';
+
+    const userUserGroupsMap: {
+        [uuid: string]: UserGroup;
+    } = useMemo(
+        () =>
+            userGroups?.reduce(
+                (prev, userGroup) => ({
+                    ...prev,
+                    [userGroup.uuid]: userGroup,
+                }),
+                {},
+            ) || {},
+        [userGroups],
+    );
+    const userUserGroupsOptions: SelectOption[] = useMemo(() => {
+        if (!userGroups) {
+            return [];
+        }
+
+        const userGoupUuids = form.getValues().userUserGroups.map((userUserGroup) => userUserGroup.userGroupUuid);
+
+        return userGroups
+            .filter((userGroup) => !userGoupUuids.includes(userGroup.uuid))
+            .map((userGroup) => ({
+                label: userGroup.name,
+                value: userGroup.uuid,
+            }));
+    }, [userGroups, form.getValues().userUserGroups]);
 
     return (
         <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -133,6 +192,76 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
                 {...form.getInputProps('userRole')}
             />
 
+            <h2 className={classes['sub-title']}>Groupes</h2>
+            <Autocomplete
+                mt="md"
+                label="Ajouter un groupe"
+                placeholder="Rechercher un groupe"
+                data={userUserGroupsOptions}
+                onOptionSubmit={(value) => {
+                    form.setFieldValue('userUserGroups', [
+                        ...form.getValues().userUserGroups,
+                        { userGroupUuid: value, userGroupRights: ['READ'] },
+                    ]);
+                    setSearchGroupValue('');
+                }}
+                value={searchGroupValue}
+                onChange={setSearchGroupValue}
+            />
+
+            <h3 className={classes['sub-sub-title']}>Groupes de l&apos;utilisateur</h3>
+            <Table className={classes['user-groups']} withRowBorders={false} layout="fixed">
+                <Table.Tbody>
+                    {form.getValues().userUserGroups.map((userUserGroup, index) => (
+                        <Table.Tr className={classes['user-groups-group']} key={userUserGroup.userGroupUuid}>
+                            <Table.Td className={classes['user-groups-label']}>
+                                {userUserGroupsMap[userUserGroup.userGroupUuid].name}
+                            </Table.Td>
+                            <Table.Td colSpan={2}>
+                                <Group align="flex-end">
+                                    <MultiSelect
+                                        flex={1}
+                                        className={classes['user-groups-select']}
+                                        mt="md"
+                                        label="Droits"
+                                        placeholder="Lecture, écriture,..."
+                                        renderOption={(item) => (
+                                            <div className="multi-select-item">
+                                                <div className="multi-select-item-label">{item.option.label}</div>
+                                                {item.checked ? (
+                                                    <IconCheck className="multi-select-item-icon" color="grey" />
+                                                ) : null}
+                                            </div>
+                                        )}
+                                        data={userGroupRights.map((right) => ({
+                                            value: right,
+                                            label: USER_GROUP_RIGHTS_NAMES_MAP[right],
+                                        }))}
+                                        key={form.key(`userUserGroups.${index}.userGroupRights`)}
+                                        {...form.getInputProps(`userUserGroups.${index}.userGroupRights`)}
+                                    />
+
+                                    <ActionIcon
+                                        variant="transparent"
+                                        onClick={() => form.removeListItem('userUserGroups', index)}
+                                    >
+                                        <IconTrash />
+                                    </ActionIcon>
+                                </Group>
+                            </Table.Td>
+                        </Table.Tr>
+                    ))}
+
+                    {form.getValues().userUserGroups.length === 0 ? (
+                        <Table.Tr>
+                            <Table.Td className="empty-results-cell" colSpan={3}>
+                                Cet utilisateur n&apos;appartient à acucun groupe
+                            </Table.Td>
+                        </Table.Tr>
+                    ) : null}
+                </Table.Tbody>
+            </Table>
+
             <div className="form-actions">
                 <Button
                     disabled={mutation.status === 'pending'}
@@ -156,6 +285,7 @@ const EMPTY_FORM_VALUES: FormValues = {
     email: '',
     userRole: 'REGULAR',
     password: '',
+    userUserGroups: [],
 };
 
 const ComponentInner: React.FC = () => {
@@ -170,6 +300,10 @@ const ComponentInner: React.FC = () => {
         const initialValues = {
             ...res.data,
             password: '',
+            userUserGroups: res.data.userUserGroups.map((userUserGroup) => ({
+                userGroupUuid: userUserGroup.userGroup.uuid,
+                userGroupRights: userUserGroup.userGroupRights,
+            })),
         };
 
         return initialValues;
@@ -185,7 +319,17 @@ const ComponentInner: React.FC = () => {
         queryFn: () => fetchData(),
     });
 
-    if (isLoading) {
+    const fetchUserGroups = async () => {
+        const res = await api.get<UserGroupDetail[]>(USER_GROUP_LIST_ENDPOINT);
+        return res.data;
+    };
+
+    const { data: userGroups, isLoading: userGroupsIsLoading } = useQuery({
+        queryKey: [USER_GROUP_LIST_ENDPOINT],
+        queryFn: () => fetchUserGroups(),
+    });
+
+    if (isLoading || userGroupsIsLoading) {
         return <Loader />;
     }
 
@@ -193,7 +337,7 @@ const ComponentInner: React.FC = () => {
         return <ErrorCard>{error.message}</ErrorCard>;
     }
 
-    return <Form uuid={uuid} initialValues={initialValues || EMPTY_FORM_VALUES} />;
+    return <Form uuid={uuid} initialValues={initialValues || EMPTY_FORM_VALUES} userGroups={userGroups || []} />;
 };
 
 const Component: React.FC = () => {

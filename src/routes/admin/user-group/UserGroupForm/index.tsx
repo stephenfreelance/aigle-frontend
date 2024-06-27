@@ -9,6 +9,7 @@ import {
 } from '@/api-endpoints';
 import ErrorCard from '@/components/ErrorCard';
 import Loader from '@/components/Loader';
+import WarningCard from '@/components/WarningCard';
 import LayoutAdminForm from '@/components/admin/LayoutAdminForm';
 import { Paginated } from '@/models/data';
 import { CollectivityType, GeoCollectivity, collectivityTypes } from '@/models/geo/_common';
@@ -17,7 +18,8 @@ import { GeoDepartment } from '@/models/geo/geo-department';
 import { GeoRegion } from '@/models/geo/geo-region';
 import { ObjectType } from '@/models/object-type';
 import { ObjectTypeCategory } from '@/models/object-type-category';
-import { UserGroup } from '@/models/user-group';
+import { SelectOption } from '@/models/ui/select-option';
+import { UserGroupDetail } from '@/models/user-group';
 import api from '@/utils/api';
 import { Button, Loader as MantineLoader, MultiSelect, TextInput } from '@mantine/core';
 import { UseFormReturnType, isNotEmpty, useForm } from '@mantine/form';
@@ -47,17 +49,13 @@ const fetchGeoCollectivities = async <T extends GeoCollectivity>(
     return res.data.results;
 };
 
-interface GeoOption {
-    value: string;
-    label: string;
-}
-const geoCollectivityToGeoOption = (geoCollectivity: GeoCollectivity): GeoOption => ({
+const geoCollectivityToGeoOption = (geoCollectivity: GeoCollectivity): SelectOption => ({
     value: geoCollectivity.uuid,
-    label: geoCollectivity.name,
+    label: geoCollectivity.displayName,
 });
 
 type GeoValues = {
-    [key in CollectivityType]: GeoOption[];
+    [key in CollectivityType]: SelectOption[];
 };
 
 const getGeoSelectedUuids = (
@@ -78,12 +76,12 @@ const getGeoMultiSelectValues = (
     },
     geoSelectedValues: GeoValues,
 ): {
-    [key in CollectivityType]: GeoOption[];
+    [key in CollectivityType]: SelectOption[];
 } => {
     const geoSelectedUuids = getGeoSelectedUuids(geoSelectedValues);
 
     const res: {
-        [key in CollectivityType]: GeoOption[];
+        [key in CollectivityType]: SelectOption[];
     } = {
         region: [],
         department: [],
@@ -228,9 +226,20 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, initialGeoSelectedValu
         }));
     };
 
+    const { communesUuids, departmentsUuids, regionsUuids, objectTypeCategoriesUuids } = form.getValues();
+    const collectivitiesUuids = [...communesUuids, ...departmentsUuids, ...regionsUuids];
+
     return (
         <form onSubmit={form.onSubmit(handleSubmit)}>
             <h1>{label}</h1>
+
+            {uuid && (!collectivitiesUuids.length || !objectTypeCategoriesUuids.length) ? (
+                <WarningCard title="Accès aux données" className={classes['warning-card']}>
+                    <p>Ce groupe n&apos;a pas de collectivités ou de thématiques associées.</p>
+                    <p>Les utilisateurs du groupe ne pourront accéder à aucune donnée.</p>
+                </WarningCard>
+            ) : null}
+
             {error ? (
                 <ErrorCard>
                     <p>Voir les indications ci-dessous pour plus d&apos;info</p>
@@ -283,6 +292,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, initialGeoSelectedValu
                 {...form.getInputProps('regionsUuids')}
                 onOptionSubmit={(uuid) => geoOnOptionSubmit(uuid, 'region', regions)}
                 onRemove={(uuid) => geoOnRemove(uuid, 'region')}
+                filter={({ options }) => options}
             />
             <MultiSelect
                 mt="md"
@@ -302,6 +312,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, initialGeoSelectedValu
                 {...form.getInputProps('departmentsUuids')}
                 onOptionSubmit={(uuid) => geoOnOptionSubmit(uuid, 'department', departments)}
                 onRemove={(uuid) => geoOnRemove(uuid, 'department')}
+                filter={({ options }) => options}
             />
             <MultiSelect
                 mt="md"
@@ -321,6 +332,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, initialGeoSelectedValu
                 {...form.getInputProps('communesUuids')}
                 onOptionSubmit={(uuid) => geoOnOptionSubmit(uuid, 'commune', communes)}
                 onRemove={(uuid) => geoOnRemove(uuid, 'commune')}
+                filter={({ options }) => options}
             />
 
             <div className="form-actions">
@@ -360,7 +372,7 @@ const ComponentInner: React.FC = () => {
             return;
         }
 
-        const res = await api.get<UserGroup>(getUserGroupDetailEndpoint(uuid));
+        const res = await api.get<UserGroupDetail>(getUserGroupDetailEndpoint(uuid));
         const initialValues = {
             ...res.data,
             communesUuids: res.data.communes.map((commune) => commune.uuid),

@@ -16,17 +16,18 @@ import {
     tileSetStatuses,
     tileSetTypes,
 } from '@/models/tile-set';
+import SearchCollectivityModal from '@/routes/admin/tile-set/TileSetForm/SearchCollectivityModal';
 import api from '@/utils/api';
 import { TILE_SET_STATUSES_NAMES_MAP, TILE_SET_TYPES_NAMES_MAP } from '@/utils/constants';
-import { isPolygon } from '@/utils/geojson';
 import { Button, Card, JsonInput, Select, TextInput } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { UseFormReturnType, isNotEmpty, useForm } from '@mantine/form';
 import { IconMapPlus } from '@tabler/icons-react';
 import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query';
+import { geojsonType } from '@turf/turf';
 import { AxiosError, AxiosResponse } from 'axios';
 import { formatISO, parse } from 'date-fns';
-import { Polygon } from 'geojson';
+import { Geometry, Polygon } from 'geojson';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import classes from './index.module.scss';
 
@@ -64,7 +65,6 @@ const MapPreview: React.FC<MapPreviewProps> = ({ url, scheme, name, type, geomet
         <Card withBorder className={classes['map-preview-container']}>
             <h2>Aperçu du fond de carte</h2>
             <InfoCard title="Paramètres de l'apperçu">
-                <p>La carte est centrée sur la préfecture de l&apos;Hérault avec un zoom 16 par défault</p>
                 <p>
                     Le carré autour de la zone de limite définie la zone dans laquelle les tuiles seront chargées pour
                     l&apos;affichage de la carte
@@ -78,6 +78,7 @@ const MapPreview: React.FC<MapPreviewProps> = ({ url, scheme, name, type, geomet
                             layers={layers}
                             displayLayersGeometry={true}
                             boundLayers={false}
+                            fitBoundsFirstLayer={true}
                         />
                     </div>
                 ) : (
@@ -129,6 +130,8 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
         geometry: initialValues.geometry ? JSON.parse(initialValues.geometry) : null,
     });
 
+    const [showSearchCollectivityModal, setShowSearchCollectivityModal] = useState(false);
+
     const form: UseFormReturnType<FormValues> = useForm({
         initialValues,
         validate: {
@@ -153,23 +156,28 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
             tileSetScheme: isNotEmpty('Le scheme du fond de carte est requis'),
             tileSetType: isNotEmpty('Le type du fond de carte est requis'),
             geometry: (value) => {
-                const error = 'Le format de la geométrie est invalide';
-
                 if (!value) {
                     return null;
                 }
 
+                let isValid = false;
+                const valueParsed = JSON.parse(value);
+
                 try {
-                    const isValid = isPolygon(JSON.parse(value));
+                    geojsonType(valueParsed, 'Polygon', 'isGeoJsonPolygon');
+                    isValid = true;
+                } catch {}
 
-                    if (isValid) {
-                        return null;
-                    }
+                try {
+                    geojsonType(valueParsed, 'MultiPolygon', 'isGeoJsonMultiPolygon');
+                    isValid = true;
+                } catch {}
 
-                    return error;
-                } catch {
-                    return error;
+                if (!isValid) {
+                    return 'Le format de la geométrie est invalide';
                 }
+
+                return null;
             },
         },
         validateInputOnChange: ['url'],
@@ -313,6 +321,20 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
                 validationError="Le format de la geométrie est invalide"
                 key={form.key('geometry')}
                 {...form.getInputProps('geometry')}
+            />
+            <Button variant="filled" mb="md" onClick={() => setShowSearchCollectivityModal(true)}>
+                Remplir la géométrie à partir d&apos;une collectivité
+            </Button>
+
+            <SearchCollectivityModal
+                showed={showSearchCollectivityModal}
+                onClose={(geometry?: Geometry) => {
+                    setShowSearchCollectivityModal(false);
+
+                    if (geometry) {
+                        form.setFieldValue('geometry', JSON.stringify(geometry, null, 2));
+                    }
+                }}
             />
 
             <MapPreview {...mapPreviewProps} key={mapPreviewProps.scheme} />

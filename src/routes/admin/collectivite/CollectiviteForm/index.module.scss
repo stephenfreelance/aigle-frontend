@@ -1,0 +1,11 @@
+.map-preview-container {
+    margin-top: var(--mantine-spacing-md);
+    
+    h2 {
+        margin-bottom: var(--mantine-spacing-md);
+    }
+
+    .map-preview-content {
+        height: 400px;
+    }    
+}
