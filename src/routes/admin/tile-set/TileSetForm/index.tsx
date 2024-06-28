@@ -6,9 +6,11 @@ import InfoCard from '@/components/InfoCard';
 import Loader from '@/components/Loader';
 import Map from '@/components/Map';
 import LayoutAdminForm from '@/components/admin/LayoutAdminForm';
+import GeoCollectivitiesMultiSelects from '@/components/admin/form-fields/GeoCollectivitiesMultiSelects';
 import { MapLayer } from '@/models/map-layer';
 import {
     TileSet,
+    TileSetDetailWithGeometry,
     TileSetScheme,
     TileSetStatus,
     TileSetType,
@@ -16,18 +18,17 @@ import {
     tileSetStatuses,
     tileSetTypes,
 } from '@/models/tile-set';
-import SearchCollectivityModal from '@/routes/admin/tile-set/TileSetForm/SearchCollectivityModal';
 import api from '@/utils/api';
 import { TILE_SET_STATUSES_NAMES_MAP, TILE_SET_TYPES_NAMES_MAP } from '@/utils/constants';
-import { Button, Card, JsonInput, Select, TextInput } from '@mantine/core';
+import { GeoValues, geoCollectivityToGeoOption } from '@/utils/geojson';
+import { Button, Card, Select, TextInput } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { UseFormReturnType, isNotEmpty, useForm } from '@mantine/form';
 import { IconMapPlus } from '@tabler/icons-react';
 import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query';
-import { geojsonType } from '@turf/turf';
 import { AxiosError, AxiosResponse } from 'axios';
 import { formatISO, parse } from 'date-fns';
-import { Geometry, Polygon } from 'geojson';
+import { Geometry } from 'geojson';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import classes from './index.module.scss';
 
@@ -38,7 +39,7 @@ interface MapPreviewProps {
     type: TileSetType;
     scheme: TileSetScheme;
     name: string;
-    geometry?: Polygon;
+    geometry?: Geometry;
 }
 
 const MapPreview: React.FC<MapPreviewProps> = ({ url, scheme, name, type, geometry }) => {
@@ -94,21 +95,19 @@ interface FormValues {
     tileSetStatus: TileSetStatus;
     tileSetScheme: TileSetScheme;
     tileSetType: TileSetType;
+    communesUuids: string[];
+    departmentsUuids: string[];
+    regionsUuids: string[];
     date?: Date;
-    geometry?: string;
 }
 
 const postForm = async (values: FormValues, uuid?: string) => {
     let response: AxiosResponse<TileSet>;
-    const values_ = {
-        ...values,
-        geometry: values.geometry ? JSON.parse(values.geometry) : null,
-    };
 
     if (uuid) {
-        response = await api.patch(getTileSetDetailEndpoint(uuid), values_);
+        response = await api.patch(getTileSetDetailEndpoint(uuid), values);
     } else {
-        response = await api.post(TILE_SET_POST_ENDPOINT, values_);
+        response = await api.post(TILE_SET_POST_ENDPOINT, values);
     }
 
     return response.data;
@@ -117,9 +116,11 @@ const postForm = async (values: FormValues, uuid?: string) => {
 interface FormProps {
     uuid?: string;
     initialValues: FormValues;
+    initialGeoSelectedValues?: GeoValues;
+    geometry?: Geometry;
 }
 
-const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
+const Form: React.FC<FormProps> = ({ uuid, initialValues, initialGeoSelectedValues, geometry }) => {
     const [error, setError] = useState<AxiosError>();
     const navigate = useNavigate();
     const [mapPreviewProps, setMapPreviewProps] = useState<MapPreviewProps>({
@@ -127,10 +128,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
         scheme: initialValues.tileSetScheme,
         name: initialValues.name,
         type: initialValues.tileSetType,
-        geometry: initialValues.geometry ? JSON.parse(initialValues.geometry) : null,
     });
-
-    const [showSearchCollectivityModal, setShowSearchCollectivityModal] = useState(false);
 
     const form: UseFormReturnType<FormValues> = useForm({
         initialValues,
@@ -155,30 +153,6 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
             tileSetStatus: isNotEmpty('Le status du fond de carte est requis'),
             tileSetScheme: isNotEmpty('Le scheme du fond de carte est requis'),
             tileSetType: isNotEmpty('Le type du fond de carte est requis'),
-            geometry: (value) => {
-                if (!value) {
-                    return null;
-                }
-
-                let isValid = false;
-                const valueParsed = JSON.parse(value);
-
-                try {
-                    geojsonType(valueParsed, 'Polygon', 'isGeoJsonPolygon');
-                    isValid = true;
-                } catch {}
-
-                try {
-                    geojsonType(valueParsed, 'MultiPolygon', 'isGeoJsonMultiPolygon');
-                    isValid = true;
-                } catch {}
-
-                if (!isValid) {
-                    return 'Le format de la geométrie est invalide';
-                }
-
-                return null;
-            },
         },
         validateInputOnChange: ['url'],
     });
@@ -204,12 +178,6 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
         setMapPreviewProps((prev) => ({
             ...prev,
             type: value,
-        })),
-    );
-    form.watch('geometry', ({ value }) =>
-        setMapPreviewProps((prev) => ({
-            ...prev,
-            geometry: form.isValid('geometry') && value ? JSON.parse(value) : null,
         })),
     );
 
@@ -309,35 +277,10 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
                 key={form.key('tileSetStatus')}
                 {...form.getInputProps('tileSetStatus')}
             />
-            <JsonInput
-                label="Géométrie des limite"
-                description="GeoJson de type 'Polygon' correspondant aux limites du fond de carte. Laisser vide s'il n'y a pas de limite d'affichage."
-                formatOnBlur
-                autosize
-                resize="vertical"
-                minRows={4}
-                maxRows={8}
-                mb="md"
-                validationError="Le format de la geométrie est invalide"
-                key={form.key('geometry')}
-                {...form.getInputProps('geometry')}
-            />
-            <Button variant="filled" mb="md" onClick={() => setShowSearchCollectivityModal(true)}>
-                Remplir la géométrie à partir d&apos;une collectivité
-            </Button>
 
-            <SearchCollectivityModal
-                showed={showSearchCollectivityModal}
-                onClose={(geometry?: Geometry) => {
-                    setShowSearchCollectivityModal(false);
+            <GeoCollectivitiesMultiSelects form={form} initialGeoSelectedValues={initialGeoSelectedValues} />
 
-                    if (geometry) {
-                        form.setFieldValue('geometry', JSON.stringify(geometry, null, 2));
-                    }
-                }}
-            />
-
-            <MapPreview {...mapPreviewProps} key={mapPreviewProps.scheme} />
+            <MapPreview {...mapPreviewProps} geometry={geometry} key={mapPreviewProps.scheme} />
 
             <div className="form-actions">
                 <Button
@@ -365,7 +308,9 @@ const EMPTY_FORM_VALUES: FormValues = {
     tileSetScheme: 'xyz',
     tileSetType: 'BACKGROUND',
     date: undefined,
-    geometry: undefined,
+    communesUuids: [],
+    departmentsUuids: [],
+    regionsUuids: [],
 };
 
 const ComponentInner: React.FC = () => {
@@ -376,21 +321,24 @@ const ComponentInner: React.FC = () => {
             return;
         }
 
-        const res = await api.get<TileSet>(getTileSetDetailEndpoint(uuid));
+        const res = await api.get<TileSetDetailWithGeometry>(getTileSetDetailEndpoint(uuid));
         const initialValues: FormValues = {
             ...res.data,
-            geometry: res.data.geometry ? JSON.stringify(res.data.geometry, null, 2) : undefined,
             date: new Date(res.data.date),
+            communesUuids: res.data.communes.map((commune) => commune.uuid),
+            departmentsUuids: res.data.departments.map((department) => department.uuid),
+            regionsUuids: res.data.regions.map((region) => region.uuid),
+        };
+        const initialGeoSelectedValues: GeoValues = {
+            region: res.data.regions.map((region) => geoCollectivityToGeoOption(region)),
+            department: res.data.departments.map((department) => geoCollectivityToGeoOption(department)),
+            commune: res.data.communes.map((commune) => geoCollectivityToGeoOption(commune)),
         };
 
-        return initialValues;
+        return { initialValues, initialGeoSelectedValues, geometry: res.data.geometry };
     };
 
-    const {
-        isLoading,
-        error,
-        data: initialValues,
-    } = useQuery({
+    const { isLoading, error, data } = useQuery({
         queryKey: [getTileSetDetailEndpoint(String(uuid))],
         enabled: !!uuid,
         queryFn: () => fetchData(),
@@ -404,7 +352,14 @@ const ComponentInner: React.FC = () => {
         return <ErrorCard>{error.message}</ErrorCard>;
     }
 
-    return <Form uuid={uuid} initialValues={initialValues || EMPTY_FORM_VALUES} />;
+    return (
+        <Form
+            uuid={uuid}
+            initialValues={data?.initialValues || EMPTY_FORM_VALUES}
+            initialGeoSelectedValues={data?.initialGeoSelectedValues}
+            geometry={data?.geometry}
+        />
+    );
 };
 
 const Component: React.FC = () => {

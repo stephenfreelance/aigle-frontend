@@ -55,6 +55,11 @@ export const getGeoListEndpoint = (collectivityType: CollectivityType) => {
     throw new Error(`Unknown collectivity type ${collectivityType}`);
 };
 
+const BASE_GEO_CUSTOM_ZONE = `${BASE_GEO}custom-zone/`;
+export const GEO_CUSTOM_ZONE_LIST_ENDPOINT = `${BASE_GEO_CUSTOM_ZONE}`;
+export const GEO_CUSTOM_ZONE_POST_ENDPOINT = `${BASE_GEO_CUSTOM_ZONE}`;
+export const getGeoCustomZoneDetailEndpoint = (uuid: string) => `${GEO_CUSTOM_ZONE_POST_ENDPOINT}${uuid}/`;
+
 export const getGeoPostEndpoint = (collectivityType: CollectivityType) => {
     if (collectivityType === 'region') {
         return GEO_REGION_POST_ENDPOINT;

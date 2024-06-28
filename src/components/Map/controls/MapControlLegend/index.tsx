@@ -1,6 +1,6 @@
 import React from 'react';
 
-import MapControlCustom from '@/components/Map/MapControlCustom';
+import MapControlCustom from '@/components/Map/controls/MapControlCustom';
 import { ObjectType } from '@/models/object-type';
 import { useMap } from '@/utils/map-context';
 import classes from './index.module.scss';

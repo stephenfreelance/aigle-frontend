@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 
-import MapControlCustom from '@/components/Map/MapControlCustom';
+import MapControlCustom from '@/components/Map/controls/MapControlCustom';
 import { DetectionFilter } from '@/models/detection-filter';
 import { ObjectType } from '@/models/object-type';
 import { useMap } from '@/utils/map-context';

@@ -20,15 +20,29 @@ interface MapState {
 }
 
 const useMap = create<MapState>()((set, get) => ({
-    setMapSettings: (settings: MapSettings) => {
+    setMapSettings: ({ settings }: MapSettings) => {
+        const allObjectTypes: ObjectType[] = [];
+        const objectTypesUuids = new Set<string>();
+
+        settings.forEach(({ objectTypes }) => {
+            objectTypes.forEach((objectType) => {
+                if (objectTypesUuids.has(objectType.uuid)) {
+                    return;
+                }
+
+                allObjectTypes.push(objectType);
+                objectTypesUuids.add(objectType.uuid);
+            });
+        });
+
         set(() => ({
-            layers: settings.tileSets.map((tileSet) => ({
+            layers: settings.map(({ tileSet }) => ({
                 tileSet,
                 displayed: tileSet.tileSetStatus === 'VISIBLE',
             })),
-            objectTypes: settings.objectTypes,
+            objectTypes: allObjectTypes,
             detectionFilter: {
-                objectTypesUuids: settings.objectTypes.map((type) => type.uuid),
+                objectTypesUuids: allObjectTypes.map((type) => type.uuid),
             },
         }));
     },

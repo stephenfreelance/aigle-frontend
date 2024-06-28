@@ -80,7 +80,7 @@ const Form: React.FC<FormProps> = ({ objectTypes, layers, polygon, hide }) => {
         // get the first displayed layer that contains the annotation
         const layer = layers
             .filter((layer) => ['BACKGROUND', 'PARTIAL'].includes(layer.tileSet.tileSetType) && layer.displayed)
-            .find((layer) => !layer.tileSet.geometry || booleanWithin(layer.tileSet.geometry, polygonCenter));
+            .find((layer) => !layer.tileSet.geometry || booleanWithin(polygonCenter, layer.tileSet.geometry));
 
         if (!layer) {
             notifications.show({

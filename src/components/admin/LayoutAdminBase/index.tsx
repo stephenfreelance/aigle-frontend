@@ -26,6 +26,7 @@ const AdminSubheader: React.FC<AdminSubheaderProps> = ({ actions }) => {
                     href="/admin/collectivites"
                     active={pathname.includes('/admin/collectivites')}
                 />
+                <NavLink label="Zones" href="/admin/custom-zones" active={pathname.includes('/admin/custom-zones')} />
                 <NavLink
                     label="Types d'objets"
                     href="/admin/object-types"

@@ -4,9 +4,9 @@ import Map, { Layer, Source, ViewStateChangeEvent } from 'react-map-gl';
 import { getDetectionListEndpoint } from '@/api-endpoints';
 import DetectionDetail from '@/components/DetectionDetail';
 import MapAddAnnotationModal from '@/components/Map/MapAddAnnotationModal';
-import MapControlFilterDetection from '@/components/Map/MapControlFilterDetection';
-import MapControlLayerDisplay from '@/components/Map/MapControlLayerDisplay';
-import MapControlLegend from '@/components/Map/MapControlLegend';
+import MapControlFilterDetection from '@/components/Map/controls/MapControlFilterDetection';
+import MapControlLayerDisplay from '@/components/Map/controls/MapControlLayerDisplay';
+import MapControlLegend from '@/components/Map/controls/MapControlLegend';
 import { DetectionGeojsonData, DetectionProperties } from '@/models/detection';
 import { MapLayer } from '@/models/map-layer';
 import api from '@/utils/api';
@@ -190,8 +190,8 @@ const Component: React.FC<ComponentProps> = ({
 
     // detections fetching
 
-    const fetchDetections = async (mapBounds?: MapBounds) => {
-        if (!displayDetections || !mapBounds) {
+    const fetchDetections = async (signal: AbortSignal, mapBounds?: MapBounds) => {
+        if (!displayDetections || !mapBounds || !detectionFilter) {
             return null;
         }
 
@@ -201,6 +201,7 @@ const Component: React.FC<ComponentProps> = ({
                 ...detectionFilter,
                 tileSetsUuids: tileSetsUuids,
             },
+            signal,
         });
         return res.data;
     };
@@ -211,7 +212,7 @@ const Component: React.FC<ComponentProps> = ({
             ...Object.values(detectionFilter || {}),
             ...tileSetsUuids,
         ],
-        queryFn: () => fetchDetections(mapBounds),
+        queryFn: ({ signal }) => fetchDetections(signal, mapBounds),
         placeholderData: keepPreviousData,
         enabled: displayDetections && !!mapBounds,
     });

@@ -4,6 +4,8 @@ import { User } from '@/models/user';
 import Map from '@/routes/Map/index.tsx';
 import CollectiviteForm from '@/routes/admin/collectivite/CollectiviteForm';
 import CollectiviteList from '@/routes/admin/collectivite/CollectiviteList';
+import CustomZoneForm from '@/routes/admin/custom-zone/CustomZoneForm';
+import CustomZoneList from '@/routes/admin/custom-zone/CustomZoneList';
 import ObjectTypeCategoryForm from '@/routes/admin/object-type-category/ObjectTypeCategoryForm';
 import ObjectTypeCategoryList from '@/routes/admin/object-type-category/ObjectTypeCategoryList';
 import ObjectTypeForm from '@/routes/admin/object-type/ObjectTypeForm';
@@ -113,6 +115,31 @@ const App: React.FC = () => {
                     element={
                         <ProtectedRoute roles={['ADMIN', 'SUPER_ADMIN']}>
                             <UserGroupForm />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/admin/custom-zones"
+                    element={
+                        <ProtectedRoute roles={['ADMIN', 'SUPER_ADMIN']}>
+                            <CustomZoneList />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/custom-zones/form"
+                    element={
+                        <ProtectedRoute roles={['ADMIN', 'SUPER_ADMIN']}>
+                            <CustomZoneForm />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/custom-zones/form/:uuid"
+                    element={
+                        <ProtectedRoute roles={['ADMIN', 'SUPER_ADMIN']}>
+                            <CustomZoneForm />
                         </ProtectedRoute>
                     }
                 />

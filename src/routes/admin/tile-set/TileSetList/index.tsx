@@ -9,7 +9,7 @@ import LayoutAdminBase from '@/components/admin/LayoutAdminBase';
 import { TileSet, TileSetScheme, TileSetStatus, tileSetSchemes, tileSetStatuses } from '@/models/tile-set';
 import { TILE_SET_STATUSES_NAMES_MAP, TILE_SET_TYPES_NAMES_MAP } from '@/utils/constants';
 import { Button, Checkbox, Input, Stack, Table, Tooltip } from '@mantine/core';
-import { IconCheck, IconLink, IconMapPlus, IconSearch, IconX } from '@tabler/icons-react';
+import { IconLink, IconMapPlus, IconSearch } from '@tabler/icons-react';
 import isEqual from 'lodash/isEqual';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -114,7 +114,6 @@ const Component: React.FC = () => {
                     <Table.Th key="type">Type</Table.Th>,
                     <Table.Th key="status">Status</Table.Th>,
                     <Table.Th key="scheme">Scheme</Table.Th>,
-                    <Table.Th key="geometry">Limites géo</Table.Th>,
                     <Table.Th key="url">URL</Table.Th>,
                 ]}
                 tableBodyRenderFns={[
@@ -123,7 +122,6 @@ const Component: React.FC = () => {
                     (item: TileSet) => TILE_SET_TYPES_NAMES_MAP[item.tileSetType],
                     (item: TileSet) => TILE_SET_STATUSES_NAMES_MAP[item.tileSetStatus],
                     (item: TileSet) => item.tileSetScheme,
-                    (item: TileSet) => <>{item.geometry ? <IconCheck /> : <IconX />}</>,
                     (item: TileSet) => (
                         <Tooltip label={item.url}>
                             <Button

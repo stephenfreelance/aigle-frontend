@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 
-import MapControlCustom from '@/components/Map/MapControlCustom';
+import MapControlCustom from '@/components/Map/controls/MapControlCustom';
 import { MapLayer } from '@/models/map-layer';
 import { TileSetType, tileSetTypes } from '@/models/tile-set';
 import { TILE_SET_TYPES_NAMES_MAP } from '@/utils/constants';

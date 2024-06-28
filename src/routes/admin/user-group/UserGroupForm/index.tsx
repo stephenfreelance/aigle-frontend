@@ -1,9 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 
 import {
     OBJECT_TYPE_CATEGORY_LIST_ENDPOINT,
     USER_GROUP_POST_ENDPOINT,
-    getGeoListEndpoint,
     getUserDetailEndpoint,
     getUserGroupDetailEndpoint,
 } from '@/api-endpoints';
@@ -11,19 +10,14 @@ import ErrorCard from '@/components/ErrorCard';
 import Loader from '@/components/Loader';
 import WarningCard from '@/components/WarningCard';
 import LayoutAdminForm from '@/components/admin/LayoutAdminForm';
-import { Paginated } from '@/models/data';
-import { CollectivityType, GeoCollectivity, collectivityTypes } from '@/models/geo/_common';
-import { GeoCommune } from '@/models/geo/geo-commune';
-import { GeoDepartment } from '@/models/geo/geo-department';
-import { GeoRegion } from '@/models/geo/geo-region';
+import GeoCollectivitiesMultiSelects from '@/components/admin/form-fields/GeoCollectivitiesMultiSelects';
 import { ObjectType } from '@/models/object-type';
 import { ObjectTypeCategory } from '@/models/object-type-category';
-import { SelectOption } from '@/models/ui/select-option';
 import { UserGroupDetail } from '@/models/user-group';
 import api from '@/utils/api';
-import { Button, Loader as MantineLoader, MultiSelect, TextInput } from '@mantine/core';
+import { GeoValues, geoCollectivityToGeoOption } from '@/utils/geojson';
+import { Button, MultiSelect, TextInput } from '@mantine/core';
 import { UseFormReturnType, isNotEmpty, useForm } from '@mantine/form';
-import { useDebouncedValue } from '@mantine/hooks';
 import { IconCheck, IconUserPlus } from '@tabler/icons-react';
 import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
@@ -31,74 +25,6 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import classes from './index.module.scss';
 
 const BACK_URL = '/admin/user-groups';
-
-const GEO_COLLECTIVITIES_LIMIT = 10;
-
-const fetchGeoCollectivities = async <T extends GeoCollectivity>(
-    collectivityType: CollectivityType,
-    q: string,
-): Promise<T[]> => {
-    const endpoint = getGeoListEndpoint(collectivityType);
-    const res = await api.get<Paginated<T>>(endpoint, {
-        params: {
-            q,
-            limit: GEO_COLLECTIVITIES_LIMIT,
-            offset: 0,
-        },
-    });
-    return res.data.results;
-};
-
-const geoCollectivityToGeoOption = (geoCollectivity: GeoCollectivity): SelectOption => ({
-    value: geoCollectivity.uuid,
-    label: geoCollectivity.displayName,
-});
-
-type GeoValues = {
-    [key in CollectivityType]: SelectOption[];
-};
-
-const getGeoSelectedUuids = (
-    geoSelectedValues: GeoValues,
-): {
-    [key in CollectivityType]: string[];
-} => {
-    return {
-        region: geoSelectedValues.region.map((geo) => geo.value),
-        department: geoSelectedValues.department.map((geo) => geo.value),
-        commune: geoSelectedValues.commune.map((geo) => geo.value),
-    };
-};
-
-const getGeoMultiSelectValues = (
-    geoResults: {
-        [key in CollectivityType]: GeoCollectivity[];
-    },
-    geoSelectedValues: GeoValues,
-): {
-    [key in CollectivityType]: SelectOption[];
-} => {
-    const geoSelectedUuids = getGeoSelectedUuids(geoSelectedValues);
-
-    const res: {
-        [key in CollectivityType]: SelectOption[];
-    } = {
-        region: [],
-        department: [],
-        commune: [],
-    };
-
-    collectivityTypes.forEach((collectivityType) => {
-        res[collectivityType] = [
-            ...geoSelectedValues[collectivityType],
-            ...(geoResults[collectivityType] || [])
-                .filter((geo) => !geoSelectedUuids[collectivityType].includes(geo.uuid))
-                .map((geo) => geoCollectivityToGeoOption(geo)),
-        ];
-    });
-
-    return res;
-};
 
 interface FormValues {
     name: string;
@@ -160,72 +86,6 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, initialGeoSelectedValu
 
     // geo data
 
-    const [geoInputValues, setGeoInputValues] = useState<{
-        [key in CollectivityType]: string;
-    }>({
-        region: '',
-        department: '',
-        commune: '',
-    });
-    const [debouncedGeoInputValues] = useDebouncedValue(geoInputValues, 250);
-
-    const { data: regions, isLoading: regionsIsLoading } = useQuery<GeoRegion[]>({
-        queryKey: ['regions', debouncedGeoInputValues.region],
-        enabled: !!debouncedGeoInputValues.region,
-        queryFn: () => fetchGeoCollectivities<GeoRegion>('region', debouncedGeoInputValues.region),
-    });
-    const { data: departments, isLoading: departmentsIsLoading } = useQuery<GeoDepartment[]>({
-        queryKey: ['departments', debouncedGeoInputValues.department],
-        enabled: !!debouncedGeoInputValues.department,
-        queryFn: () => fetchGeoCollectivities<GeoDepartment>('department', debouncedGeoInputValues.department),
-    });
-    const { data: communes, isLoading: communesIsLoading } = useQuery<GeoCommune[]>({
-        queryKey: ['communes', debouncedGeoInputValues.commune],
-        enabled: !!debouncedGeoInputValues.commune,
-        queryFn: () => fetchGeoCollectivities<GeoCommune>('commune', debouncedGeoInputValues.commune),
-    });
-
-    const [geoSelectedValues, setGeoSelectedValues] = useState<GeoValues>(
-        initialGeoSelectedValues || {
-            region: [],
-            department: [],
-            commune: [],
-        },
-    );
-
-    const geoMultiSelectValues = useMemo(
-        () =>
-            getGeoMultiSelectValues(
-                {
-                    region: regions || [],
-                    department: departments || [],
-                    commune: communes || [],
-                },
-                geoSelectedValues,
-            ),
-        [regions, departments, communes, geoSelectedValues],
-    );
-
-    const geoOnOptionSubmit = (uuid: string, collectivityType: CollectivityType, geoItems?: GeoCollectivity[]) => {
-        const option = geoItems?.find((geo) => geo.uuid === uuid);
-
-        if (!option) {
-            return;
-        }
-
-        setGeoSelectedValues((prev) => ({
-            ...prev,
-            [collectivityType]: [...prev[collectivityType], geoCollectivityToGeoOption(option)],
-        }));
-    };
-
-    const geoOnRemove = (uuid: string, collectivityType: CollectivityType) => {
-        setGeoSelectedValues((prev) => ({
-            ...prev,
-            [collectivityType]: prev[collectivityType].filter((geo) => geo.value !== uuid),
-        }));
-    };
-
     const { communesUuids, departmentsUuids, regionsUuids, objectTypeCategoriesUuids } = form.getValues();
     const collectivitiesUuids = [...communesUuids, ...departmentsUuids, ...regionsUuids];
 
@@ -274,66 +134,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, initialGeoSelectedValu
 
             <h2 className={classes['sub-title']}>Collectivités accessibles par le groupe</h2>
 
-            <MultiSelect
-                mt="md"
-                label="Regions"
-                placeholder="Rechercher une région"
-                searchable
-                data={geoMultiSelectValues.region}
-                onSearchChange={(value) => {
-                    setGeoInputValues((prev) => ({
-                        ...prev,
-                        region: value,
-                    }));
-                }}
-                rightSection={regionsIsLoading ? <MantineLoader size="xs" /> : null}
-                hidePickedOptions={true}
-                key={form.key('regionsUuids')}
-                {...form.getInputProps('regionsUuids')}
-                onOptionSubmit={(uuid) => geoOnOptionSubmit(uuid, 'region', regions)}
-                onRemove={(uuid) => geoOnRemove(uuid, 'region')}
-                filter={({ options }) => options}
-            />
-            <MultiSelect
-                mt="md"
-                label="Departments"
-                placeholder="Rechercher un département"
-                searchable
-                data={geoMultiSelectValues.department}
-                onSearchChange={(value) => {
-                    setGeoInputValues((prev) => ({
-                        ...prev,
-                        department: value,
-                    }));
-                }}
-                rightSection={departmentsIsLoading ? <MantineLoader size="xs" /> : null}
-                hidePickedOptions={true}
-                key={form.key('departmentsUuids')}
-                {...form.getInputProps('departmentsUuids')}
-                onOptionSubmit={(uuid) => geoOnOptionSubmit(uuid, 'department', departments)}
-                onRemove={(uuid) => geoOnRemove(uuid, 'department')}
-                filter={({ options }) => options}
-            />
-            <MultiSelect
-                mt="md"
-                label="Communes"
-                placeholder="Rechercher une commune"
-                searchable
-                data={geoMultiSelectValues.commune}
-                onSearchChange={(value) => {
-                    setGeoInputValues((prev) => ({
-                        ...prev,
-                        commune: value,
-                    }));
-                }}
-                rightSection={communesIsLoading ? <MantineLoader size="xs" /> : null}
-                hidePickedOptions={true}
-                key={form.key('communesUuids')}
-                {...form.getInputProps('communesUuids')}
-                onOptionSubmit={(uuid) => geoOnOptionSubmit(uuid, 'commune', communes)}
-                onRemove={(uuid) => geoOnRemove(uuid, 'commune')}
-                filter={({ options }) => options}
-            />
+            <GeoCollectivitiesMultiSelects form={form} initialGeoSelectedValues={initialGeoSelectedValues} />
 
             <div className="form-actions">
                 <Button
