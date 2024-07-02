@@ -1,8 +1,8 @@
-import { DETECTION_POST_ENDPOINT } from '@/api-endpoints';
-import { DetectionDetail, DetectionObject } from '@/models/detection';
+import { DETECTION_OBJECT_POST_ENDPOINT } from '@/api-endpoints';
+import { DetectionObjectDetail } from '@/models/detection-object';
 import api from '@/utils/api';
 import { useMap } from '@/utils/map-context';
-import { Select } from '@mantine/core';
+import { Loader as MantineLoader, Select } from '@mantine/core';
 import { UseFormReturnType, useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { UseMutationResult, useMutation } from '@tanstack/react-query';
@@ -15,18 +15,17 @@ interface FormValues {
 }
 
 const postForm = async (detectionUuid: string, values: FormValues) => {
-    const response = await api.patch(`${DETECTION_POST_ENDPOINT}${detectionUuid}/`, values);
-    return response.data;
+    await api.patch(`${DETECTION_OBJECT_POST_ENDPOINT}${detectionUuid}/`, values);
 };
 
 interface ComponentProps {
-    detection: DetectionDetail;
+    detectionObject: DetectionObjectDetail;
 }
-const Component: React.FC<ComponentProps> = ({ detection }) => {
+const Component: React.FC<ComponentProps> = ({ detectionObject }) => {
     const { objectTypes, eventEmitter } = useMap();
     const form: UseFormReturnType<FormValues> = useForm({
         initialValues: {
-            objectTypeUuid: detection.detectionObject.objectType.uuid,
+            objectTypeUuid: detectionObject.objectType.uuid,
         },
     });
     form.watch('objectTypeUuid', () => {
@@ -34,13 +33,13 @@ const Component: React.FC<ComponentProps> = ({ detection }) => {
         handleSubmit(formValues);
     });
 
-    const mutation: UseMutationResult<DetectionObject, AxiosError, FormValues> = useMutation({
-        mutationFn: (values: FormValues) => postForm(detection.uuid, values),
+    const mutation: UseMutationResult<void, AxiosError, FormValues> = useMutation({
+        mutationFn: (values: FormValues) => postForm(detectionObject.uuid, values),
         onSuccess: () => {
             eventEmitter.emit('UPDATE_DETECTIONS');
             notifications.show({
                 title: 'Mise à jour de la détection',
-                message: `La détection #${detection.id} a été mise à jour avec succès.`,
+                message: `L'objet #${detectionObject.id} a été mise à jour avec succès.`,
             });
         },
         onError: (error) => {
@@ -50,7 +49,7 @@ const Component: React.FC<ComponentProps> = ({ detection }) => {
                 notifications.show({
                     color: 'red',
                     title: 'Erreur',
-                    message: 'Une erreur est survenue lors de la mise à jour de la détection',
+                    message: "Une erreur est survenue lors de la mise à jour de l'objet",
                 });
             }
         },
@@ -71,6 +70,8 @@ const Component: React.FC<ComponentProps> = ({ detection }) => {
                         label: type.name,
                     }))}
                     key={form.key('objectTypeUuid')}
+                    disabled={mutation.status === 'pending'}
+                    rightSection={mutation.status === 'pending' ? <MantineLoader size="xs" /> : null}
                     {...form.getInputProps('objectTypeUuid')}
                 />
             ) : undefined}

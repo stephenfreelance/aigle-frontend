@@ -1,9 +1,14 @@
+@import "@/constants.scss";
+
 .container {
-    padding: 24px;
+    padding: $detection-detail-panel-padding;
 
     display: flex;
     flex-direction: column;
     gap: 16px;
+
+    height: 100%;
+    overflow-y: overlay;
 
     .general-informations {
         .general-informations-item {

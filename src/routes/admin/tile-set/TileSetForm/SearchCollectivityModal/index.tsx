@@ -3,6 +3,7 @@ import { Paginated } from '@/models/data';
 import { CollectivityType, GeoCollectivity, GeoCollectivityDetail, collectivityTypes } from '@/models/geo/_common';
 import api from '@/utils/api';
 import { COLLECTIVITY_TYPES_NAMES_MAP } from '@/utils/constants';
+import { geoCollectivityToGeoOption } from '@/utils/geojson';
 import { Button, Loader as MantineLoader, Modal, Select } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
 import { useQuery } from '@tanstack/react-query';
@@ -72,10 +73,7 @@ const Component: React.FC<ComponentProps> = ({ showed, onClose }: ComponentProps
                 mt="md"
                 placeholder={`Rechercher ${COLLECTIVITY_TYPES_NAMES_MAP[collectivityTypeSelected]}`}
                 searchable
-                data={(data || []).map((geo) => ({
-                    value: geo.uuid,
-                    label: geo.displayName,
-                }))}
+                data={(data || []).map((geo) => geoCollectivityToGeoOption(geo))}
                 onSearchChange={setSearchValue}
                 onChange={(uuid) => setCollectvityUuid(uuid)}
                 value={collectvityUuid}

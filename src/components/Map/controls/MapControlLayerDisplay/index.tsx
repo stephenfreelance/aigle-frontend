@@ -5,7 +5,7 @@ import { MapLayer } from '@/models/map-layer';
 import { TileSetType, tileSetTypes } from '@/models/tile-set';
 import { TILE_SET_TYPES_NAMES_MAP } from '@/utils/constants';
 import { useMap } from '@/utils/map-context';
-import { Checkbox, Stack } from '@mantine/core';
+import { Checkbox, Radio, Stack } from '@mantine/core';
 import { IconBoxMultiple } from '@tabler/icons-react';
 import classes from './index.module.scss';
 
@@ -34,28 +34,47 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ layers }) => {
         [layers],
     );
 
+    const backgroundTileSetUuidDisplayed = layersMap.BACKGROUND.find((layer) => layer.displayed)?.tileSet.uuid;
+
     return (
         <>
             <h2>Affichage des couches</h2>
-            {tileSetTypes.map((type) =>
-                layersMap[type].length ? (
-                    <div key={type} className={classes['layers-section']}>
-                        <h3 className={classes['layers-section-title']}>{TILE_SET_TYPES_NAMES_MAP[type]}</h3>
+            {layersMap.BACKGROUND.length ? (
+                <div className={classes['layers-section']}>
+                    <h3 className={classes['layers-section-title']}>Arrière-plan</h3>
+                    <Radio.Group
+                        value={backgroundTileSetUuidDisplayed}
+                        onChange={(uuid) => setTileSetVisibility(uuid, true)}
+                    >
                         <Stack className={classes['layers-section-group']}>
-                            {layersMap[type].map((layer) => (
-                                <Checkbox
-                                    key={layer.tileSet.uuid}
-                                    checked={layer.displayed}
-                                    label={layer.tileSet.name}
-                                    onChange={(event) =>
-                                        setTileSetVisibility(layer.tileSet.uuid, event.currentTarget.checked)
-                                    }
-                                />
+                            {layersMap.BACKGROUND.map((layer) => (
+                                <Radio key={layer.tileSet.uuid} label={layer.tileSet.name} value={layer.tileSet.uuid} />
                             ))}
                         </Stack>
-                    </div>
-                ) : null,
-            )}
+                    </Radio.Group>
+                </div>
+            ) : null}
+            {tileSetTypes
+                .filter((type) => type !== 'BACKGROUND')
+                .map((type) =>
+                    layersMap[type].length ? (
+                        <div key={type} className={classes['layers-section']}>
+                            <h3 className={classes['layers-section-title']}>{TILE_SET_TYPES_NAMES_MAP[type]}</h3>
+                            <Stack className={classes['layers-section-group']}>
+                                {layersMap[type].map((layer) => (
+                                    <Checkbox
+                                        key={layer.tileSet.uuid}
+                                        checked={layer.displayed}
+                                        label={layer.tileSet.name}
+                                        onChange={(event) =>
+                                            setTileSetVisibility(layer.tileSet.uuid, event.currentTarget.checked)
+                                        }
+                                    />
+                                ))}
+                            </Stack>
+                        </div>
+                    ) : null,
+                )}
         </>
     );
 };

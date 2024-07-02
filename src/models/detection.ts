@@ -1,19 +1,33 @@
 import { Timestamped, Uuided } from '@/models/data';
-import { ObjectType } from '@/models/object-type';
+import { DetectionObjectDetail } from '@/models/detection-object';
+import { Tile } from '@/models/tile';
+import { TileSet } from '@/models/tile-set';
 import { FeatureCollection, Polygon } from 'geojson';
 
-export const detectionControlStatuses = ['NO_CONTROL', 'SIGNALED_INTERNALLY', 'SIGNALED_COLLECTIVITY'] as const;
+export const detectionControlStatuses = [
+    'DETECTED',
+    'SIGNALED_INTERNALLY',
+    'SIGNALED_COLLECTIVITY',
+    'CONFIRMED_FIELD',
+    'INVALIDATED_FIELD',
+] as const;
 export type DetectionControlStatus = (typeof detectionControlStatuses)[number];
 
-export const detectionValidationStatuses = ['SUSPECT', 'LEGITIMATE', 'INVALIDATED'] as const;
+export const detectionValidationStatuses = [
+    'DETECTED_NOT_VERIFIED',
+    'SUSPECT',
+    'LEGITIMATE',
+    'INVALIDATED',
+    'CONTROLLED',
+] as const;
 export type DetectionValidationStatus = (typeof detectionValidationStatuses)[number];
 
 export const detectionSources = ['INTERFACE_DRAWN', 'ANALYSIS'];
 export type DetectionSource = (typeof detectionSources)[number];
 
 export interface DetectionProperties {
-    id: number;
     uuid: string;
+    detectionObjectUuid: string;
     objectTypeUuid: string;
     objectTypeColor: string;
     detectionControlStatus: DetectionControlStatus;
@@ -28,16 +42,19 @@ export interface DetectionData extends Uuided, Timestamped {
     userLastUpdateUuid: string;
 }
 
-export interface DetectionObject extends Uuided, Timestamped {
-    address: string;
-    objectType: ObjectType;
-}
-
 export interface DetectionDetail extends Uuided, Timestamped {
-    id: number;
     geometry: Polygon;
     score: number;
     detectionSource: DetectionSource;
     detectionData: DetectionData;
-    detectionObject: DetectionObject;
+    detectionObject: Omit<DetectionObjectDetail, 'detections'>;
+}
+
+export interface DetectionWithTile extends Uuided, Timestamped {
+    geometry: Polygon;
+    score: number;
+    detectionSource: DetectionSource;
+    detectionData: DetectionData;
+    tileSet: TileSet;
+    tile: Tile;
 }

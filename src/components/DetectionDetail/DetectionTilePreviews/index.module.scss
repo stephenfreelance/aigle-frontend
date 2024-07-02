@@ -1,0 +1,11 @@
+@import "@/constants.scss";
+
+.detection-tile-previews-container {
+    margin-top: var(--mantine-spacing-md);
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+
+    justify-content: space-between;
+}

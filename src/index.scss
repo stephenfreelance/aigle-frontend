@@ -214,6 +214,14 @@ header {
 
 // mapbox
 
+.mapboxgl-ctrl-logo {
+    display: none !important;
+}
+
+.mapboxgl-ctrl-attrib {
+    display: none !important;
+}
+
 .mapboxgl-canvas {
     width: 100% !important;
 }

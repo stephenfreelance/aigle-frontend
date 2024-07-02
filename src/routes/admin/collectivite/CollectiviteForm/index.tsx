@@ -15,7 +15,7 @@ import { IconWorldPlus } from '@tabler/icons-react';
 import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { formatISO } from 'date-fns';
-import { GeoJsonObject, Geometry } from 'geojson';
+import { Geometry } from 'geojson';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import classes from './index.module.scss';
@@ -70,13 +70,13 @@ const MapPreview: React.FC<MapPreviewProps> = ({ name, geometry }) => {
 };
 
 interface FormValues {
-    displayName: string;
+    name: string;
     code: string;
 }
 
 const postForm = async (values: FormValues, collectivityType: CollectivityType, uuid: string) => {
     const values_ = {
-        displayName: values.displayName,
+        name: values.name,
     };
     const response = await api.patch(getGeoDetailEndpoint(collectivityType, uuid), values_);
     return response.data;
@@ -86,7 +86,7 @@ interface FormProps {
     uuid: string;
     initialValues: FormValues;
     collectivityType: CollectivityType;
-    geometry: GeoJsonObject;
+    geometry: Geometry;
     backUrl: string;
 }
 
@@ -98,7 +98,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, collectivityType, geom
         mode: 'uncontrolled',
         initialValues,
         validate: {
-            displayName: isNotEmpty("Le nom d'affichage de la collectivité est requis"),
+            name: isNotEmpty("Le nom d'affichage de la collectivité est requis"),
         },
     });
 
@@ -131,10 +131,10 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, collectivityType, geom
             <TextInput
                 mt="md"
                 withAsterisk
-                label="Nom d'affichage"
+                label="Nom de la collectivité"
                 placeholder="Ma collectivité"
-                key={form.key('displayName')}
-                {...form.getInputProps('displayName')}
+                key={form.key('name')}
+                {...form.getInputProps('name')}
             />
             <TextInput
                 mt="md"
@@ -146,7 +146,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, collectivityType, geom
                 {...form.getInputProps('code')}
             />
 
-            <MapPreview name={form.getValues().displayName} geometry={geometry} />
+            <MapPreview name={form.getValues().name} geometry={geometry} />
 
             <div className="form-actions">
                 <Button

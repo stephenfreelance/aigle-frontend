@@ -1,10 +1,5 @@
-import { Timestamped, Uuided } from '@/models/data';
-import { Geometry } from 'geojson';
+import { GeoZone } from '@/models/geo/geo-zone';
 
-export interface GeoCustomZone extends Uuided, Timestamped {
-    name: string;
-}
+export interface GeoCustomZone extends GeoZone {}
 
-export interface GeoCustomZoneDetail extends GeoCustomZone {
-    geometry: Geometry;
-}
+export interface GeoCustomZoneDetail extends GeoCustomZone {}

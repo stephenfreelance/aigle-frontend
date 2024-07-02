@@ -9,5 +9,5 @@ export type GeoValues = {
 
 export const geoCollectivityToGeoOption = (geoCollectivity: GeoCollectivity): SelectOption => ({
     value: geoCollectivity.uuid,
-    label: geoCollectivity.displayName,
+    label: geoCollectivity.name,
 });

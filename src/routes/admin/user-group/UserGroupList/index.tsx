@@ -74,7 +74,7 @@ const Component: React.FC = () => {
                     (item: UserGroupDetail) => (
                         <PillsDataCell<GeoCollectivity>
                             items={[...item.regions, ...item.departments, ...item.communes]}
-                            getLabel={(geo) => geo.displayName}
+                            getLabel={(geo) => geo.name}
                         />
                     ),
                 ]}

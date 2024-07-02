@@ -1,13 +1,15 @@
 import { ObjectType } from '@/models/object-type';
 import { TileSet } from '@/models/tile-set';
 import { UserGroupRight } from '@/models/user';
+import { Geometry } from 'geojson';
 
-export interface MapSetting {
+export interface TileSetSetting {
     tileSet: TileSet;
-    objectTypes: ObjectType[];
     userGroupRights: UserGroupRight[];
+    geometry: Geometry;
 }
 
 export interface MapSettings {
-    settings: MapSetting[];
+    objectTypes: ObjectType[];
+    tileSetSettings: TileSetSetting[];
 }

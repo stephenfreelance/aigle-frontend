@@ -85,8 +85,8 @@ const Component: React.FC = () => {
                         />
                     </FiltersSection>
                 }
-                tableHeader={[<Table.Th key="code">Code</Table.Th>, <Table.Th key="displayName">Nom</Table.Th>]}
-                tableBodyRenderFns={[(item: GeoCollectivity) => item.code, (item: GeoCollectivity) => item.displayName]}
+                tableHeader={[<Table.Th key="code">Code</Table.Th>, <Table.Th key="name">Nom</Table.Th>]}
+                tableBodyRenderFns={[(item: GeoCollectivity) => item.code, (item: GeoCollectivity) => item.name]}
                 onItemClick={({ uuid }) => navigate(`/admin/collectivites/${collectivityTypeSelected}/form/${uuid}`)}
             />
         </LayoutAdminBase>

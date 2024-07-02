@@ -1,0 +1,26 @@
+@import "@/constants.scss";
+
+$tile-preview-gap: 8px;
+$tile-preview-size: calc(($detection-detail-panel-width - $detection-detail-panel-padding) / 3 - 2 * $tile-preview-gap);
+
+.detection-tile-preview-container-wrapper {
+    display: flex;
+    flex-direction: column;
+
+    .detection-tile-preview {
+        padding: 0 4px;
+
+        margin-top: 4px;
+
+        text-align: center;
+    }
+
+    .detection-tile-preview-container {
+        height: $tile-preview-size;
+        width: $tile-preview-size;
+
+        border-radius: $border-radius-small;
+
+        overflow: hidden;
+    }
+}

@@ -17,8 +17,8 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { bbox, bboxPolygon, centroid, feature, getCoord } from '@turf/turf';
-import { FeatureCollection, Geometry, Polygon } from 'geojson';
+import { bbox, bboxPolygon, centroid, difference, feature, featureCollection, getCoord, polygon } from '@turf/turf';
+import { Feature, FeatureCollection, Geometry, MultiPolygon, Polygon } from 'geojson';
 import mapboxgl from 'mapbox-gl';
 import DrawRectangle, { DrawStyles } from 'mapbox-gl-draw-rectangle-restrict-area';
 import classes from './index.module.scss';
@@ -122,7 +122,7 @@ const Component: React.FC<ComponentProps> = ({
     boundLayers = true,
 }) => {
     const [mapBounds, setMapBounds] = useState<MapBounds>();
-    const [detectionDetailUuidShowed, setDetectionDetailUuidShowed] = useState<string | null>(null);
+    const [detectionObjectDetailUuidShowed, setDetectionObjectDetailUuidShowed] = useState<string | null>(null);
     const [sectionShowed, leftSectionShowed] = useState<LeftSection>();
 
     const [addAnnotationPolygon, setAddAnnotationPolygon] = useState<Polygon>();
@@ -260,14 +260,14 @@ const Component: React.FC<ComponentProps> = ({
 
     const onMapClick = ({ features, target }: mapboxgl.MapLayerMouseEvent) => {
         if (!features || !features.length) {
-            setDetectionDetailUuidShowed(null);
+            setDetectionObjectDetailUuidShowed(null);
             leftSectionShowed(undefined);
             return;
         }
 
         const clickedFeature = features[0];
         const detectionProperties = clickedFeature.properties as DetectionProperties;
-        setDetectionDetailUuidShowed(detectionProperties.uuid);
+        setDetectionObjectDetailUuidShowed(detectionProperties.detectionObjectUuid);
 
         target.flyTo({
             center: getCoord(centroid(clickedFeature.geometry as Polygon)) as [number, number],
@@ -410,7 +410,7 @@ const Component: React.FC<ComponentProps> = ({
                             'line-color': ['get', 'objectTypeColor'],
                             'line-width': [
                                 'case',
-                                ['==', ['get', 'uuid'], detectionDetailUuidShowed], // condition to check if uuid matches
+                                ['==', ['get', 'detectionObjectUuid'], detectionObjectDetailUuidShowed], // condition to check if uuid matches
                                 4, // width for the selected polygon
                                 2, // width for other polygons
                             ],
@@ -441,11 +441,11 @@ const Component: React.FC<ComponentProps> = ({
                     </Source>
                 ))}
 
-                {detectionDetailUuidShowed ? (
+                {detectionObjectDetailUuidShowed ? (
                     <div className={classes['map-detection-detail-panel-container']}>
                         <DetectionDetail
-                            detectionUuid={detectionDetailUuidShowed}
-                            onClose={() => setDetectionDetailUuidShowed(null)}
+                            detectionObjectUuid={detectionObjectDetailUuidShowed}
+                            onClose={() => setDetectionObjectDetailUuidShowed(null)}
                         />
                     </div>
                 ) : undefined}

@@ -1,8 +1,10 @@
-import { getDetectionDetailEndpoint, getObjectTypeDetailEndpoint } from '@/api-endpoints';
+import { getDetectionObjectDetailEndpoint } from '@/api-endpoints';
 import DateInfo from '@/components/DateInfo';
+import DetectionDetailDetectionData from '@/components/DetectionDetail/DetectionDetailDetectionData';
 import DetectionDetailDetectionObject from '@/components/DetectionDetail/DetectionDetailDetectionObject';
+import DetectionTilePreviews from '@/components/DetectionDetail/DetectionTilePreviews';
 import Loader from '@/components/Loader';
-import { DetectionDetail } from '@/models/detection';
+import { DetectionObjectDetail } from '@/models/detection-object';
 import api from '@/utils/api';
 import { Accordion, ActionIcon } from '@mantine/core';
 import { IconCalendarClock, IconMap, IconMapPin, IconX } from '@tabler/icons-react';
@@ -16,18 +18,18 @@ import classes from './index.module.scss';
 const getGoogleMapLink = (point: Position) => `https://www.google.com/maps/place/${point[1]},${point[0]}`;
 
 interface ComponentProps {
-    detectionUuid: string;
+    detectionObjectUuid: string;
     onClose?: () => void;
 }
 
-const Component: React.FC<ComponentProps> = ({ detectionUuid, onClose }: ComponentProps) => {
+const Component: React.FC<ComponentProps> = ({ detectionObjectUuid, onClose }: ComponentProps) => {
     const fetchData = async () => {
-        const res = await api.get<DetectionDetail>(getDetectionDetailEndpoint(detectionUuid));
+        const res = await api.get<DetectionObjectDetail>(getDetectionObjectDetailEndpoint(detectionObjectUuid));
 
         return res.data;
     };
     const { data } = useQuery({
-        queryKey: [getObjectTypeDetailEndpoint(String(detectionUuid))],
+        queryKey: [getDetectionObjectDetailEndpoint(String(detectionObjectUuid))],
         queryFn: () => fetchData(),
     });
 
@@ -37,12 +39,12 @@ const Component: React.FC<ComponentProps> = ({ detectionUuid, onClose }: Compone
 
     const {
         geometry: { coordinates: centerPoint },
-    } = centroid(data.geometry);
+    } = centroid(data.detections[0].geometry);
 
     return (
         <div className={classes.container}>
             <div className={classes['top-section']}>
-                <h1>Détection #{data.id}</h1>
+                <h1>Objet détecté #{data.id}</h1>
                 {onClose ? (
                     <ActionIcon variant="transparent" onClick={onClose}>
                         <IconX />
@@ -54,13 +56,13 @@ const Component: React.FC<ComponentProps> = ({ detectionUuid, onClose }: Compone
                     <Accordion.Control>Informations générales</Accordion.Control>
                     <Accordion.Panel className={classes['general-informations-content']}>
                         <p className={classes['general-informations-content-item']}>
-                            <IconMap size={16} /> {data.detectionObject.address}
+                            <IconMap size={16} /> {data.address}
                         </p>
                         <p className={classes['general-informations-content-item']}>
                             <IconCalendarClock size={16} />{' '}
                             <span className={classes['general-informations-content-item-text']}>
                                 Dernière mise à jour :&nbsp;
-                                <DateInfo date={data.detectionObject.updatedAt} />
+                                <DateInfo date={data.updatedAt} />
                             </span>
                         </p>
                         <p className={classes['general-informations-content-item']}>
@@ -77,7 +79,9 @@ const Component: React.FC<ComponentProps> = ({ detectionUuid, onClose }: Compone
                     </Accordion.Panel>
                 </Accordion.Item>
             </Accordion>
-            <DetectionDetailDetectionObject detection={data} />
+            <DetectionDetailDetectionObject detectionObject={data} />
+            <DetectionTilePreviews detectionObject={data} />
+            <DetectionDetailDetectionData detectionObject={data} />
         </div>
     );
 };

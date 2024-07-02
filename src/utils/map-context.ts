@@ -20,26 +20,40 @@ interface MapState {
 }
 
 const useMap = create<MapState>()((set, get) => ({
-    setMapSettings: ({ settings }: MapSettings) => {
+    setMapSettings: (settings: MapSettings) => {
         const allObjectTypes: ObjectType[] = [];
         const objectTypesUuids = new Set<string>();
 
-        settings.forEach(({ objectTypes }) => {
-            objectTypes.forEach((objectType) => {
-                if (objectTypesUuids.has(objectType.uuid)) {
-                    return;
-                }
+        settings.objectTypes.forEach((objectType) => {
+            if (objectTypesUuids.has(objectType.uuid)) {
+                return;
+            }
 
-                allObjectTypes.push(objectType);
-                objectTypesUuids.add(objectType.uuid);
+            allObjectTypes.push(objectType);
+            objectTypesUuids.add(objectType.uuid);
+        });
+
+        const layers: MapLayer[] = [];
+        let backgroundSet = false;
+
+        settings.tileSetSettings.forEach(({ tileSet, geometry }) => {
+            let displayed = false;
+
+            if (tileSet.tileSetType !== 'BACKGROUND') {
+                displayed = tileSet.tileSetStatus === 'VISIBLE';
+            } else {
+                displayed = !backgroundSet;
+                backgroundSet = true;
+            }
+
+            layers.push({
+                tileSet: { ...tileSet, geometry },
+                displayed,
             });
         });
 
         set(() => ({
-            layers: settings.map(({ tileSet }) => ({
-                tileSet,
-                displayed: tileSet.tileSetStatus === 'VISIBLE',
-            })),
+            layers,
             objectTypes: allObjectTypes,
             detectionFilter: {
                 objectTypesUuids: allObjectTypes.map((type) => type.uuid),
@@ -70,6 +84,20 @@ const useMap = create<MapState>()((set, get) => ({
             }
 
             state.layers[layerIndex].displayed = visible;
+
+            if (state.layers[layerIndex].tileSet.tileSetType === 'BACKGROUND' && !visible) {
+                throw new Error('Cannot hide background layer');
+            }
+
+            // only one background can be displayed at once
+            if (state.layers[layerIndex].tileSet.tileSetType === 'BACKGROUND') {
+                state.layers.forEach((layer) => {
+                    if (layer.tileSet.tileSetType === 'BACKGROUND' && layer.tileSet.uuid !== uuid) {
+                        layer.displayed = false;
+                    }
+                });
+            }
+
             return {
                 layers: state.layers,
             };

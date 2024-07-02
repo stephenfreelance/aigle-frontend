@@ -1,0 +1,22 @@
+.detection-tile-preview-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form {
+    margin-top: var(--mantine-spacing-md);
+    .detection-validation-status-select-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+
+        gap: var(--mantine-spacing-sm);
+
+        margin-top: var(--mantine-spacing-sm);
+    }
+}
+
+.title {
+    margin-bottom: var(--mantine-spacing-sm);
+}

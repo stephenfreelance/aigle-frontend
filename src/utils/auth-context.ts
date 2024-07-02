@@ -1,5 +1,4 @@
 import { User } from '@/models/user';
-import { DEFAULT_ROUTE } from '@/utils/constants';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -40,7 +39,6 @@ const useAuth = create<AuthState>()(
                     accessToken: undefined,
                     userMe: undefined,
                 }));
-                window.location.replace(DEFAULT_ROUTE);
             },
             isAuthenticated: () => !!get().accessToken,
         }),
