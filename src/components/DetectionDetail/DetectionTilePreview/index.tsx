@@ -36,7 +36,14 @@ const Component: React.FC<ComponentProps> = ({ bounds, detection, color, tileSet
                             />
                         </Source>
                     ) : null}
-                    <Source id="raster-source" type="raster" tiles={[tileSet.url]} tileSize={256} bounds={bounds}>
+                    <Source
+                        id="raster-source"
+                        scheme={tileSet.tileSetScheme}
+                        type="raster"
+                        tiles={[tileSet.url]}
+                        tileSize={256}
+                        bounds={bounds}
+                    >
                         <Layer
                             beforeId={detection ? 'geojson-layer' : undefined}
                             id="raster-layer"
