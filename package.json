@@ -5,15 +5,14 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "tsc && vite build",
+        "build": "vite build",
+        "start": "node server.js",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "lint:scss": "stylelint \"./src/**/*.scss\"",
         "preview": "vite preview",
         "precommit": "lint && lint:scss && pretty-quick --staged",
         "prepare": "husky install .husky",
-        "format": "prettier --write .",
-        "start": "serve -s dist",
-        "heroku-postbuild": "npm install --legacy-peer-deps && npm install --only=dev --legacy-peer-deps && npm run build"
+        "format": "prettier --write ."
     },
     "dependencies": {
         "@mantine/charts": "^7.10.2",
