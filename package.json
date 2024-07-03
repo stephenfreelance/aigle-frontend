@@ -12,7 +12,7 @@
         "precommit": "lint && lint:scss && pretty-quick --staged",
         "prepare": "husky install .husky",
         "format": "prettier --write .",
-        "scalingo-prebuild": "npm install --legacy-peer-deps && npm run build"
+        "scalingo-prebuild": "npm install --legacy-peer-deps --ignore-scripts && npm run build"
     },
     "dependencies": {
         "@mantine/charts": "^7.10.2",
