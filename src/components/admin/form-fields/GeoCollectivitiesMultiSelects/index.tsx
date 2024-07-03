@@ -174,7 +174,7 @@ const Component = <T extends GeoCollectivitiesFormValues>({ form, initialGeoSele
             />
             <MultiSelect
                 mt="md"
-                label="Departments"
+                label="Départements"
                 placeholder="Rechercher un département"
                 searchable
                 data={geoMultiSelectValues.department}
