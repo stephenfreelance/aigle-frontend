@@ -17,15 +17,15 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { bbox, bboxPolygon, centroid, difference, feature, featureCollection, getCoord, polygon } from '@turf/turf';
-import { Feature, FeatureCollection, Geometry, MultiPolygon, Polygon } from 'geojson';
+import { bbox, bboxPolygon, centroid, feature, getCoord } from '@turf/turf';
+import { FeatureCollection, Geometry, Polygon } from 'geojson';
 import mapboxgl from 'mapbox-gl';
 import DrawRectangle, { DrawStyles } from 'mapbox-gl-draw-rectangle-restrict-area';
 import classes from './index.module.scss';
 
 const MAP_INITIAL_VIEW_STATE = {
-    longitude: 3.8767337,
-    latitude: 43.6112422,
+    longitude: 3.95657,
+    latitude: 43.61951,
     zoom: 16,
 } as const;
 

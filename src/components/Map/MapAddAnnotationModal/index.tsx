@@ -1,7 +1,6 @@
 import { DETECTION_POST_ENDPOINT } from '@/api-endpoints';
 import InfoCard from '@/components/InfoCard';
 import Loader from '@/components/Loader';
-import { DetectionObject } from '@/models/detection';
 import { MapLayer } from '@/models/map-layer';
 import { ObjectType } from '@/models/object-type';
 import api from '@/utils/api';
@@ -39,7 +38,7 @@ interface FormValues {
 }
 
 const postForm = async (values: FormValues, tileSetUuid: string, polygon: Polygon, address: string | null) => {
-    const response = await api.post(`${DETECTION_POST_ENDPOINT}`, {
+    await api.post(`${DETECTION_POST_ENDPOINT}`, {
         detectionObject: {
             objectTypeUuid: values.objectTypeUuid,
             address,
@@ -47,7 +46,6 @@ const postForm = async (values: FormValues, tileSetUuid: string, polygon: Polygo
         tileSetUuid,
         geometry: polygon,
     });
-    return response.data;
 };
 
 interface FormProps {
@@ -95,7 +93,7 @@ const Form: React.FC<FormProps> = ({ objectTypes, layers, polygon, hide }) => {
         return layer.tileSet;
     }, [layers, polygon]);
 
-    const mutation: UseMutationResult<DetectionObject, AxiosError, FormValues> = useMutation({
+    const mutation: UseMutationResult<void, AxiosError, FormValues> = useMutation({
         mutationFn: (values: FormValues) => postForm(values, tileSet?.uuid || '', polygon, address || null),
         onSuccess: () => {
             eventEmitter.emit('UPDATE_DETECTIONS');

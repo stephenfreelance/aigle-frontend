@@ -6,6 +6,7 @@ import DataTable from '@/components/admin/DataTable';
 import FiltersSection from '@/components/admin/FiltersSection';
 import LayoutAdminBase from '@/components/admin/LayoutAdminBase';
 import PillsDataCell from '@/components/admin/data-cells/PillsDataCell';
+import UserGroupRightIcon from '@/components/icons/UserGroupRightIcon';
 import { Uuided } from '@/models/data';
 import { User, UserRole, UserUserGroup, userRoles } from '@/models/user';
 import { ROLES_NAMES_MAP, USER_GROUP_RIGHTS_ORDERED } from '@/utils/constants';
@@ -13,7 +14,6 @@ import { Button, Checkbox, Input, Stack, Table } from '@mantine/core';
 import { IconSearch, IconUserPlus } from '@tabler/icons-react';
 import isEqual from 'lodash/isEqual';
 import { Link, useNavigate } from 'react-router-dom';
-import UserGroupRightIcon from '@/components/icons/UserGroupRightIcon';
 
 interface DataFilter {
     email: string;
