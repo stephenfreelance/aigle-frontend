@@ -83,8 +83,8 @@ const Form: React.FC<FormProps> = ({ objectTypes, layers, polygon, hide }) => {
         if (!layer) {
             notifications.show({
                 color: 'red',
-                title: "Erreur lors de l'ajout d'une annotation",
-                message: "Assurez-vous de dessiner l'annotation sur une couche visible",
+                title: "Erreur lors de l'ajout de l'objet",
+                message: "Assurez-vous de dessiner l'objet sur une couche visible",
             });
             hide();
             return null;
@@ -98,8 +98,8 @@ const Form: React.FC<FormProps> = ({ objectTypes, layers, polygon, hide }) => {
         onSuccess: () => {
             eventEmitter.emit('UPDATE_DETECTIONS');
             notifications.show({
-                title: "Ajout d'une annotation",
-                message: `L'annotation a été créée avec succès`,
+                title: "Ajout d'un objet",
+                message: `L'objet a été créée avec succès`,
             });
             hide();
         },
@@ -122,7 +122,7 @@ const Form: React.FC<FormProps> = ({ objectTypes, layers, polygon, hide }) => {
 
     return (
         <form onSubmit={form.onSubmit(handleSubmit)} className={clsx('compact', classes.form)}>
-            <InfoCard title="Informations sur l'annotation" withCloseButton={false}>
+            <InfoCard title="Informations sur l'objet" withCloseButton={false}>
                 <ul>
                     <li>
                         Fond de carte associé: <b>{tileSet?.name}</b>
@@ -149,7 +149,7 @@ const Form: React.FC<FormProps> = ({ objectTypes, layers, polygon, hide }) => {
                 </Button>
 
                 <Button type="submit" leftSection={<IconShape />}>
-                    Ajouter l&apos;annotation
+                    Ajouter l&apos;objet
                 </Button>
             </div>
         </form>
@@ -173,7 +173,7 @@ const Component: React.FC<ComponentProps> = ({ isShowed, polygon, hide }) => {
     }
 
     return (
-        <Modal opened={isShowed} onClose={hide} title="Ajouter une annotation">
+        <Modal opened={isShowed} onClose={hide} title="Ajouter un objet">
             {objectTypes ? (
                 <Form objectTypes={objectTypes} layers={layers} polygon={polygon} hide={hide} />
             ) : (

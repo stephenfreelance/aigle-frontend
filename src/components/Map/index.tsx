@@ -122,7 +122,10 @@ const Component: React.FC<ComponentProps> = ({
     boundLayers = true,
 }) => {
     const [mapBounds, setMapBounds] = useState<MapBounds>();
-    const [detectionObjectDetailUuidShowed, setDetectionObjectDetailUuidShowed] = useState<string | null>(null);
+    const [detectionDetailsShowed, setDetectionDetailsShowed] = useState<{
+        detectionObjectUuid: string;
+        detectionUuid: string;
+    } | null>(null);
     const [sectionShowed, leftSectionShowed] = useState<LeftSection>();
 
     const [addAnnotationPolygon, setAddAnnotationPolygon] = useState<Polygon>();
@@ -145,6 +148,56 @@ const Component: React.FC<ComponentProps> = ({
                 node.addControl(control, position);
             }
         });
+
+        // change labels
+
+        for (const { querySelector, title } of [
+            {
+                querySelector: '.mapbox-gl-draw_polygon',
+                title: 'Dessiner un objet',
+            },
+            {
+                querySelector: '.mapboxgl-ctrl-fullscreen',
+                title: 'Plein écran',
+            },
+            {
+                querySelector: '.mapboxgl-ctrl-fullscreen > .mapboxgl-ctrl-icon',
+                title: 'Plein écran',
+            },
+            {
+                querySelector: '.mapboxgl-ctrl-zoom-in',
+                title: 'Zoomer',
+            },
+            {
+                querySelector: '.mapboxgl-ctrl-zoom-in > .mapboxgl-ctrl-icon',
+                title: 'Zoomer',
+            },
+            {
+                querySelector: '.mapboxgl-ctrl-zoom-out',
+                title: 'Dézoomer',
+            },
+            {
+                querySelector: '.mapboxgl-ctrl-zoom-out > .mapboxgl-ctrl-icon',
+                title: 'Dézoomer',
+            },
+            {
+                querySelector: '.mapboxgl-ctrl-compass',
+                title: 'Boussole',
+            },
+            {
+                querySelector: '.mapboxgl-ctrl-compass > .mapboxgl-ctrl-icon',
+                title: 'Boussole',
+            },
+        ]) {
+            const control = document.querySelector(querySelector);
+
+            if (!control) {
+                continue;
+            }
+
+            control.setAttribute('title', title);
+            control.setAttribute('aria-label', title);
+        }
 
         // draw control callbacks
 
@@ -260,15 +313,33 @@ const Component: React.FC<ComponentProps> = ({
 
     const onMapClick = ({ features, target }: mapboxgl.MapLayerMouseEvent) => {
         if (!features || !features.length) {
-            setDetectionObjectDetailUuidShowed(null);
+            setDetectionDetailsShowed(null);
             leftSectionShowed(undefined);
+            target.easeTo({
+                padding: {
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    left: 0,
+                },
+                duration: 250,
+            });
             return;
         }
 
         const clickedFeature = features[0];
         const detectionProperties = clickedFeature.properties as DetectionProperties;
-        setDetectionObjectDetailUuidShowed(detectionProperties.detectionObjectUuid);
+        setDetectionDetailsShowed({
+            detectionObjectUuid: detectionProperties.detectionObjectUuid,
+            detectionUuid: detectionProperties.uuid,
+        });
 
+        target.setPadding({
+            top: 0,
+            right: 500, // $detection-detail-panel-width
+            bottom: 0,
+            left: 0,
+        });
         target.flyTo({
             center: getCoord(centroid(clickedFeature.geometry as Polygon)) as [number, number],
         });
@@ -410,7 +481,11 @@ const Component: React.FC<ComponentProps> = ({
                             'line-color': ['get', 'objectTypeColor'],
                             'line-width': [
                                 'case',
-                                ['==', ['get', 'detectionObjectUuid'], detectionObjectDetailUuidShowed], // condition to check if uuid matches
+                                [
+                                    '==',
+                                    ['get', 'detectionObjectUuid'],
+                                    detectionDetailsShowed?.detectionObjectUuid || null,
+                                ], // condition to check if uuid matches
                                 4, // width for the selected polygon
                                 2, // width for other polygons
                             ],
@@ -425,6 +500,16 @@ const Component: React.FC<ComponentProps> = ({
                         scheme={layer.tileSet.tileSetScheme}
                         tiles={[layer.tileSet.url]}
                         tileSize={256}
+                        {...(layer.tileSet.maxZoom
+                            ? {
+                                  maxzoom: layer.tileSet.maxZoom,
+                              }
+                            : {})}
+                        {...(layer.tileSet.minZoom
+                            ? {
+                                  minzoom: layer.tileSet.minZoom,
+                              }
+                            : {})}
                         {...(boundLayers && layer.tileSet.geometry
                             ? {
                                   bounds: bbox(layer.tileSet.geometry),
@@ -441,11 +526,12 @@ const Component: React.FC<ComponentProps> = ({
                     </Source>
                 ))}
 
-                {detectionObjectDetailUuidShowed ? (
+                {detectionDetailsShowed ? (
                     <div className={classes['map-detection-detail-panel-container']}>
                         <DetectionDetail
-                            detectionObjectUuid={detectionObjectDetailUuidShowed}
-                            onClose={() => setDetectionObjectDetailUuidShowed(null)}
+                            detectionObjectUuid={detectionDetailsShowed.detectionObjectUuid}
+                            detectionUuid={detectionDetailsShowed.detectionUuid}
+                            onClose={() => setDetectionDetailsShowed(null)}
                         />
                     </div>
                 ) : undefined}

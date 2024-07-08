@@ -1,0 +1,17 @@
+.loader {
+    margin-top: var(--mantine-spacing-md);
+    margin-bottom: var(--mantine-spacing-md);
+
+    min-width: 50vw;
+}
+
+.previews-container {
+    margin-top: var(--mantine-spacing-md);
+    margin-bottom: var(--mantine-spacing-md);
+
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    gap: var(--mantine-spacing-md);
+}

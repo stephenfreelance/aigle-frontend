@@ -2,7 +2,7 @@ import { getDetectionObjectDetailEndpoint } from '@/api-endpoints';
 import DateInfo from '@/components/DateInfo';
 import DetectionDetailDetectionData from '@/components/DetectionDetail/DetectionDetailDetectionData';
 import DetectionDetailDetectionObject from '@/components/DetectionDetail/DetectionDetailDetectionObject';
-import DetectionTilePreviews from '@/components/DetectionDetail/DetectionTilePreviews';
+import DetectionTileHistory from '@/components/DetectionDetail/DetectionTileHistory';
 import Loader from '@/components/Loader';
 import { DetectionObjectDetail } from '@/models/detection-object';
 import api from '@/utils/api';
@@ -19,16 +19,17 @@ const getGoogleMapLink = (point: Position) => `https://www.google.com/maps/place
 
 interface ComponentProps {
     detectionObjectUuid: string;
-    onClose?: () => void;
+    detectionUuid: string;
+    onClose: () => void;
 }
 
-const Component: React.FC<ComponentProps> = ({ detectionObjectUuid, onClose }: ComponentProps) => {
+const Component: React.FC<ComponentProps> = ({ detectionObjectUuid, detectionUuid, onClose }: ComponentProps) => {
     const fetchData = async () => {
         const res = await api.get<DetectionObjectDetail>(getDetectionObjectDetailEndpoint(detectionObjectUuid));
 
         return res.data;
     };
-    const { data } = useQuery({
+    const { data, isRefetching } = useQuery({
         queryKey: [getDetectionObjectDetailEndpoint(String(detectionObjectUuid))],
         queryFn: () => fetchData(),
     });
@@ -37,9 +38,12 @@ const Component: React.FC<ComponentProps> = ({ detectionObjectUuid, onClose }: C
         return <Loader className={classes.loader} />;
     }
 
+    const initialDetection =
+        data.detections.find((detection) => detection.uuid === detectionUuid) || data.detections[0];
+
     const {
         geometry: { coordinates: centerPoint },
-    } = centroid(data.detections[0].geometry);
+    } = centroid(initialDetection.geometry);
 
     return (
         <div className={classes.container}>
@@ -56,7 +60,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObjectUuid, onClose }: C
                     <Accordion.Control>Informations générales</Accordion.Control>
                     <Accordion.Panel className={classes['general-informations-content']}>
                         <p className={classes['general-informations-content-item']}>
-                            <IconMap size={16} /> {data.address}
+                            <IconMap size={16} /> {data.address ? data.address : <i>Adresse non-spécifiée</i>}
                         </p>
                         <p className={classes['general-informations-content-item']}>
                             <IconCalendarClock size={16} />{' '}
@@ -80,8 +84,12 @@ const Component: React.FC<ComponentProps> = ({ detectionObjectUuid, onClose }: C
                 </Accordion.Item>
             </Accordion>
             <DetectionDetailDetectionObject detectionObject={data} />
-            <DetectionTilePreviews detectionObject={data} />
-            <DetectionDetailDetectionData detectionObject={data} />
+            <DetectionTileHistory detectionObject={data} />
+            <DetectionDetailDetectionData
+                detectionObject={data}
+                detectionRefreshing={isRefetching}
+                initialDetection={initialDetection}
+            />
         </div>
     );
 };

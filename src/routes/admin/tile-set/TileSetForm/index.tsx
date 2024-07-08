@@ -21,7 +21,7 @@ import {
 import api from '@/utils/api';
 import { TILE_SET_STATUSES_NAMES_MAP, TILE_SET_TYPES_NAMES_MAP } from '@/utils/constants';
 import { GeoValues, geoCollectivityToGeoOption } from '@/utils/geojson';
-import { Button, Card, Select, TextInput } from '@mantine/core';
+import { Button, Card, NumberInput, Select, TextInput } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { UseFormReturnType, isNotEmpty, useForm } from '@mantine/form';
 import { IconMapPlus } from '@tabler/icons-react';
@@ -51,6 +51,8 @@ const MapPreview: React.FC<MapPreviewProps> = ({ url, scheme, name, type, geomet
                 createdAt: fakeDate,
                 updatedAt: fakeDate,
                 uuid: 'fake-uuid',
+                minZoom: null,
+                maxZoom: null,
                 date: fakeDate,
                 name: name,
                 url: url || '',
@@ -95,6 +97,8 @@ interface FormValues {
     tileSetStatus: TileSetStatus;
     tileSetScheme: TileSetScheme;
     tileSetType: TileSetType;
+    minZoom: number | null;
+    maxZoom: number | null;
     communesUuids: string[];
     departmentsUuids: string[];
     regionsUuids: string[];
@@ -150,9 +154,39 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, initialGeoSelectedValu
                     return "Le format de l'url est invalide";
                 }
             },
-            tileSetStatus: isNotEmpty('Le status du fond de carte est requis'),
+            tileSetStatus: isNotEmpty('Le statut du fond de carte est requis'),
             tileSetScheme: isNotEmpty('Le scheme du fond de carte est requis'),
             tileSetType: isNotEmpty('Le type du fond de carte est requis'),
+            maxZoom: (value) => {
+                if (value === null) {
+                    return null;
+                }
+
+                if (value <= 0) {
+                    return 'Le niveau zoom max doit être positif';
+                }
+
+                if (form.values.minZoom && value <= form.values.minZoom) {
+                    return 'Le niveau de zoom max doit être supérieur au niveau de zoom min';
+                }
+
+                return null;
+            },
+            minZoom: (value) => {
+                if (value === null) {
+                    return null;
+                }
+
+                if (value <= 0) {
+                    return 'Le niveau zoom min doit être positif';
+                }
+
+                if (form.values.maxZoom && value >= form.values.maxZoom) {
+                    return 'Le niveau de zoom min doit être inférieu au niveau de zoom max';
+                }
+
+                return null;
+            },
         },
         validateInputOnChange: ['url'],
     });
@@ -277,6 +311,22 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, initialGeoSelectedValu
                 key={form.key('tileSetStatus')}
                 {...form.getInputProps('tileSetStatus')}
             />
+            <NumberInput
+                mt="md"
+                label="Zoom minimum d'affichage"
+                placeholder="15"
+                min={0}
+                key={form.key('minZoom')}
+                {...form.getInputProps('minZoom')}
+            />
+            <NumberInput
+                mt="md"
+                label="Zoom maximum d'affichage"
+                placeholder="19"
+                min={0}
+                key={form.key('maxZoom')}
+                {...form.getInputProps('maxZoom')}
+            />
 
             <GeoCollectivitiesMultiSelects form={form} initialGeoSelectedValues={initialGeoSelectedValues} />
 
@@ -307,6 +357,8 @@ const EMPTY_FORM_VALUES: FormValues = {
     tileSetStatus: 'VISIBLE',
     tileSetScheme: 'xyz',
     tileSetType: 'BACKGROUND',
+    minZoom: null,
+    maxZoom: null,
     date: undefined,
     communesUuids: [],
     departmentsUuids: [],

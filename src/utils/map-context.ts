@@ -2,6 +2,7 @@ import { DetectionFilter } from '@/models/detection-filter';
 import { MapLayer } from '@/models/map-layer';
 import { MapSettings } from '@/models/map-settings';
 import { ObjectType } from '@/models/object-type';
+import { TileSet, TileSetStatus, TileSetType } from '@/models/tile-set';
 import EventEmitter from 'eventemitter3';
 import { create } from 'zustand';
 
@@ -16,6 +17,7 @@ interface MapState {
     updateDetectionFilter: (detectionFilter: DetectionFilter) => void;
     getDisplayedTileSetUrls: () => string[];
     setTileSetVisibility: (uuid: string, visible: boolean) => void;
+    getTileSets: (tileSetTypes: TileSetType[], tileSetStatuses: TileSetStatus[]) => TileSet[];
     eventEmitter: EventEmitter<MapEventType>;
 }
 
@@ -102,6 +104,15 @@ const useMap = create<MapState>()((set, get) => ({
                 layers: state.layers,
             };
         });
+    },
+    getTileSets: (tileSetTypes: TileSetType[], tileSetStatuses: TileSetStatus[]) => {
+        return (get().layers || [])
+            .filter(
+                (layer) =>
+                    tileSetTypes.includes(layer.tileSet.tileSetType) &&
+                    tileSetStatuses.includes(layer.tileSet.tileSetStatus),
+            )
+            .map((layer) => layer.tileSet);
     },
     eventEmitter: new EventEmitter<MapEventType>(),
 }));

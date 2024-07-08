@@ -69,7 +69,7 @@ const Component: React.FC = () => {
                         />
 
                         <Checkbox.Group
-                            label="Status"
+                            label="Statut"
                             value={filter.statuses}
                             onChange={(statuses) => {
                                 setFilter((filter) => ({
@@ -112,7 +112,7 @@ const Component: React.FC = () => {
                     <Table.Th key="date">Date</Table.Th>,
                     <Table.Th key="name">Nom</Table.Th>,
                     <Table.Th key="type">Type</Table.Th>,
-                    <Table.Th key="status">Status</Table.Th>,
+                    <Table.Th key="status">Statut</Table.Th>,
                     <Table.Th key="scheme">Scheme</Table.Th>,
                     <Table.Th key="url">URL</Table.Th>,
                 ]}

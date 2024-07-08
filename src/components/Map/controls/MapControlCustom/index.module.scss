@@ -1,5 +1,9 @@
 @import '@/constants.scss';
 
+.wrapper {
+    position: relative;
+}
+
 .button {
     border-radius: $border-radius-small !important;
 }

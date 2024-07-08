@@ -1,6 +1,6 @@
-import { ActionIcon, Switch } from '@mantine/core';
+import { ActionIcon, Switch, Tooltip } from '@mantine/core';
 import clsx from 'clsx';
-import React, { PropsWithChildren, useRef } from 'react';
+import React, { PropsWithChildren, useMemo, useRef } from 'react';
 import { ControlPosition, useControl } from 'react-map-gl';
 import classes from './index.module.scss';
 
@@ -13,6 +13,7 @@ interface ComponentProps extends PropsWithChildren {
     contentClassName?: string;
     containerClassName?: string;
     isShowed: boolean;
+    label?: string;
     setIsShowed: (state: boolean) => void;
 }
 
@@ -23,6 +24,7 @@ const Component: React.FC<ComponentProps> = ({
     containerClassName,
     contentClassName,
     isShowed,
+    label,
     setIsShowed,
     children,
 }) => {
@@ -53,25 +55,37 @@ const Component: React.FC<ComponentProps> = ({
 
     useControl(() => new CustomMapControl(), { position });
 
+    const tooltipPosition = useMemo(() => {
+        if (['top-right', 'top-left'].includes(position)) {
+            return 'bottom';
+        }
+
+        return 'top';
+    }, [position]);
+
     return (
         <>
             <div className={containerClassName} ref={controlContainerRef}>
                 {controlType === 'ACTION_BUTTON' ? (
-                    <ActionIcon
-                        className={classes.button}
-                        size={36}
-                        variant="white"
-                        onClick={() => setIsShowed(!isShowed)}
-                    >
-                        {controlInner}
-                    </ActionIcon>
+                    <Tooltip label={label} position={tooltipPosition} offset={16}>
+                        <ActionIcon
+                            className={classes.button}
+                            size={36}
+                            variant="white"
+                            onClick={() => setIsShowed(!isShowed)}
+                        >
+                            {controlInner}
+                        </ActionIcon>
+                    </Tooltip>
                 ) : null}
                 {controlType === 'SWITCH' ? (
-                    <Switch
-                        label={controlInner}
-                        checked={isShowed}
-                        onChange={(event) => setIsShowed(event.currentTarget.checked)}
-                    />
+                    <Tooltip label={label}>
+                        <Switch
+                            label={controlInner}
+                            checked={isShowed}
+                            onChange={(event) => setIsShowed(event.currentTarget.checked)}
+                        />
+                    </Tooltip>
                 ) : null}
             </div>
             <div

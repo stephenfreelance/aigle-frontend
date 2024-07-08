@@ -50,11 +50,17 @@ export interface DetectionDetail extends Uuided, Timestamped {
     detectionObject: Omit<DetectionObjectDetail, 'detections'>;
 }
 
-export interface DetectionWithTile extends Uuided, Timestamped {
+
+export interface DetectionWithTileMinimal extends Uuided, Timestamped {
     geometry: Polygon;
     score: number;
     detectionSource: DetectionSource;
     detectionData: DetectionData;
-    tileSet: TileSet;
     tile: Tile;
+}
+
+
+
+export interface DetectionWithTile extends DetectionWithTileMinimal {
+    tileSet: TileSet;
 }

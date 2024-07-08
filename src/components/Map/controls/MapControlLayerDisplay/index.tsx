@@ -9,6 +9,8 @@ import { Checkbox, Radio, Stack } from '@mantine/core';
 import { IconBoxMultiple } from '@tabler/icons-react';
 import classes from './index.module.scss';
 
+const CONTROL_LABEL = 'Affichage des couches';
+
 type LayersMap = Record<TileSetType, MapLayer[]>;
 
 interface ComponentInnerProps {
@@ -38,7 +40,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ layers }) => {
 
     return (
         <>
-            <h2>Affichage des couches</h2>
+            <h2>{CONTROL_LABEL}</h2>
             {layersMap.BACKGROUND.length ? (
                 <div className={classes['layers-section']}>
                     <h3 className={classes['layers-section-title']}>Arrière-plan</h3>
@@ -98,6 +100,7 @@ const Component: React.FC<ComponentProps> = ({ isShowed, setIsShowed }) => {
             containerClassName={classes.container}
             isShowed={isShowed}
             setIsShowed={setIsShowed}
+            label={CONTROL_LABEL}
         >
             <ComponentInner layers={layers} />
         </MapControlCustom>

@@ -1,11 +1,11 @@
-import { DETECTION_OBJECT_POST_ENDPOINT } from '@/api-endpoints';
+import { DETECTION_OBJECT_POST_ENDPOINT, getDetectionObjectDetailEndpoint } from '@/api-endpoints';
 import { DetectionObjectDetail } from '@/models/detection-object';
 import api from '@/utils/api';
 import { useMap } from '@/utils/map-context';
 import { Loader as MantineLoader, Select } from '@mantine/core';
 import { UseFormReturnType, useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { UseMutationResult, useMutation } from '@tanstack/react-query';
+import { UseMutationResult, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import React from 'react';
 import classes from './index.module.scss';
@@ -33,9 +33,27 @@ const Component: React.FC<ComponentProps> = ({ detectionObject }) => {
         handleSubmit(formValues);
     });
 
+    const queryClient = useQueryClient();
+
     const mutation: UseMutationResult<void, AxiosError, FormValues> = useMutation({
         mutationFn: (values: FormValues) => postForm(detectionObject.uuid, values),
         onSuccess: () => {
+            queryClient.setQueryData(
+                [getDetectionObjectDetailEndpoint(detectionObject.uuid)],
+                (prev: DetectionObjectDetail) => {
+                    const objectTypeUuid = form.getValues().objectTypeUuid;
+                    const objectType = (objectTypes || []).find((ot) => ot.uuid === objectTypeUuid);
+
+                    if (!objectType) {
+                        return prev;
+                    }
+
+                    return {
+                        ...prev,
+                        objectType,
+                    };
+                },
+            );
             eventEmitter.emit('UPDATE_DETECTIONS');
             notifications.show({
                 title: 'Mise à jour de la détection',

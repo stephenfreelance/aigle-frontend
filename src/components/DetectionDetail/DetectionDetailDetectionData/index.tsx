@@ -1,14 +1,22 @@
-import { DETECTION_DATA_POST_ENDPOINT, getDetectionObjectDetailEndpoint } from '@/api-endpoints';
+import {
+    DETECTION_POST_ENDPOINT,
+    getDetectionDataDetailEndpoint,
+    getDetectionObjectDetailEndpoint,
+} from '@/api-endpoints';
 import DetectionTilePreview from '@/components/DetectionDetail/DetectionTilePreview';
 import ErrorCard from '@/components/ErrorCard';
+import InfoCard from '@/components/InfoCard';
 import {
     DetectionControlStatus,
+    DetectionData,
+    DetectionDetail,
     DetectionValidationStatus,
     DetectionWithTile,
     detectionControlStatuses,
     detectionValidationStatuses,
 } from '@/models/detection';
 import { DetectionObjectDetail } from '@/models/detection-object';
+import { TileSet } from '@/models/tile-set';
 import api from '@/utils/api';
 import {
     DETECTION_CONTROL_STATUSES_NAMES_MAP,
@@ -16,12 +24,13 @@ import {
     DETECTION_VALIDATION_STATUSES_NAMES_MAP,
 } from '@/utils/constants';
 import { useMap } from '@/utils/map-context';
-import { Button, Loader as MantineLoader, Select } from '@mantine/core';
+import { Button, LoadingOverlay, Loader as MantineLoader, Select } from '@mantine/core';
 import { UseFormReturnType, useForm } from '@mantine/form';
 import { UseMutationResult, useMutation, useQueryClient } from '@tanstack/react-query';
 import { bbox } from '@turf/turf';
 import { AxiosError } from 'axios';
-import React, { useMemo, useState } from 'react';
+import { Polygon } from 'geojson';
+import React, { useEffect, useMemo, useState } from 'react';
 import classes from './index.module.scss';
 
 interface FormValues {
@@ -29,18 +38,41 @@ interface FormValues {
     detectionValidationStatus: DetectionValidationStatus;
 }
 
-const postForm = async (uuid: string, values: FormValues) => {
-    const res = await api.patch(`${DETECTION_DATA_POST_ENDPOINT}${uuid}/`, values);
-    return res.data;
+const postForm = async (
+    values: FormValues,
+    geometry?: Polygon,
+    tileSetUuid?: string,
+    detectionObjectUuid?: string,
+    uuid?: string,
+) => {
+    let resValue: DetectionData;
+
+    if (uuid) {
+        const response = await api.patch<DetectionData>(getDetectionDataDetailEndpoint(uuid), values);
+        resValue = response.data;
+    } else {
+        const body = {
+            detectionObjectUuid,
+            tileSetUuid,
+            geometry,
+            detectionData: values,
+        };
+        const response = await api.post<DetectionDetail>(DETECTION_POST_ENDPOINT, body);
+        resValue = response.data.detectionData;
+    }
+
+    return resValue;
 };
 
 interface FormProps {
     detectionObjectUuid: string;
-    uuid: string;
+    tileSetUuid?: string;
+    uuid?: string;
+    geometry?: Polygon;
     initialValues: FormValues;
 }
 
-const Form: React.FC<FormProps> = ({ detectionObjectUuid, uuid, initialValues }) => {
+const Form: React.FC<FormProps> = ({ detectionObjectUuid, tileSetUuid, uuid, geometry, initialValues }) => {
     const [error, setError] = useState<AxiosError>();
     const { eventEmitter } = useMap();
 
@@ -50,11 +82,13 @@ const Form: React.FC<FormProps> = ({ detectionObjectUuid, uuid, initialValues })
     const queryClient = useQueryClient();
 
     const mutation: UseMutationResult<FormValues, AxiosError, FormValues> = useMutation({
-        mutationFn: (values: FormValues) => postForm(uuid, values),
+        mutationFn: (values: FormValues) => postForm(values, geometry, tileSetUuid, detectionObjectUuid, uuid),
         onSuccess: (values: FormValues) => {
-            queryClient.setQueryData(
-                [getDetectionObjectDetailEndpoint(String(detectionObjectUuid))],
-                (prev: DetectionObjectDetail) => {
+            const queryKey = getDetectionObjectDetailEndpoint(String(detectionObjectUuid));
+
+            // update existing detections objects
+            if (uuid) {
+                queryClient.setQueryData([queryKey], (prev: DetectionObjectDetail) => {
                     const detectionDataIndex = prev.detections.findIndex(
                         (detection) => detection.detectionData.uuid === uuid,
                     );
@@ -67,8 +101,16 @@ const Form: React.FC<FormProps> = ({ detectionObjectUuid, uuid, initialValues })
                         ...prev.detections[detectionDataIndex].detectionData,
                         ...values,
                     };
-                },
-            );
+                });
+            }
+
+            // refetch if creating detection object
+            if (!uuid) {
+                queryClient.invalidateQueries({
+                    queryKey: [queryKey],
+                });
+            }
+
             eventEmitter.emit('UPDATE_DETECTIONS');
         },
         onError: (error) => {
@@ -80,6 +122,10 @@ const Form: React.FC<FormProps> = ({ detectionObjectUuid, uuid, initialValues })
         },
     });
     const submit = async () => {
+        if (!uuid) {
+            return;
+        }
+
         const formValues = form.getValues();
         await handleSubmit(formValues);
     };
@@ -92,6 +138,14 @@ const Form: React.FC<FormProps> = ({ detectionObjectUuid, uuid, initialValues })
 
     return (
         <form onSubmit={form.onSubmit(handleSubmit)} className={classes.form}>
+            {!uuid ? (
+                <InfoCard title="Ajout d'un objet" withCloseButton={false}>
+                    <p>Cet objet n'exsite pas acutellement. Vous êtes sur le point de le créer.</p>
+                    <Button mt="xs" type="submit" fullWidth>
+                        Créer l'objet
+                    </Button>
+                </InfoCard>
+            ) : null}
             {error ? (
                 <ErrorCard>
                     <p>Voir les indications ci-dessous pour plus d&apos;info</p>
@@ -99,7 +153,7 @@ const Form: React.FC<FormProps> = ({ detectionObjectUuid, uuid, initialValues })
             ) : null}
             <Select
                 allowDeselect={false}
-                label="Status du contrôle"
+                label="Statut du contrôle"
                 data={detectionControlStatuses.map((status) => ({
                     value: status,
                     label: DETECTION_CONTROL_STATUSES_NAMES_MAP[status],
@@ -127,57 +181,87 @@ const Form: React.FC<FormProps> = ({ detectionObjectUuid, uuid, initialValues })
     );
 };
 
+const EMPTY_FORM_VALUES: FormValues = {
+    detectionControlStatus: 'DETECTED',
+    detectionValidationStatus: 'SUSPECT',
+};
+
 interface ComponentProps {
     detectionObject: DetectionObjectDetail;
+    initialDetection: DetectionWithTile;
+    detectionRefreshing: boolean;
 }
-const Component: React.FC<ComponentProps> = ({ detectionObject }) => {
-    const [detectionSelected, setDetectionSelected] = useState<DetectionWithTile>(detectionObject.detections[0]);
+const Component: React.FC<ComponentProps> = ({ detectionObject, initialDetection, detectionRefreshing }) => {
+    const [detectionSelected, setDetectionSelected] = useState<DetectionWithTile | undefined>(initialDetection);
+    const [tileSetSelected, setTileSetSelected] = useState<TileSet>(initialDetection.tileSet);
 
     const previewBounds = useMemo(
-        () => bbox(detectionObject.detections[0].tile.geometry) as [number, number, number, number],
+        () => bbox(initialDetection.tile.geometry) as [number, number, number, number],
         [detectionObject],
     );
 
+    useEffect(() => {
+        selectDetection(tileSetSelected.uuid);
+    }, [detectionObject]);
+
+    const selectDetection = (tileSetUuid: string) => {
+        const tileSetPreview = detectionObject.tileSets.find(({ tileSet }) => tileSet.uuid === tileSetUuid);
+
+        if (!tileSetPreview) {
+            return;
+        }
+
+        setTileSetSelected(tileSetPreview.tileSet);
+
+        const detection = detectionObject.detections.find((detection) => detection.tileSet.uuid === tileSetUuid);
+
+        setDetectionSelected(detection);
+    };
+
     return (
         <div className={classes.container}>
-            <h2 className={classes.title}>Editer une détection</h2>
+            <h2 className={classes.title}>Editer ou rajouter une détection</h2>
             <Select
                 allowDeselect={false}
                 label="Source d'image"
-                data={detectionObject.detections.map((detection) => ({
-                    value: detection.uuid,
-                    label: detection.tileSet.name,
+                data={detectionObject.tileSets.map(({ tileSet }) => ({
+                    value: tileSet.uuid,
+                    label: tileSet.name,
                 }))}
-                value={detectionSelected.uuid}
-                onChange={(detectionUuid) => {
-                    const detection = detectionObject.detections.find((detection) => detection.uuid === detectionUuid);
-
-                    if (!detection) {
-                        return;
-                    }
-                    setDetectionSelected(detection);
-                }}
-                mb="md"
+                value={tileSetSelected.uuid}
+                onChange={(tileSetUuid) => selectDetection(String(tileSetUuid))}
             />
-            <div className={classes['detection-tile-preview-container']}>
-                <DetectionTilePreview
-                    bounds={previewBounds}
-                    detection={detectionSelected}
-                    color={detectionObject.objectType.color}
-                    tileSet={detectionSelected.tileSet}
-                    displayName={false}
+
+            <div className={classes['detection-tile-preview-form-container']}>
+                <LoadingOverlay visible={detectionRefreshing} zIndex={10000} overlayProps={{ radius: 'sm', blur: 2 }} />
+
+                <div className={classes['detection-tile-preview-container']}>
+                    <DetectionTilePreview
+                        bounds={previewBounds}
+                        geometry={detectionSelected?.geometry || initialDetection.geometry}
+                        strokedLine={!detectionSelected}
+                        color={detectionObject.objectType.color}
+                        tileSet={tileSetSelected}
+                        displayName={false}
+                    />
+                </div>
+
+                <Form
+                    key={tileSetSelected.uuid}
+                    detectionObjectUuid={detectionObject.uuid}
+                    uuid={detectionSelected?.detectionData.uuid}
+                    initialValues={
+                        detectionSelected
+                            ? {
+                                  detectionControlStatus: detectionSelected.detectionData.detectionControlStatus,
+                                  detectionValidationStatus: detectionSelected.detectionData.detectionValidationStatus,
+                              }
+                            : EMPTY_FORM_VALUES
+                    }
+                    geometry={initialDetection.geometry}
+                    tileSetUuid={tileSetSelected.uuid}
                 />
             </div>
-
-            <Form
-                key={detectionSelected.detectionData.uuid}
-                detectionObjectUuid={detectionObject.uuid}
-                uuid={detectionSelected.detectionData.uuid}
-                initialValues={{
-                    detectionControlStatus: detectionSelected.detectionData.detectionControlStatus,
-                    detectionValidationStatus: detectionSelected.detectionData.detectionValidationStatus,
-                }}
-            />
         </div>
     );
 };

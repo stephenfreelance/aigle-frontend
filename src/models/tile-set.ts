@@ -20,6 +20,8 @@ export interface TileSet extends Uuided, Timestamped {
     tileSetStatus: TileSetStatus;
     tileSetScheme: TileSetScheme;
     tileSetType: TileSetType;
+    minZoom: number | null;
+    maxZoom: number | null;
     geometry?: Geometry;
 }
 

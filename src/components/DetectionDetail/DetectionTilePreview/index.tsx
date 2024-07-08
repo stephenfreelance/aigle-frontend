@@ -1,19 +1,27 @@
-import { DetectionWithTile } from '@/models/detection';
 import { TileSet } from '@/models/tile-set';
 import { MAPBOX_TOKEN } from '@/utils/constants';
+import { Polygon } from 'geojson';
 import React from 'react';
 import Map, { Layer, Source } from 'react-map-gl';
 import classes from './index.module.scss';
 
 interface ComponentProps {
-    detection?: DetectionWithTile;
+    geometry?: Polygon;
     color: string;
     tileSet: TileSet;
     bounds: [number, number, number, number];
     displayName?: boolean;
+    strokedLine?: boolean;
 }
 
-const Component: React.FC<ComponentProps> = ({ bounds, detection, color, tileSet, displayName = true }) => {
+const Component: React.FC<ComponentProps> = ({
+    bounds,
+    geometry,
+    color,
+    tileSet,
+    displayName = true,
+    strokedLine = false,
+}) => {
     return (
         <div className={classes['detection-tile-preview-container-wrapper']}>
             <div className={classes['detection-tile-preview-container']}>
@@ -24,14 +32,15 @@ const Component: React.FC<ComponentProps> = ({ bounds, detection, color, tileSet
                     maxBounds={bounds}
                     interactive={false}
                 >
-                    {detection ? (
-                        <Source id="geojson-data" type="geojson" data={detection.geometry}>
+                    {geometry ? (
+                        <Source id="geojson-data" type="geojson" data={geometry}>
                             <Layer
                                 id="geojson-layer"
                                 type="line"
                                 paint={{
                                     'line-color': color,
                                     'line-width': 2,
+                                    'line-dasharray': strokedLine ? [2, 2] : [],
                                 }}
                             />
                         </Source>
@@ -45,7 +54,7 @@ const Component: React.FC<ComponentProps> = ({ bounds, detection, color, tileSet
                         bounds={bounds}
                     >
                         <Layer
-                            beforeId={detection ? 'geojson-layer' : undefined}
+                            beforeId={geometry ? 'geojson-layer' : undefined}
                             id="raster-layer"
                             type="raster"
                             source="raster-source"

@@ -2,6 +2,7 @@ import React from 'react';
 
 import { MAP_SETTINGS_ENDPOINT } from '@/api-endpoints';
 import Header from '@/components/Header';
+import Loader from '@/components/Loader';
 import MapComponent from '@/components/Map';
 import { MapSettings } from '@/models/map-settings';
 import api from '@/utils/api';
@@ -27,7 +28,7 @@ const Component: React.FC = () => {
         <>
             <Header />
             <div className={classes['map-container']}>
-                <MapComponent layers={layers || []} />
+                {layers ? <MapComponent layers={layers} /> : <Loader className={classes.loader} />}
             </div>
         </>
     );

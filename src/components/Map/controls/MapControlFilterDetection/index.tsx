@@ -9,6 +9,8 @@ import { UseFormReturnType, useForm } from '@mantine/form';
 import { IconCheck, IconFilter, IconX } from '@tabler/icons-react';
 import classes from './index.module.scss';
 
+const CONTROL_LABEL = 'Filtrer les objets';
+
 interface FormValues {
     objectTypesUuids: DetectionFilter['objectTypesUuids'];
 }
@@ -46,7 +48,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ objectTypes, objectType
 
     return (
         <form className={classes.form}>
-            <h2>Filtrer les annotations</h2>
+            <h2>{CONTROL_LABEL}</h2>
             <MultiSelect
                 className="multiselect-pills-hidden"
                 mt="md"
@@ -116,6 +118,7 @@ const Component: React.FC<ComponentProps> = ({ isShowed, setIsShowed }) => {
 
     return (
         <MapControlCustom
+            label={CONTROL_LABEL}
             controlInner={<IconFilter color="#777777" />}
             contentClassName={classes.content}
             containerClassName={classes.container}
