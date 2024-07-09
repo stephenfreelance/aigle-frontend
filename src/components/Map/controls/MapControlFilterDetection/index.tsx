@@ -1,10 +1,16 @@
 import React, { useMemo } from 'react';
 
 import MapControlCustom from '@/components/Map/controls/MapControlCustom';
+import { detectionControlStatuses, detectionValidationStatuses } from '@/models/detection';
 import { DetectionFilter } from '@/models/detection-filter';
 import { ObjectType } from '@/models/object-type';
+import {
+    DETECTION_CONTROL_STATUSES_NAMES_MAP,
+    DETECTION_VALIDATION_STATUSES_COLORS_MAP,
+    DETECTION_VALIDATION_STATUSES_NAMES_MAP,
+} from '@/utils/constants';
 import { useMap } from '@/utils/map-context';
-import { ActionIcon, Badge, ColorSwatch, Group, MultiSelect } from '@mantine/core';
+import { ActionIcon, Badge, Checkbox, ColorSwatch, Group, MultiSelect, Stack } from '@mantine/core';
 import { UseFormReturnType, useForm } from '@mantine/form';
 import { IconCheck, IconFilter, IconX } from '@tabler/icons-react';
 import classes from './index.module.scss';
@@ -13,24 +19,51 @@ const CONTROL_LABEL = 'Filtrer les objets';
 
 interface FormValues {
     objectTypesUuids: DetectionFilter['objectTypesUuids'];
+    detectionValidationStatuses: DetectionFilter['detectionValidationStatuses'];
+    detectionControlStatuses: DetectionFilter['detectionControlStatuses'];
 }
 
 interface ComponentInnerProps {
     objectTypes: ObjectType[];
     objectTypesUuidsSelected: DetectionFilter['objectTypesUuids'];
+    detectionValidationStatusesSelected: DetectionFilter['detectionValidationStatuses'];
+    detectionControlStatusesSelected: DetectionFilter['detectionControlStatuses'];
 }
 
-const ComponentInner: React.FC<ComponentInnerProps> = ({ objectTypes, objectTypesUuidsSelected }) => {
+const ComponentInner: React.FC<ComponentInnerProps> = ({
+    objectTypes,
+    objectTypesUuidsSelected,
+    detectionValidationStatusesSelected,
+    detectionControlStatusesSelected,
+}) => {
     const { updateDetectionFilter } = useMap();
     const form: UseFormReturnType<FormValues> = useForm({
         mode: 'uncontrolled',
         initialValues: {
             objectTypesUuids: objectTypesUuidsSelected,
+            detectionValidationStatuses: detectionValidationStatusesSelected,
+            detectionControlStatuses: detectionControlStatusesSelected,
         },
     });
     form.watch('objectTypesUuids', ({ value }) => {
         updateDetectionFilter({
+            detectionValidationStatuses: form.getValues().detectionValidationStatuses,
             objectTypesUuids: value,
+            detectionControlStatuses: form.getValues().detectionControlStatuses,
+        });
+    });
+    form.watch('detectionValidationStatuses', ({ value }) => {
+        updateDetectionFilter({
+            detectionValidationStatuses: value,
+            objectTypesUuids: form.getValues().objectTypesUuids,
+            detectionControlStatuses: form.getValues().detectionControlStatuses,
+        });
+    });
+    form.watch('detectionControlStatuses', ({ value }) => {
+        updateDetectionFilter({
+            detectionValidationStatuses: form.getValues().detectionValidationStatuses,
+            objectTypesUuids: form.getValues().objectTypesUuids,
+            detectionControlStatuses: value,
         });
     });
 
@@ -100,6 +133,59 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ objectTypes, objectType
             ) : (
                 <p className={classes['empty-filter-text']}>Aucun filtre sur les types n&apos;est appliqué</p>
             )}
+
+            <div className={classes['statuses-filters-container']}>
+                <div>
+                    <Checkbox.Group
+                        mt="xl"
+                        label="Statuts de validation"
+                        key={form.key('detectionValidationStatuses')}
+                        {...form.getInputProps('detectionValidationStatuses')}
+                    >
+                        <Stack gap="xs" mt="sm">
+                            {detectionValidationStatuses.map((status) => (
+                                <Checkbox
+                                    key={status}
+                                    value={status}
+                                    label={DETECTION_VALIDATION_STATUSES_NAMES_MAP[status]}
+                                    color={DETECTION_VALIDATION_STATUSES_COLORS_MAP[status]}
+                                />
+                            ))}
+                        </Stack>
+                    </Checkbox.Group>
+
+                    {form.getValues().detectionValidationStatuses.length === 0 ? (
+                        <p className={classes['empty-filter-text']}>
+                            Aucun filtre sur les statuts de validation n&apos;est appliqué
+                        </p>
+                    ) : null}
+                </div>
+
+                <div>
+                    <Checkbox.Group
+                        mt="xl"
+                        label="Statuts de contrôle"
+                        key={form.key('detectionControlStatuses')}
+                        {...form.getInputProps('detectionControlStatuses')}
+                    >
+                        <Stack gap="xs" mt="sm">
+                            {detectionControlStatuses.map((status) => (
+                                <Checkbox
+                                    key={status}
+                                    value={status}
+                                    label={DETECTION_CONTROL_STATUSES_NAMES_MAP[status]}
+                                />
+                            ))}
+                        </Stack>
+                    </Checkbox.Group>
+
+                    {form.getValues().detectionControlStatuses.length === 0 ? (
+                        <p className={classes['empty-filter-text']}>
+                            Aucun filtre sur les statuts de contrôle n&apos;est appliqué
+                        </p>
+                    ) : null}
+                </div>
+            </div>
         </form>
     );
 };
@@ -125,7 +211,12 @@ const Component: React.FC<ComponentProps> = ({ isShowed, setIsShowed }) => {
             isShowed={isShowed}
             setIsShowed={setIsShowed}
         >
-            <ComponentInner objectTypes={objectTypes} objectTypesUuidsSelected={detectionFilter.objectTypesUuids} />
+            <ComponentInner
+                objectTypes={objectTypes}
+                objectTypesUuidsSelected={detectionFilter.objectTypesUuids}
+                detectionValidationStatusesSelected={detectionFilter.detectionValidationStatuses}
+                detectionControlStatusesSelected={detectionFilter.detectionControlStatuses}
+            />
         </MapControlCustom>
     );
 };

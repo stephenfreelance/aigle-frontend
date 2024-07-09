@@ -41,7 +41,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject }) => {
                         geometry={tileSetUuidsDetectionsMap[tileSet.uuid]?.geometry}
                         color={detectionObject.objectType.color}
                         tileSet={tileSet}
-                        className={clsx({
+                        className={clsx(classes['detection-tile-preview'], {
                             [classes['detection-tile-preview-animated']]: !preview,
                         })}
                     />
@@ -49,7 +49,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject }) => {
             </div>
 
             {detectionObject.tileSets.length > 3 ? (
-                <Button mt="sm" variant="light" fullWidth onClick={() => setFullHistoryShowed((state) => !state)}>
+                <Button variant="light" fullWidth onClick={() => setFullHistoryShowed((state) => !state)}>
                     {fullHistoryShowed ? 'Voir moins' : "Voir tout l'historique"}
                 </Button>
             ) : null}

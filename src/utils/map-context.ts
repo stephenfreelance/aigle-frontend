@@ -1,3 +1,4 @@
+import { detectionControlStatuses, detectionValidationStatuses } from '@/models/detection';
 import { DetectionFilter } from '@/models/detection-filter';
 import { MapLayer } from '@/models/map-layer';
 import { MapSettings } from '@/models/map-settings';
@@ -6,7 +7,7 @@ import { TileSet, TileSetStatus, TileSetType } from '@/models/tile-set';
 import EventEmitter from 'eventemitter3';
 import { create } from 'zustand';
 
-type MapEventType = 'UPDATE_DETECTIONS';
+type MapEventType = 'UPDATE_DETECTIONS' | 'JUMP_TO';
 
 interface MapState {
     layers?: MapLayer[];
@@ -59,6 +60,8 @@ const useMap = create<MapState>()((set, get) => ({
             objectTypes: allObjectTypes,
             detectionFilter: {
                 objectTypesUuids: allObjectTypes.map((type) => type.uuid),
+                detectionValidationStatuses: [...detectionValidationStatuses],
+                detectionControlStatuses: [...detectionControlStatuses],
             },
         }));
     },

@@ -130,3 +130,9 @@ export const getDetectionObjectHistoryEndpoint = (uuid: string) => `${BASE_DETEC
 const BASE_DETECTION_DATA = `${BASE_API}detection-data/`;
 export const DETECTION_DATA_POST_ENDPOINT = `${BASE_DETECTION_DATA}`;
 export const getDetectionDataDetailEndpoint = (uuid: string) => `${BASE_DETECTION_DATA}${uuid}/`;
+
+const BASE_PARCEL = `${BASE_API}parcel/`;
+export const PARCEL_LIST_ENDPOINT = `${BASE_PARCEL}`;
+export const getDetectionParcelDetailEndpoint = (uuid: string) => `${BASE_PARCEL}${uuid}/`;
+export const PARCEL_SUGGEST_SECTION_ENDPOINT = `${BASE_PARCEL}suggest_section/`;
+export const PARCEL_SUGGEST_NUM_PARCEL_ENDPOINT = `${BASE_PARCEL}suggest_num_parcel/`;

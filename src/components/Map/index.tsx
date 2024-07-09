@@ -7,6 +7,7 @@ import MapAddAnnotationModal from '@/components/Map/MapAddAnnotationModal';
 import MapControlFilterDetection from '@/components/Map/controls/MapControlFilterDetection';
 import MapControlLayerDisplay from '@/components/Map/controls/MapControlLayerDisplay';
 import MapControlLegend from '@/components/Map/controls/MapControlLegend';
+import MapControlSearchParcel from '@/components/Map/controls/MapControlSearchParcel';
 import { DetectionGeojsonData, DetectionProperties } from '@/models/detection';
 import { MapLayer } from '@/models/map-layer';
 import api from '@/utils/api';
@@ -92,7 +93,7 @@ const GEOJSON_LAYER_EXTRA_BOUNDINGS_ID = 'geojson-layer-data-extra-boundings';
 
 const GEOJSON_LAYER_EXTRA_COLOR = '#FF0000';
 
-type LeftSection = 'SEARCH_ADDRESS' | 'FILTER_DETECTION' | 'LEGEND' | 'LAYER_DISPLAY';
+type LeftSection = 'SEARCH_ADDRESS' | 'FILTER_DETECTION' | 'LEGEND' | 'LAYER_DISPLAY' | 'SEARCH_PARCEL';
 
 const EMPTY_GEOJSON_FEATURE_COLLECTION: FeatureCollection = {
     type: 'FeatureCollection',
@@ -133,11 +134,15 @@ const Component: React.FC<ComponentProps> = ({
     const { eventEmitter, detectionFilter } = useMap();
 
     const [cursor, setCursor] = useState<string>();
+    const [mapRef, setMapRef] = useState<mapboxgl.Map>();
 
     const handleMapRef = useCallback((node?: mapboxgl.Map) => {
+        console.log('handle map ref', node);
         if (!node) {
             return;
         }
+
+        setMapRef(node);
 
         MAP_CONTROLS.forEach(({ control, position, hideWhenNoDetection }) => {
             if (!displayDetections && hideWhenNoDetection) {
@@ -279,6 +284,23 @@ const Component: React.FC<ComponentProps> = ({
         };
     }, []);
     useEffect(() => {
+        if (!mapRef) {
+            return;
+        }
+
+        const jumpTo = (center: mapboxgl.LngLatLike) => {
+            mapRef.jumpTo({
+                center,
+            });
+        };
+
+        eventEmitter.on('JUMP_TO', jumpTo);
+
+        return () => {
+            eventEmitter.off('JUMP_TO', jumpTo);
+        };
+    }, [mapRef]);
+    useEffect(() => {
         refetch();
     }, [detectionFilter]);
 
@@ -381,6 +403,12 @@ const Component: React.FC<ComponentProps> = ({
             >
                 {displayDetections ? (
                     <>
+                        <MapControlSearchParcel
+                            isShowed={sectionShowed === 'SEARCH_PARCEL'}
+                            setIsShowed={(state: boolean) => {
+                                leftSectionShowed(state ? 'SEARCH_PARCEL' : undefined);
+                            }}
+                        />
                         <MapControlFilterDetection
                             isShowed={sectionShowed === 'FILTER_DETECTION'}
                             setIsShowed={(state: boolean) => {

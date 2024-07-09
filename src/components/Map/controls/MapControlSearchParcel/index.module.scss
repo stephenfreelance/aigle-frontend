@@ -9,8 +9,7 @@
     margin-top: 10px;
 
     .empty-filter-text {
-        font-style: italic;
-        margin-top: var(--mantine-spacing-xs);
+        margin-top: var(--mantine-spacing-sm);
     }
 
     .form {
@@ -24,8 +23,12 @@
     border-radius: $border-radius-small;
 }
 
-.statuses-filters-container {
-    display: flex;
-    flex-direction: row;
-    gap: var(--mantine-spacing-xl);
+.layers-section {
+    .layers-section-title {
+        margin-top: var(--mantine-spacing-sm);
+    }
+
+    .layers-section-group {
+        margin-top: var(--mantine-spacing-xs);
+    }
 }

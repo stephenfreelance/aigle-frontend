@@ -68,11 +68,6 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, userGroups }) => {
     const [error, setError] = useState<AxiosError>();
     const navigate = useNavigate();
 
-    console.log({
-        userGroups,
-        values: initialValues.userUserGroups,
-    });
-
     const [searchGroupValue, setSearchGroupValue] = useState('');
 
     const form: UseFormReturnType<FormValues> = useForm({

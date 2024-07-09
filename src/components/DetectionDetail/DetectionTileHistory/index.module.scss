@@ -1,4 +1,4 @@
-@import '@/constants.scss';
+@import "@/constants.scss";
 
 @keyframes appears {
     0% {
@@ -19,6 +19,10 @@
     flex-wrap: wrap;
 
     justify-content: space-between;
+
+    .detection-tile-preview {
+        margin-bottom: var(--mantine-spacing-sm);
+    }
 
     .detection-tile-preview-animated {
         animation: appears 0.3s ease-in-out;

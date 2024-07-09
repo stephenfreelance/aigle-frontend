@@ -7,11 +7,17 @@ $tile-preview-size: calc(($detection-detail-panel-width - $detection-detail-pane
     display: flex;
     flex-direction: column;
 
-    .detection-tile-preview {
+    .detection-tile-preview-title {
         padding: 0 4px;
 
         margin-top: 4px;
 
+        text-align: center;
+    }
+
+    .detection-tile-preview-date {
+        color: var(--mantine-color-dark-filled);
+        font-style: italic;
         text-align: center;
     }
 
