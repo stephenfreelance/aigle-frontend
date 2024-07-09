@@ -4,12 +4,14 @@ import { Polygon } from 'geojson';
 import React from 'react';
 import Map, { Layer, Source } from 'react-map-gl';
 import classes from './index.module.scss';
+import clsx from 'clsx';
 
 interface ComponentProps {
     geometry?: Polygon;
     color: string;
     tileSet: TileSet;
     bounds: [number, number, number, number];
+    className?: string;
     displayName?: boolean;
     strokedLine?: boolean;
 }
@@ -19,11 +21,12 @@ const Component: React.FC<ComponentProps> = ({
     geometry,
     color,
     tileSet,
+    className,
     displayName = true,
     strokedLine = false,
 }) => {
     return (
-        <div className={classes['detection-tile-preview-container-wrapper']}>
+        <div className={clsx(classes['detection-tile-preview-container-wrapper'], className)}>
             <div className={classes['detection-tile-preview-container']}>
                 <Map
                     mapboxAccessToken={MAPBOX_TOKEN}

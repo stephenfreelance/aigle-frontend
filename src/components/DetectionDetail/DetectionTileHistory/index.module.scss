@@ -1,13 +1,28 @@
 @import '@/constants.scss';
 
+@keyframes appears {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .detection-tile-previews-container {
     margin-top: var(--mantine-spacing-md);
 
     display: flex;
     flex-direction: row;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
 
     justify-content: space-between;
+
+    .detection-tile-preview-animated {
+        animation: appears 0.3s ease-in-out;
+    }
 }
 
 .container {
