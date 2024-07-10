@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 
 import { GEO_CUSTOM_ZONE_POST_ENDPOINT, getGeoCustomZoneDetailEndpoint } from '@/api-endpoints';
-import ErrorCard from '@/components/ErrorCard';
-import Loader from '@/components/Loader';
 import Map from '@/components/Map';
 import LayoutAdminForm from '@/components/admin/LayoutAdminForm';
+import ErrorCard from '@/components/ui/ErrorCard';
+import Loader from '@/components/ui/Loader';
 import { MapLayer } from '@/models/map-layer';
 import api from '@/utils/api';
 import { TILES_URL_FALLBACK } from '@/utils/constants';

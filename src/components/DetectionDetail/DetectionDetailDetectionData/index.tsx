@@ -4,8 +4,8 @@ import {
     getDetectionObjectDetailEndpoint,
 } from '@/api-endpoints';
 import DetectionTilePreview from '@/components/DetectionDetail/DetectionTilePreview';
-import ErrorCard from '@/components/ErrorCard';
 import InfoCard from '@/components/InfoCard';
+import ErrorCard from '@/components/ui/ErrorCard';
 import {
     DetectionControlStatus,
     DetectionData,
@@ -19,6 +19,7 @@ import { DetectionObjectDetail } from '@/models/detection-object';
 import { TileSet } from '@/models/tile-set';
 import api from '@/utils/api';
 import {
+    DEFAULT_DATE_FORMAT,
     DETECTION_CONTROL_STATUSES_NAMES_MAP,
     DETECTION_VALIDATION_STATUSES_COLORS_MAP,
     DETECTION_VALIDATION_STATUSES_NAMES_MAP,
@@ -29,6 +30,7 @@ import { UseFormReturnType, useForm } from '@mantine/form';
 import { UseMutationResult, useMutation, useQueryClient } from '@tanstack/react-query';
 import { bbox } from '@turf/turf';
 import { AxiosError } from 'axios';
+import { format } from 'date-fns';
 import { Polygon } from 'geojson';
 import React, { useEffect, useMemo, useState } from 'react';
 import classes from './index.module.scss';
@@ -140,9 +142,9 @@ const Form: React.FC<FormProps> = ({ detectionObjectUuid, tileSetUuid, uuid, geo
         <form onSubmit={form.onSubmit(handleSubmit)} className={classes.form}>
             {!uuid ? (
                 <InfoCard title="Ajout d'un objet" withCloseButton={false}>
-                    <p>Cet objet n'exsite pas acutellement. Vous êtes sur le point de le créer.</p>
+                    <p>Cet objet n&apos;exsite pas acutellement. Vous êtes sur le point de le créer.</p>
                     <Button mt="xs" type="submit" fullWidth>
-                        Créer l'objet
+                        Créer l&apos;objet
                     </Button>
                 </InfoCard>
             ) : null}
@@ -226,7 +228,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, initialDetection
                 label="Source d'image"
                 data={detectionObject.tileSets.map(({ tileSet }) => ({
                     value: tileSet.uuid,
-                    label: tileSet.name,
+                    label: `${tileSet.name} - ${format(tileSet.date, DEFAULT_DATE_FORMAT)}`,
                 }))}
                 value={tileSetSelected.uuid}
                 onChange={(tileSetUuid) => selectDetection(String(tileSetUuid))}

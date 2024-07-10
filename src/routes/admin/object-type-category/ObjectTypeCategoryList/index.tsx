@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 
 import { OBJECT_TYPE_CATEGORY_LIST_ENDPOINT, OBJECT_TYPE_LIST_ENDPOINT } from '@/api-endpoints';
-import DateInfo from '@/components/DateInfo';
 import DataTable from '@/components/admin/DataTable';
 import FiltersSection from '@/components/admin/FiltersSection';
 import LayoutAdminBase from '@/components/admin/LayoutAdminBase';
+import DateInfo from '@/components/ui/DateInfo';
+import SelectItem from '@/components/ui/SelectItem';
 import { ObjectType } from '@/models/object-type';
 import { ObjectTypeCategoryDetail } from '@/models/object-type-category';
 import api from '@/utils/api';
-import { Button, ColorSwatch, Group, Input, MultiSelect, ScrollArea, Table } from '@mantine/core';
-import { IconCategoryPlus, IconCheck, IconSearch } from '@tabler/icons-react';
+import { Button, Group, Input, MultiSelect, ScrollArea, Table } from '@mantine/core';
+import { IconCategoryPlus, IconSearch } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import isEqual from 'lodash/isEqual';
 import { Link, useNavigate } from 'react-router-dom';
@@ -84,15 +85,7 @@ const Component: React.FC = () => {
                                 label: name,
                             }))}
                             renderOption={(item) => (
-                                <div className="multi-select-item">
-                                    <div className="multi-select-item-label">
-                                        <ColorSwatch color={objectTypesUuidsColorsMap[item.option.value]} size={24} />
-                                        {item.option.label}
-                                    </div>
-                                    {item.checked ? (
-                                        <IconCheck className="multi-select-item-icon" color="grey" />
-                                    ) : null}
-                                </div>
+                                <SelectItem item={item} color={objectTypesUuidsColorsMap[item.option.value]} />
                             )}
                             value={filter.objectTypesUuids}
                             onChange={(objectTypesUuids: string[]) =>

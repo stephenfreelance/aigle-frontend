@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 
 import { getGeoDetailEndpoint } from '@/api-endpoints';
-import ErrorCard from '@/components/ErrorCard';
-import Loader from '@/components/Loader';
 import Map from '@/components/Map';
 import LayoutAdminForm from '@/components/admin/LayoutAdminForm';
+import ErrorCard from '@/components/ui/ErrorCard';
+import Loader from '@/components/ui/Loader';
 import { CollectivityType, GeoCollectivity, GeoCollectivityDetail, collectivityTypes } from '@/models/geo/_common';
 import { MapLayer } from '@/models/map-layer';
 import api from '@/utils/api';

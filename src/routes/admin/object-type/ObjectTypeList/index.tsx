@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 
 import { OBJECT_TYPE_CATEGORY_LIST_ENDPOINT, OBJECT_TYPE_LIST_ENDPOINT } from '@/api-endpoints';
-import DateInfo from '@/components/DateInfo';
 import DataTable from '@/components/admin/DataTable';
 import FiltersSection from '@/components/admin/FiltersSection';
 import LayoutAdminBase from '@/components/admin/LayoutAdminBase';
 import PillsDataCell from '@/components/admin/data-cells/PillsDataCell';
+import DateInfo from '@/components/ui/DateInfo';
+import SelectItem from '@/components/ui/SelectItem';
 import { ObjectType, ObjectTypeDetail } from '@/models/object-type';
 import { ObjectTypeCategory } from '@/models/object-type-category';
 import api from '@/utils/api';
 import { Button, ColorSwatch, Input, MultiSelect, Table } from '@mantine/core';
-import { IconCheck, IconCubePlus, IconSearch } from '@tabler/icons-react';
+import { IconCubePlus, IconSearch } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import isEqual from 'lodash/isEqual';
 import { Link, useNavigate } from 'react-router-dom';
@@ -76,14 +77,7 @@ const Component: React.FC = () => {
                                 value: uuid,
                                 label: name,
                             }))}
-                            renderOption={(item) => (
-                                <div className="multi-select-item">
-                                    <div className="multi-select-item-label">{item.option.label}</div>
-                                    {item.checked ? (
-                                        <IconCheck className="multi-select-item-icon" color="grey" />
-                                    ) : null}
-                                </div>
-                            )}
+                            renderOption={(item) => <SelectItem item={item} />}
                             value={filter.objectTypeCategoriesUuids}
                             onChange={(objectTypeCategoriesUuids: string[]) =>
                                 setFilter((prev) => ({

@@ -1,10 +1,10 @@
 import { DETECTION_POST_ENDPOINT } from '@/api-endpoints';
 import InfoCard from '@/components/InfoCard';
-import Loader from '@/components/Loader';
+import Loader from '@/components/ui/Loader';
 import { MapLayer } from '@/models/map-layer';
 import { ObjectType } from '@/models/object-type';
 import api from '@/utils/api';
-import { MAPBOX_TOKEN } from '@/utils/constants';
+import { DEFAULT_DATE_FORMAT, MAPBOX_TOKEN } from '@/utils/constants';
 import { LngLat } from '@/utils/geojson';
 import { useMap } from '@/utils/map-context';
 import { Button, Modal, Select } from '@mantine/core';
@@ -12,9 +12,10 @@ import { UseFormReturnType, useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconShape } from '@tabler/icons-react';
 import { UseMutationResult, useMutation } from '@tanstack/react-query';
-import { booleanWithin, centroid, getCoord } from '@turf/turf';
+import { area, booleanWithin, centroid, getCoord } from '@turf/turf';
 import { AxiosError } from 'axios';
 import clsx from 'clsx';
+import { format } from 'date-fns';
 import { Polygon } from 'geojson';
 import React, { useEffect, useMemo, useState } from 'react';
 import classes from './index.module.scss';
@@ -125,10 +126,18 @@ const Form: React.FC<FormProps> = ({ objectTypes, layers, polygon, hide }) => {
             <InfoCard title="Informations sur l'objet" withCloseButton={false}>
                 <ul>
                     <li>
-                        Fond de carte associé: <b>{tileSet?.name}</b>
+                        Fond de carte associé:{' '}
+                        <b>
+                            {tileSet
+                                ? `${tileSet.name} - ${format(tileSet.date, DEFAULT_DATE_FORMAT)}`
+                                : 'Chargement...'}
+                        </b>
                     </li>
                     <li>
                         Addresse: <b>{address === undefined ? 'Chargement...' : address || 'Inconnue'}</b>
+                    </li>
+                    <li>
+                        Surface: <b>{area(polygon).toFixed(2)} m²</b>
                     </li>
                 </ul>
             </InfoCard>

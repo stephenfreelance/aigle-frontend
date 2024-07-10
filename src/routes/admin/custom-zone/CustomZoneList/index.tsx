@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 
 import { GEO_CUSTOM_ZONE_LIST_ENDPOINT } from '@/api-endpoints';
-import DateInfo from '@/components/DateInfo';
 import DataTable from '@/components/admin/DataTable';
 import FiltersSection from '@/components/admin/FiltersSection';
 import LayoutAdminBase from '@/components/admin/LayoutAdminBase';
+import DateInfo from '@/components/ui/DateInfo';
 import { GeoCustomZone } from '@/models/geo/geo-custom-zone';
 import { Button, Input, Table } from '@mantine/core';
 import { IconHexagonPlus2, IconSearch } from '@tabler/icons-react';

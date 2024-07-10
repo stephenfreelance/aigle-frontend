@@ -1,11 +1,11 @@
 import { TileSet } from '@/models/tile-set';
 import { DEFAULT_DATE_FORMAT, MAPBOX_TOKEN } from '@/utils/constants';
 import clsx from 'clsx';
+import { format } from 'date-fns';
 import { Polygon } from 'geojson';
 import React from 'react';
 import Map, { Layer, Source } from 'react-map-gl';
 import classes from './index.module.scss';
-import { format } from 'date-fns';
 
 interface ComponentProps {
     geometry?: Polygon;
@@ -70,7 +70,9 @@ const Component: React.FC<ComponentProps> = ({
             {displayName ? (
                 <>
                     <p className={classes['detection-tile-preview-title']}>{tileSet.name}</p>
-                    <p className={classes['detection-tile-preview-date']}>{format(tileSet.date, DEFAULT_DATE_FORMAT)}</p>
+                    <p className={classes['detection-tile-preview-date']}>
+                        {format(tileSet.date, DEFAULT_DATE_FORMAT)}
+                    </p>
                 </>
             ) : null}
         </div>

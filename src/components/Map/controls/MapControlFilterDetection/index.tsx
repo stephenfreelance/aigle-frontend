@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 
 import MapControlCustom from '@/components/Map/controls/MapControlCustom';
+import SelectItem from '@/components/ui/SelectItem';
 import { detectionControlStatuses, detectionValidationStatuses } from '@/models/detection';
 import { DetectionFilter } from '@/models/detection-filter';
 import { ObjectType } from '@/models/object-type';
@@ -10,9 +11,9 @@ import {
     DETECTION_VALIDATION_STATUSES_NAMES_MAP,
 } from '@/utils/constants';
 import { useMap } from '@/utils/map-context';
-import { ActionIcon, Badge, Checkbox, ColorSwatch, Group, MultiSelect, Stack } from '@mantine/core';
+import { ActionIcon, Badge, Checkbox, Group, MultiSelect, Stack } from '@mantine/core';
 import { UseFormReturnType, useForm } from '@mantine/form';
-import { IconCheck, IconFilter, IconX } from '@tabler/icons-react';
+import { IconFilter, IconX } from '@tabler/icons-react';
 import classes from './index.module.scss';
 
 const CONTROL_LABEL = 'Filtrer les objets';
@@ -92,15 +93,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                     value: uuid,
                     label: name,
                 }))}
-                renderOption={(item) => (
-                    <div className="multi-select-item">
-                        <div className="multi-select-item-label">
-                            <ColorSwatch color={objectTypesMap[item.option.value].color} size={24} />
-                            {item.option.label}
-                        </div>
-                        {item.checked ? <IconCheck className="multi-select-item-icon" color="grey" /> : null}
-                    </div>
-                )}
+                renderOption={(item) => <SelectItem item={item} color={objectTypesMap[item.option.value].color} />}
                 key={form.key('objectTypesUuids')}
                 {...form.getInputProps('objectTypesUuids')}
             />

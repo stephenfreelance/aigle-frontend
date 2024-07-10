@@ -15,6 +15,7 @@ interface ComponentProps extends PropsWithChildren {
     isShowed: boolean;
     label?: string;
     setIsShowed: (state: boolean) => void;
+    disabled?: boolean;
 }
 
 const Component: React.FC<ComponentProps> = ({
@@ -26,6 +27,7 @@ const Component: React.FC<ComponentProps> = ({
     isShowed,
     label,
     setIsShowed,
+    disabled,
     children,
 }) => {
     const containerRef = useRef<HTMLDivElement>(document.createElement('div'));
@@ -73,6 +75,7 @@ const Component: React.FC<ComponentProps> = ({
                             size={36}
                             variant="white"
                             onClick={() => setIsShowed(!isShowed)}
+                            disabled={!!disabled}
                         >
                             {controlInner}
                         </ActionIcon>
@@ -84,6 +87,7 @@ const Component: React.FC<ComponentProps> = ({
                             label={controlInner}
                             checked={isShowed}
                             onChange={(event) => setIsShowed(event.currentTarget.checked)}
+                            disabled={!!disabled}
                         />
                     </Tooltip>
                 ) : null}

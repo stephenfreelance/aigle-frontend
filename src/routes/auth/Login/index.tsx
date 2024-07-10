@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 
 import { AUTH_LOGIN_ENDPOINT } from '@/api-endpoints';
 import LayoutAuth from '@/components/auth/LayoutAuth';
-import ErrorCard from '@/components/ErrorCard';
+import ErrorCard from '@/components/ui/ErrorCard';
 import api from '@/utils/api';
 import { useAuth } from '@/utils/auth-context';
 import { useMutation, UseMutationResult } from '@tanstack/react-query';

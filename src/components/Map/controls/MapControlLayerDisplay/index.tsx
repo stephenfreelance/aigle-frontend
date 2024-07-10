@@ -82,11 +82,12 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ layers }) => {
 };
 
 interface ComponentProps {
+    disabled?: boolean;
     isShowed: boolean;
     setIsShowed: (state: boolean) => void;
 }
 
-const Component: React.FC<ComponentProps> = ({ isShowed, setIsShowed }) => {
+const Component: React.FC<ComponentProps> = ({ isShowed, setIsShowed, disabled }) => {
     const { layers } = useMap();
 
     if (!layers) {
@@ -101,6 +102,7 @@ const Component: React.FC<ComponentProps> = ({ isShowed, setIsShowed }) => {
             isShowed={isShowed}
             setIsShowed={setIsShowed}
             label={CONTROL_LABEL}
+            disabled={disabled}
         >
             <ComponentInner layers={layers} />
         </MapControlCustom>

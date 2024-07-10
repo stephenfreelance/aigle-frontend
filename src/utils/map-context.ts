@@ -7,14 +7,39 @@ import { TileSet, TileSetStatus, TileSetType } from '@/models/tile-set';
 import EventEmitter from 'eventemitter3';
 import { create } from 'zustand';
 
+const getInitialLayers = (settings: MapSettings) => {
+    const layers: MapLayer[] = [];
+    let backgroundSet = false;
+
+    settings.tileSetSettings.forEach(({ tileSet, geometry }) => {
+        let displayed = false;
+
+        if (tileSet.tileSetType !== 'BACKGROUND') {
+            displayed = tileSet.tileSetStatus === 'VISIBLE';
+        } else {
+            displayed = !backgroundSet;
+            backgroundSet = true;
+        }
+
+        layers.push({
+            tileSet: { ...tileSet, geometry },
+            displayed,
+        });
+    });
+
+    return layers;
+};
+
 type MapEventType = 'UPDATE_DETECTIONS' | 'JUMP_TO';
 
 interface MapState {
     layers?: MapLayer[];
     objectTypes?: ObjectType[];
     detectionFilter?: DetectionFilter;
+    settings?: MapSettings;
 
     setMapSettings: (settings: MapSettings) => void;
+    resetLayers: () => void;
     updateDetectionFilter: (detectionFilter: DetectionFilter) => void;
     getDisplayedTileSetUrls: () => string[];
     setTileSetVisibility: (uuid: string, visible: boolean) => void;
@@ -36,26 +61,10 @@ const useMap = create<MapState>()((set, get) => ({
             objectTypesUuids.add(objectType.uuid);
         });
 
-        const layers: MapLayer[] = [];
-        let backgroundSet = false;
-
-        settings.tileSetSettings.forEach(({ tileSet, geometry }) => {
-            let displayed = false;
-
-            if (tileSet.tileSetType !== 'BACKGROUND') {
-                displayed = tileSet.tileSetStatus === 'VISIBLE';
-            } else {
-                displayed = !backgroundSet;
-                backgroundSet = true;
-            }
-
-            layers.push({
-                tileSet: { ...tileSet, geometry },
-                displayed,
-            });
-        });
+        const layers = getInitialLayers(settings);
 
         set(() => ({
+            settings,
             layers,
             objectTypes: allObjectTypes,
             detectionFilter: {
@@ -63,6 +72,19 @@ const useMap = create<MapState>()((set, get) => ({
                 detectionValidationStatuses: [...detectionValidationStatuses],
                 detectionControlStatuses: [...detectionControlStatuses],
             },
+        }));
+    },
+    resetLayers: () => {
+        const settings = get().settings;
+
+        if (!settings) {
+            return;
+        }
+
+        const layers = getInitialLayers(settings);
+
+        set(() => ({
+            layers,
         }));
     },
     updateDetectionFilter: (detectionFilter: DetectionFilter) => {

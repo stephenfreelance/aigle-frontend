@@ -196,7 +196,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ setIsShowed }) => {
                 mt="md"
                 label="Section"
                 error={form.errors.section}
-                placeholder="Rechercher une section"
+                placeholder="Rechercher une section (B, CD,...)"
                 data={sections}
                 onOptionSubmit={(value) => {
                     const option = (sections || []).find((option) => option === value);
@@ -217,7 +217,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ setIsShowed }) => {
                 mt="md"
                 label="Parcelle"
                 error={form.errors.numParcel}
-                placeholder="Rechercher une parcelle"
+                placeholder="Rechercher une parcelle (54, 236,...)"
                 data={parcelles}
                 onOptionSubmit={(value) => {
                     const option = (parcelles || []).find((option) => option === value);

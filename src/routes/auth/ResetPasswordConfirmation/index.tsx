@@ -4,8 +4,8 @@ import { AxiosError } from 'axios';
 import React, { useState } from 'react';
 
 import { AUTH_RESET_PASSWORD_CONFIRM_ENDPOINT } from '@/api-endpoints';
-import ErrorCard from '@/components/ErrorCard';
 import LayoutAuth from '@/components/auth/LayoutAuth';
+import ErrorCard from '@/components/ui/ErrorCard';
 import api from '@/utils/api';
 import { PASSWORD_MIN_LENGTH } from '@/utils/constants';
 import { IconCheck } from '@tabler/icons-react';

@@ -6,11 +6,12 @@ import {
     getUserDetailEndpoint,
     getUserGroupDetailEndpoint,
 } from '@/api-endpoints';
-import ErrorCard from '@/components/ErrorCard';
-import Loader from '@/components/Loader';
-import WarningCard from '@/components/WarningCard';
 import LayoutAdminForm from '@/components/admin/LayoutAdminForm';
 import GeoCollectivitiesMultiSelects from '@/components/admin/form-fields/GeoCollectivitiesMultiSelects';
+import ErrorCard from '@/components/ui/ErrorCard';
+import Loader from '@/components/ui/Loader';
+import SelectItem from '@/components/ui/SelectItem';
+import WarningCard from '@/components/ui/WarningCard';
 import { ObjectType } from '@/models/object-type';
 import { ObjectTypeCategory } from '@/models/object-type-category';
 import { UserGroupDetail } from '@/models/user-group';
@@ -18,7 +19,7 @@ import api from '@/utils/api';
 import { GeoValues, geoCollectivityToGeoOption } from '@/utils/geojson';
 import { Button, MultiSelect, TextInput } from '@mantine/core';
 import { UseFormReturnType, isNotEmpty, useForm } from '@mantine/form';
-import { IconCheck, IconUserPlus } from '@tabler/icons-react';
+import { IconUserPlus } from '@tabler/icons-react';
 import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -122,12 +123,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, initialGeoSelectedValu
                     value: uuid,
                     label: name,
                 }))}
-                renderOption={(item) => (
-                    <div className="multi-select-item">
-                        <div className="multi-select-item-label">{item.option.label}</div>
-                        {item.checked ? <IconCheck className="multi-select-item-icon" color="grey" /> : null}
-                    </div>
-                )}
+                renderOption={(item) => <SelectItem item={item} />}
                 key={form.key('objectTypeCategoriesUuids')}
                 {...form.getInputProps('objectTypeCategoriesUuids')}
             />

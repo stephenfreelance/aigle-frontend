@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react';
 
 import { USERS_POST_ENDPOINT, USER_GROUP_LIST_ENDPOINT, getUserDetailEndpoint } from '@/api-endpoints';
-import ErrorCard from '@/components/ErrorCard';
-import Loader from '@/components/Loader';
 import LayoutAdminForm from '@/components/admin/LayoutAdminForm';
+import ErrorCard from '@/components/ui/ErrorCard';
+import Loader from '@/components/ui/Loader';
+import SelectItem from '@/components/ui/SelectItem';
 import { ObjectType } from '@/models/object-type';
 import { SelectOption } from '@/models/ui/select-option';
 import { User, UserRole, UserUserGroupInput, userGroupRights, userRoles } from '@/models/user';
@@ -22,7 +23,7 @@ import {
     TextInput,
 } from '@mantine/core';
 import { UseFormReturnType, isEmail, isNotEmpty, useForm } from '@mantine/form';
-import { IconCheck, IconTrash, IconUserPlus } from '@tabler/icons-react';
+import { IconTrash, IconUserPlus } from '@tabler/icons-react';
 import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
 import omit from 'lodash/omit';
@@ -220,14 +221,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, userGroups }) => {
                                         mt="md"
                                         label="Droits"
                                         placeholder="Lecture, écriture,..."
-                                        renderOption={(item) => (
-                                            <div className="multi-select-item">
-                                                <div className="multi-select-item-label">{item.option.label}</div>
-                                                {item.checked ? (
-                                                    <IconCheck className="multi-select-item-icon" color="grey" />
-                                                ) : null}
-                                            </div>
-                                        )}
+                                        renderOption={(item) => <SelectItem item={item} />}
                                         data={userGroupRights.map((right) => ({
                                             value: right,
                                             label: USER_GROUP_RIGHTS_NAMES_MAP[right],

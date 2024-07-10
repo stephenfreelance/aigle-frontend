@@ -10,4 +10,5 @@ export interface TileSetSetting {
 export interface MapSettings {
     objectTypes: ObjectType[];
     tileSetSettings: TileSetSetting[];
+    globalGeometry: Geometry | null;
 }

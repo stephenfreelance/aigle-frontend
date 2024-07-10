@@ -5,15 +5,16 @@ import {
     OBJECT_TYPE_POST_ENDPOINT,
     getObjectTypeDetailEndpoint,
 } from '@/api-endpoints';
-import ErrorCard from '@/components/ErrorCard';
-import Loader from '@/components/Loader';
 import LayoutAdminForm from '@/components/admin/LayoutAdminForm';
+import ErrorCard from '@/components/ui/ErrorCard';
+import Loader from '@/components/ui/Loader';
+import SelectItem from '@/components/ui/SelectItem';
 import { ObjectType, ObjectTypeDetail } from '@/models/object-type';
 import { ObjectTypeCategory } from '@/models/object-type-category';
 import api from '@/utils/api';
 import { Button, ColorInput, MultiSelect, TextInput } from '@mantine/core';
 import { UseFormReturnType, isNotEmpty, useForm } from '@mantine/form';
-import { IconCheck, IconCubePlus } from '@tabler/icons-react';
+import { IconCubePlus } from '@tabler/icons-react';
 import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -110,12 +111,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, categories }) => {
                     value: uuid,
                     label: name,
                 }))}
-                renderOption={(item) => (
-                    <div className="multi-select-item">
-                        <div className="multi-select-item-label">{item.option.label}</div>
-                        {item.checked ? <IconCheck className="multi-select-item-icon" color="grey" /> : null}
-                    </div>
-                )}
+                renderOption={(item) => <SelectItem item={item} />}
                 key={form.key('objectTypeCategoriesUuids')}
                 {...form.getInputProps('objectTypeCategoriesUuids')}
             />

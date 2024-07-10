@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Map, { Layer, Source, ViewStateChangeEvent } from 'react-map-gl';
 
 import { getDetectionListEndpoint } from '@/api-endpoints';
@@ -13,6 +13,7 @@ import { MapLayer } from '@/models/map-layer';
 import api from '@/utils/api';
 import { MAPBOX_TOKEN } from '@/utils/constants';
 import { useMap } from '@/utils/map-context';
+import { notifications } from '@mantine/notifications';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
@@ -127,11 +128,12 @@ const Component: React.FC<ComponentProps> = ({
         detectionObjectUuid: string;
         detectionUuid: string;
     } | null>(null);
-    const [sectionShowed, leftSectionShowed] = useState<LeftSection>();
+    const [leftSectionShowed, setLeftSectionShowed] = useState<LeftSection>();
+    const [drawMode, setDrawMode] = useState<boolean>(false);
 
     const [addAnnotationPolygon, setAddAnnotationPolygon] = useState<Polygon>();
 
-    const { eventEmitter, detectionFilter } = useMap();
+    const { eventEmitter, detectionFilter, resetLayers, settings } = useMap();
 
     const [cursor, setCursor] = useState<string>();
     const [mapRef, setMapRef] = useState<mapboxgl.Map>();
@@ -208,11 +210,21 @@ const Component: React.FC<ComponentProps> = ({
 
         node.on('draw.modechange', ({ mode }: { mode: keyof MapboxDraw.Modes }) => {
             if (mode === 'draw_polygon') {
+                resetLayers();
+                setDrawMode(true);
+                setLeftSectionShowed(undefined);
+
+                notifications.show({
+                    title: 'Mode de dessin activé',
+                    message: "L'affichage des couches a été réinitialisé",
+                });
                 MAPBOX_DRAW_CONTROL.changeMode('draw_rectangle', {
                     escapeKeyStopsDrawing: true, // default true
                     allowCreateExceeded: false, // default false
                     exceedCallsOnEachMove: false, // default false
                 });
+            } else {
+                setDrawMode(false);
             }
         });
 
@@ -244,7 +256,19 @@ const Component: React.FC<ComponentProps> = ({
     }, []);
 
     const layersDisplayed = layers.filter((layer) => layer.displayed);
-    const tileSetsUuids = layersDisplayed.map((layer) => layer.tileSet.uuid);
+
+    // we get detections for all the layers available for the user, even if they are not displayed
+    const tileSetsUuidsDetection = useMemo(
+        () =>
+            layers
+                .filter(
+                    (layer) =>
+                        ['BACKGROUND', 'PARTIAL'].includes(layer.tileSet.tileSetType) &&
+                        ['VISIBLE', 'HIDDEN'].includes(layer.tileSet.tileSetStatus),
+                )
+                .map((layer) => layer.tileSet.uuid),
+        [],
+    );
 
     // detections fetching
 
@@ -257,7 +281,7 @@ const Component: React.FC<ComponentProps> = ({
             params: {
                 ...mapBounds,
                 ...detectionFilter,
-                tileSetsUuids: tileSetsUuids,
+                tileSetsUuids: tileSetsUuidsDetection,
             },
             signal,
         });
@@ -268,7 +292,7 @@ const Component: React.FC<ComponentProps> = ({
             DETECTION_ENDPOINT,
             ...Object.values(mapBounds || {}),
             ...Object.values(detectionFilter || {}),
-            ...tileSetsUuids,
+            ...tileSetsUuidsDetection,
         ],
         queryFn: ({ signal }) => fetchDetections(signal, mapBounds),
         placeholderData: keepPreviousData,
@@ -322,7 +346,7 @@ const Component: React.FC<ComponentProps> = ({
 
     useEffect(() => {
         const geocoderEventCallback = () => {
-            leftSectionShowed('SEARCH_ADDRESS');
+            setLeftSectionShowed('SEARCH_ADDRESS');
         };
         MAPBOX_GEOCODER.on('loading', geocoderEventCallback);
 
@@ -336,7 +360,7 @@ const Component: React.FC<ComponentProps> = ({
     const onMapClick = ({ features, target }: mapboxgl.MapLayerMouseEvent) => {
         if (!features || !features.length) {
             setDetectionDetailsShowed(null);
-            leftSectionShowed(undefined);
+            setLeftSectionShowed(undefined);
             target.easeTo({
                 padding: {
                     top: 0,
@@ -400,32 +424,34 @@ const Component: React.FC<ComponentProps> = ({
                 onMouseEnter={onPolygonMouseEnter}
                 onMouseLeave={onPolygonMouseLeave}
                 cursor={cursor}
+                {...(settings?.globalGeometry ? { bounds: bbox(settings.globalGeometry) } : {})}
             >
                 {displayDetections ? (
                     <>
                         <MapControlSearchParcel
-                            isShowed={sectionShowed === 'SEARCH_PARCEL'}
+                            isShowed={leftSectionShowed === 'SEARCH_PARCEL'}
                             setIsShowed={(state: boolean) => {
-                                leftSectionShowed(state ? 'SEARCH_PARCEL' : undefined);
+                                setLeftSectionShowed(state ? 'SEARCH_PARCEL' : undefined);
                             }}
                         />
                         <MapControlFilterDetection
-                            isShowed={sectionShowed === 'FILTER_DETECTION'}
+                            isShowed={leftSectionShowed === 'FILTER_DETECTION'}
                             setIsShowed={(state: boolean) => {
-                                leftSectionShowed(state ? 'FILTER_DETECTION' : undefined);
+                                setLeftSectionShowed(state ? 'FILTER_DETECTION' : undefined);
                             }}
                         />
                         <MapControlLegend
-                            isShowed={sectionShowed === 'LEGEND'}
+                            isShowed={leftSectionShowed === 'LEGEND'}
                             setIsShowed={(state: boolean) => {
-                                leftSectionShowed(state ? 'LEGEND' : undefined);
+                                setLeftSectionShowed(state ? 'LEGEND' : undefined);
                             }}
                         />
                         <MapControlLayerDisplay
-                            isShowed={sectionShowed === 'LAYER_DISPLAY'}
+                            isShowed={leftSectionShowed === 'LAYER_DISPLAY'}
                             setIsShowed={(state: boolean) => {
-                                leftSectionShowed(state ? 'LAYER_DISPLAY' : undefined);
+                                setLeftSectionShowed(state ? 'LAYER_DISPLAY' : undefined);
                             }}
+                            disabled={drawMode}
                         />
                         <MapAddAnnotationModal
                             isShowed={!!addAnnotationPolygon}
@@ -538,9 +564,9 @@ const Component: React.FC<ComponentProps> = ({
                                   minzoom: layer.tileSet.minZoom,
                               }
                             : {})}
-                        {...(boundLayers && layer.tileSet.geometry
+                        {...(boundLayers && (layer.tileSet.geometry || settings?.globalGeometry)
                             ? {
-                                  bounds: bbox(layer.tileSet.geometry),
+                                  bounds: bbox(layer.tileSet.geometry || settings.globalGeometry),
                               }
                             : {})}
                     >

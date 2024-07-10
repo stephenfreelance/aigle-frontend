@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 
 import { USER_GROUP_LIST_ENDPOINT } from '@/api-endpoints';
-import DateInfo from '@/components/DateInfo';
 import DataTable from '@/components/admin/DataTable';
 import FiltersSection from '@/components/admin/FiltersSection';
 import LayoutAdminBase from '@/components/admin/LayoutAdminBase';
 import PillsDataCell from '@/components/admin/data-cells/PillsDataCell';
+import DateInfo from '@/components/ui/DateInfo';
 import { GeoCollectivity } from '@/models/geo/_common';
 import { ObjectTypeCategory } from '@/models/object-type-category';
 import { UserGroupDetail } from '@/models/user-group';

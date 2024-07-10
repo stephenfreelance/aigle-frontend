@@ -1,8 +1,8 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 
-import ErrorCard from '@/components/ErrorCard';
-import Loader from '@/components/Loader';
 import FiltersSection from '@/components/admin/FiltersSection';
+import ErrorCard from '@/components/ui/ErrorCard';
+import Loader from '@/components/ui/Loader';
 import { Paginated, Uuided } from '@/models/data';
 import { PAGINATION_OFFSET_LIMIT_INITIAL_VALUE, PaginationOffsetLimit } from '@/models/table';
 import api from '@/utils/api';

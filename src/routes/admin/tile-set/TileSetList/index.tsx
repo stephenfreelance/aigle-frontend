@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 
 import { TILE_SET_LIST_ENDPOINT } from '@/api-endpoints';
-import DateInfo from '@/components/DateInfo';
 import InfoCard from '@/components/InfoCard';
 import DataTable from '@/components/admin/DataTable';
 import FiltersSection from '@/components/admin/FiltersSection';
 import LayoutAdminBase from '@/components/admin/LayoutAdminBase';
+import DateInfo from '@/components/ui/DateInfo';
 import { TileSet, TileSetScheme, TileSetStatus, tileSetSchemes, tileSetStatuses } from '@/models/tile-set';
 import { TILE_SET_STATUSES_NAMES_MAP, TILE_SET_TYPES_NAMES_MAP } from '@/utils/constants';
 import { Button, Checkbox, Input, Stack, Table, Tooltip } from '@mantine/core';

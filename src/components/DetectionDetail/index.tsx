@@ -1,13 +1,14 @@
 import { getDetectionObjectDetailEndpoint } from '@/api-endpoints';
-import DateInfo from '@/components/DateInfo';
 import DetectionDetailDetectionData from '@/components/DetectionDetail/DetectionDetailDetectionData';
 import DetectionDetailDetectionObject from '@/components/DetectionDetail/DetectionDetailDetectionObject';
 import DetectionTileHistory from '@/components/DetectionDetail/DetectionTileHistory';
-import Loader from '@/components/Loader';
+import DateInfo from '@/components/ui/DateInfo';
+import Loader from '@/components/ui/Loader';
 import { DetectionObjectDetail } from '@/models/detection-object';
 import api from '@/utils/api';
+import { formatParcel } from '@/utils/format';
 import { Accordion, ActionIcon } from '@mantine/core';
-import { IconCalendarClock, IconMap, IconMapPin, IconX } from '@tabler/icons-react';
+import { IconCalendarClock, IconMap, IconMapPin, IconRoute, IconX } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { centroid } from '@turf/turf';
 import { Position } from 'geojson';
@@ -60,7 +61,10 @@ const Component: React.FC<ComponentProps> = ({ detectionObjectUuid, detectionUui
                     <Accordion.Control>Informations générales</Accordion.Control>
                     <Accordion.Panel className={classes['general-informations-content']}>
                         <p className={classes['general-informations-content-item']}>
-                            <IconMap size={16} /> {data.address ? data.address : <i>Adresse non-spécifiée</i>}
+                            <IconRoute size={16} />
+                            <span className={classes['general-informations-content-item-text']}>
+                                {data.address ? data.address : <i>Adresse non-spécifiée</i>}
+                            </span>
                         </p>
                         <p className={classes['general-informations-content-item']}>
                             <IconCalendarClock size={16} />{' '}
@@ -79,6 +83,16 @@ const Component: React.FC<ComponentProps> = ({ detectionObjectUuid, detectionUui
                             >
                                 {`${centerPoint[1].toFixed(5)}, ${centerPoint[0].toFixed(5)}`}
                             </Link>
+                        </p>
+                        <p className={classes['general-informations-content-item']}>
+                            <IconMap size={16} />
+                            <span className={classes['general-informations-content-item-text']}>
+                                {data.parcel ? (
+                                    `Parcelle : ${formatParcel(data.parcel)}`
+                                ) : (
+                                    <i>Parcelle non-spécifiée</i>
+                                )}
+                            </span>
                         </p>
                     </Accordion.Panel>
                 </Accordion.Item>

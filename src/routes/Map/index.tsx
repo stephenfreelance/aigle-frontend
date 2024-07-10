@@ -2,8 +2,8 @@ import React from 'react';
 
 import { MAP_SETTINGS_ENDPOINT } from '@/api-endpoints';
 import Header from '@/components/Header';
-import Loader from '@/components/Loader';
 import MapComponent from '@/components/Map';
+import Loader from '@/components/ui/Loader';
 import { MapSettings } from '@/models/map-settings';
 import api from '@/utils/api';
 import { useMap } from '@/utils/map-context';
