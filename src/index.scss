@@ -278,3 +278,30 @@ header {
 
     opacity: 0.575;
 }
+
+// custom
+
+$tile-size: 256px;
+$tile-scale: calc($tile-preview-detail-size / $tile-size);
+$tile-margin: calc(-1* ($tile-size * (1 - $tile-scale)) / 2);
+
+// we do all this because we want to display previews with 256px width to get the right tiles
+
+.detection-tile-preview-detail-container { 
+    height: $tile-size;
+    width: $tile-size;
+
+    transform: scale($tile-scale); 
+
+    border-radius: $border-radius-small;
+
+    overflow: hidden;
+
+    margin-top: $tile-margin;
+    margin-left: $tile-margin;
+}
+
+.detection-tile-preview-detail {
+    width: $tile-preview-detail-size;
+    height: $tile-preview-detail-size;
+}

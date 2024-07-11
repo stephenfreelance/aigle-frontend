@@ -1,0 +1,19 @@
+
+$tile-preview-size: 400px;
+
+.container {
+    position: absolute;
+    left: -10000px;
+    top: -10000px;
+    z-index: -10;
+}
+
+.detection-tile-preview-detail {
+    height: $tile-preview-size;
+    width: $tile-preview-size;
+}
+
+.detection-tile-preview-inner {
+    height: $tile-preview-size;
+    width: $tile-preview-size;
+}

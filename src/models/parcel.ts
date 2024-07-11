@@ -11,3 +11,5 @@ export interface ParcelMinimal extends Uuided, Timestamped {
 export interface Parcel extends ParcelMinimal {
     geometry: Polygon;
 }
+
+export interface ParcelDetail extends Parcel {}

@@ -38,12 +38,24 @@ const Component: React.FC<ComponentProps> = ({ detectionObject }) => {
                     <DetectionTilePreview
                         bounds={previewBounds}
                         key={tileSet.uuid}
-                        geometry={tileSetUuidsDetectionsMap[tileSet.uuid]?.geometry}
-                        color={detectionObject.objectType.color}
+                        geometries={
+                            tileSetUuidsDetectionsMap[tileSet.uuid]?.geometry
+                                ? [
+                                      {
+                                          geometry: tileSetUuidsDetectionsMap[tileSet.uuid].geometry,
+                                          color: detectionObject.objectType.color,
+                                      },
+                                  ]
+                                : undefined
+                        }
                         tileSet={tileSet}
-                        className={clsx(classes['detection-tile-preview'], {
-                            [classes['detection-tile-preview-animated']]: !preview,
-                        })}
+                        classNames={{
+                            wrapper: clsx(classes['detection-tile-preview'], {
+                                [classes['detection-tile-preview-animated']]: !preview,
+                            }),
+                            inner: 'detection-tile-preview-detail-container',
+                            main: 'detection-tile-preview-detail',
+                        }}
                     />
                 ))}
             </div>

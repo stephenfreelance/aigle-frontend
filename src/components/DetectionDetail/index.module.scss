@@ -1,48 +1,48 @@
-@import '@/constants.scss';
+@import "@/constants.scss";
 
 .container {
     padding: $detection-detail-panel-padding;
-
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-
     height: 100%;
-    overflow-y: overlay;
 
-    .general-informations {
-        .general-informations-item {
-        }
+    .inner {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
 
-        .mantine-Accordion-panel {
-        }
-        .general-informations-content {
-            .general-informations-content-item {
-                display: flex;
-                gap: 8px;
-                font-size: 0.85rem;
-                align-items: center;
-                justify-content: flex-start;
+        .general-informations {
+            .general-informations-item {
+            }
 
-                &:not(:last-of-type) {
-                    margin-bottom: 8px;
+            .mantine-Accordion-panel {
+            }
+            .general-informations-content {
+                .general-informations-content-item {
+                    display: flex;
+                    gap: 8px;
+                    font-size: 0.85rem;
+                    align-items: center;
+                    justify-content: flex-start;
+
+                    &:not(:last-of-type) {
+                        margin-bottom: 8px;
+                    }
+                }
+
+                .general-informations-content-item-text {
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-start;
                 }
             }
-
-            .general-informations-content-item-text {
-                display: flex;
-                align-items: center;
-                justify-content: flex-start;
-            }
         }
-    }
 
-    .top-section {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
+        .top-section {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
 
-        align-items: center;
+            align-items: center;
+        }
     }
 }
 

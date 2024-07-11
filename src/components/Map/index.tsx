@@ -24,6 +24,8 @@ import { FeatureCollection, Geometry, Polygon } from 'geojson';
 import mapboxgl from 'mapbox-gl';
 import DrawRectangle, { DrawStyles } from 'mapbox-gl-draw-rectangle-restrict-area';
 import classes from './index.module.scss';
+import ReactPDF, { PDFDownloadLink } from '@react-pdf/renderer';
+import SignalementPDF from '@/components/signalement-pdf/SignalementPDFDocument';
 
 const MAP_INITIAL_VIEW_STATE = {
     longitude: 3.95657,
@@ -576,6 +578,16 @@ const Component: React.FC<ComponentProps> = ({
                             id={getLayerId(layer)}
                             type="raster"
                             source={getSourceId(layer)}
+                            {...(layer.tileSet.maxZoom
+                                ? {
+                                      maxzoom: layer.tileSet.maxZoom,
+                                  }
+                                : {})}
+                            {...(layer.tileSet.minZoom
+                                ? {
+                                      minzoom: layer.tileSet.minZoom,
+                                  }
+                                : {})}
                         />
                     </Source>
                 ))}

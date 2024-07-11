@@ -1,8 +1,5 @@
 @import '@/constants.scss';
 
-$tile-preview-gap: 8px;
-$tile-preview-size: calc(($detection-detail-panel-width - $detection-detail-panel-padding) / 3 - 2 * $tile-preview-gap);
-
 .detection-tile-preview-container-wrapper {
     display: flex;
     flex-direction: column;
@@ -19,14 +16,5 @@ $tile-preview-size: calc(($detection-detail-panel-width - $detection-detail-pane
         color: var(--mantine-color-dark-filled);
         font-style: italic;
         text-align: center;
-    }
-
-    .detection-tile-preview-container {
-        height: $tile-preview-size;
-        width: $tile-preview-size;
-
-        border-radius: $border-radius-small;
-
-        overflow: hidden;
     }
 }

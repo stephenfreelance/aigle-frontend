@@ -240,11 +240,19 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, initialDetection
                 <div className={classes['detection-tile-preview-container']}>
                     <DetectionTilePreview
                         bounds={previewBounds}
-                        geometry={detectionSelected?.geometry || initialDetection.geometry}
+                        geometries={[
+                            {
+                                geometry: detectionSelected?.geometry || initialDetection.geometry,
+                                color: detectionObject.objectType.color,
+                            },
+                        ]}
                         strokedLine={!detectionSelected}
-                        color={detectionObject.objectType.color}
                         tileSet={tileSetSelected}
                         displayName={false}
+                        classNames={{
+                            inner: 'detection-tile-preview-detail-container',
+                            main: 'detection-tile-preview-detail',
+                        }}
                     />
                 </div>
 
