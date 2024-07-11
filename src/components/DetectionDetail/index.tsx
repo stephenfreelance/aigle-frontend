@@ -9,6 +9,7 @@ import { DetectionObjectDetail } from '@/models/detection-object';
 import api from '@/utils/api';
 import { formatParcel } from '@/utils/format';
 import { Accordion, ActionIcon, Loader as MantineLoader, ScrollArea, Tooltip } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import { IconCalendarClock, IconDownload, IconMap, IconMapPin, IconRoute, IconX } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { centroid } from '@turf/turf';
@@ -69,7 +70,13 @@ const Component: React.FC<ComponentProps> = ({ detectionObjectUuid, detectionUui
                         <ActionIcon
                             variant="transparent"
                             disabled={signalementPdfLoading}
-                            onClick={() => setSignalementPdfLoading(true)}
+                            onClick={() => {
+                                notifications.show({
+                                    title: 'Génération de la fiche de signalement en cours',
+                                    message: 'Le téléchargement se lancera dans quelques instants',
+                                });
+                                setSignalementPdfLoading(true);
+                            }}
                         >
                             {signalementPdfLoading ? <MantineLoader size="xs" /> : <IconDownload />}
                         </ActionIcon>

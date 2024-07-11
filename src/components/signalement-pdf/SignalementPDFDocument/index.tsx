@@ -69,6 +69,7 @@ const styles = StyleSheet.create({
 });
 
 export interface PreviewImage {
+    index: number;
     src: string;
     title: string;
 }

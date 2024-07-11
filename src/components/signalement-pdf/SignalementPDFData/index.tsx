@@ -96,7 +96,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onDownl
     });
 
     const previewBounds = bbox(detectionObject.detections[0].tile.geometry) as [number, number, number, number];
-    const tileSetsToRender = detectionObject.tileSets.filter(({ preview }) => preview);
+    const tileSetsToRender = detectionObject.tileSets.filter(({ preview }) => preview).reverse();
 
     const tileSetUuidsDetectionsMap = detectionObject.detections.reduce<Record<string, DetectionWithTile>>(
         (prev, curr) => {
@@ -106,7 +106,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onDownl
         {},
     );
 
-    const getPreviewImage = useCallback((uuid: string, title: string) => {
+    const getPreviewImage = useCallback((uuid: string, title: string, index: number) => {
         const id = getPreviewId(uuid);
         const canvas = document.querySelector(`#${id} canvas`);
         const src = (canvas as HTMLCanvasElement).toDataURL('image/png');
@@ -114,6 +114,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onDownl
         setPreviewImages((prev) => [
             ...prev,
             {
+                index,
                 src,
                 title,
             },
@@ -127,7 +128,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onDownl
     return (
         <div className={classes.container}>
             SignalementPDFdata {detectionObject.id} {latLong}
-            {tileSetsToRender.map(({ tileSet }) => (
+            {tileSetsToRender.map(({ tileSet }, index) => (
                 <DetectionTilePreview
                     geometries={[
                         ...(tileSetUuidsDetectionsMap[tileSet.uuid]?.geometry
@@ -149,7 +150,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onDownl
                     }}
                     id={getPreviewId(tileSet.uuid)}
                     displayName={false}
-                    onIdle={() => getPreviewImage(tileSet.uuid, format(tileSet.date, DEFAULT_DATE_FORMAT))}
+                    onIdle={() => getPreviewImage(tileSet.uuid, format(tileSet.date, DEFAULT_DATE_FORMAT), index)}
                     extended={true}
                 />
             ))}
@@ -162,14 +163,14 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onDownl
                 }}
                 id={getPreviewId(PLAN_URL_TILESET.uuid)}
                 displayName={false}
-                onIdle={() => getPreviewImage(PLAN_URL_TILESET.uuid, 'Plan')}
+                onIdle={() => getPreviewImage(PLAN_URL_TILESET.uuid, 'Plan', tileSetsToRender.length)}
                 extended={true}
             />
             {previewImages.length === tileSetsToRender.length + 1 ? (
                 <DocumentContainer
                     detectionObject={detectionObject}
                     latLong={latLong}
-                    previewImages={previewImages}
+                    previewImages={previewImages.sort((a, b) => a.index - b.index)}
                     onDownloadTriggered={onDownloadTriggered}
                 />
             ) : null}
