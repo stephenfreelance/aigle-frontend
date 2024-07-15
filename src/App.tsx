@@ -6,6 +6,7 @@ import CollectiviteForm from '@/routes/admin/collectivite/CollectiviteForm';
 import CollectiviteList from '@/routes/admin/collectivite/CollectiviteList';
 import CustomZoneForm from '@/routes/admin/custom-zone/CustomZoneForm';
 import CustomZoneList from '@/routes/admin/custom-zone/CustomZoneList';
+import ImportsPage from '@/routes/admin/imports';
 import ObjectTypeCategoryForm from '@/routes/admin/object-type-category/ObjectTypeCategoryForm';
 import ObjectTypeCategoryList from '@/routes/admin/object-type-category/ObjectTypeCategoryList';
 import ObjectTypeForm from '@/routes/admin/object-type/ObjectTypeForm';
@@ -232,6 +233,15 @@ const App: React.FC = () => {
                     element={
                         <ProtectedRoute roles={['ADMIN', 'SUPER_ADMIN']}>
                             <TileSetForm />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/admin/imports"
+                    element={
+                        <ProtectedRoute roles={['ADMIN', 'SUPER_ADMIN']}>
+                            <ImportsPage />
                         </ProtectedRoute>
                     }
                 />

@@ -142,6 +142,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
             <Button.Group className={classes['prescription-selection-container']}>
                 <Button
                     fullWidth
+                    size="xs"
                     variant={form.getValues().prescripted === null ? 'filled' : 'outline'}
                     type="button"
                     onClick={() => form.setFieldValue('prescripted', null)}
@@ -150,6 +151,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                 </Button>
                 <Button
                     fullWidth
+                    size="xs"
                     variant={form.getValues().prescripted === true ? 'filled' : 'outline'}
                     type="button"
                     onClick={() => form.setFieldValue('prescripted', true)}
@@ -158,6 +160,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                 </Button>
                 <Button
                     fullWidth
+                    size="xs"
                     variant={form.getValues().prescripted === false ? 'filled' : 'outline'}
                     type="button"
                     onClick={() => form.setFieldValue('prescripted', false)}

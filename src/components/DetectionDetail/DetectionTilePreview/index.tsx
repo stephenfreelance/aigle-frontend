@@ -96,6 +96,7 @@ const Component: React.FC<ComponentProps> = ({
                         style={{ width: '100%', height: '100%' }}
                         mapStyle="mapbox://styles/mapbox/streets-v11"
                         interactive={false}
+                        reuseMaps={true}
                         maxBounds={bounds_}
                         {...(id ? { id } : {})}
                         {...(onIdle ? { onIdle } : {})}

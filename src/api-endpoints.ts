@@ -136,3 +136,5 @@ export const PARCEL_LIST_ENDPOINT = `${BASE_PARCEL}`;
 export const getDetectionParcelDetailEndpoint = (uuid: string) => `${BASE_PARCEL}${uuid}/`;
 export const PARCEL_SUGGEST_SECTION_ENDPOINT = `${BASE_PARCEL}suggest_section/`;
 export const PARCEL_SUGGEST_NUM_PARCEL_ENDPOINT = `${BASE_PARCEL}suggest_num_parcel/`;
+
+export const IMPORTS_INFOS_ENDPOINT = `${BASE_API}utils/imports-infos/`;

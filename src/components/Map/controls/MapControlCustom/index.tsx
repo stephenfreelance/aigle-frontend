@@ -4,7 +4,7 @@ import React, { PropsWithChildren, useMemo, useRef } from 'react';
 import { ControlPosition, useControl } from 'react-map-gl';
 import classes from './index.module.scss';
 
-type ControlType = 'ACTION_BUTTON' | 'SWITCH';
+type ControlType = 'ACTION_BUTTON' | 'SWITCH' | 'SIMPLE';
 
 interface ComponentProps extends PropsWithChildren {
     position?: ControlPosition;
@@ -14,7 +14,7 @@ interface ComponentProps extends PropsWithChildren {
     containerClassName?: string;
     isShowed: boolean;
     label?: string;
-    setIsShowed: (state: boolean) => void;
+    setIsShowed?: (state: boolean) => void;
     disabled?: boolean;
 }
 
@@ -67,34 +67,37 @@ const Component: React.FC<ComponentProps> = ({
 
     return (
         <>
-            <div className={containerClassName} ref={controlContainerRef}>
-                {controlType === 'ACTION_BUTTON' ? (
-                    <Tooltip label={label} position={tooltipPosition} offset={16}>
-                        <ActionIcon
-                            className={classes.button}
-                            size={36}
-                            variant="white"
-                            onClick={() => setIsShowed(!isShowed)}
-                            disabled={!!disabled}
-                        >
-                            {controlInner}
-                        </ActionIcon>
-                    </Tooltip>
-                ) : null}
-                {controlType === 'SWITCH' ? (
-                    <Tooltip label={label}>
-                        <Switch
-                            label={controlInner}
-                            checked={isShowed}
-                            onChange={(event) => setIsShowed(event.currentTarget.checked)}
-                            disabled={!!disabled}
-                        />
-                    </Tooltip>
-                ) : null}
-            </div>
+            {controlType !== 'SIMPLE' ? (
+                <div className={containerClassName} ref={controlContainerRef}>
+                    {controlType === 'ACTION_BUTTON' ? (
+                        <Tooltip label={label} position={tooltipPosition} offset={16}>
+                            <ActionIcon
+                                className={classes.button}
+                                size={36}
+                                variant="white"
+                                onClick={() => setIsShowed && setIsShowed(!isShowed)}
+                                disabled={!!disabled}
+                            >
+                                {controlInner}
+                            </ActionIcon>
+                        </Tooltip>
+                    ) : null}
+                    {controlType === 'SWITCH' ? (
+                        <Tooltip label={label}>
+                            <Switch
+                                label={controlInner}
+                                checked={isShowed}
+                                onChange={(event) => setIsShowed && setIsShowed(event.currentTarget.checked)}
+                                disabled={!!disabled}
+                            />
+                        </Tooltip>
+                    ) : null}
+                </div>
+            ) : null}
+
             <div
                 className={clsx(classes.content, contentClassName, {
-                    [classes.showed]: isShowed,
+                    [classes.showed]: isShowed || controlType === 'SIMPLE',
                 })}
             >
                 {children}

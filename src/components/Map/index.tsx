@@ -24,6 +24,7 @@ import { FeatureCollection, Geometry, Polygon } from 'geojson';
 import mapboxgl from 'mapbox-gl';
 import DrawRectangle, { DrawStyles } from 'mapbox-gl-draw-rectangle-restrict-area';
 import classes from './index.module.scss';
+import MapControlBackgroundSlider from '@/components/Map/controls/MapControlBackgroundSlider';
 
 const MAP_INITIAL_VIEW_STATE = {
     longitude: 3.95657,
@@ -439,6 +440,7 @@ const Component: React.FC<ComponentProps> = ({
                                 setLeftSectionShowed(state ? 'FILTER_DETECTION' : undefined);
                             }}
                         />
+                        <MapControlBackgroundSlider />
                         <MapControlLegend
                             isShowed={leftSectionShowed === 'LEGEND'}
                             setIsShowed={(state: boolean) => {
