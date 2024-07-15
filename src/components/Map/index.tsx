@@ -423,7 +423,6 @@ const Component: React.FC<ComponentProps> = ({
                 onMouseEnter={onPolygonMouseEnter}
                 onMouseLeave={onPolygonMouseLeave}
                 cursor={cursor}
-                {...(settings?.globalGeometry ? { bounds: bbox(settings.globalGeometry) } : {})}
             >
                 {displayDetections ? (
                     <>
