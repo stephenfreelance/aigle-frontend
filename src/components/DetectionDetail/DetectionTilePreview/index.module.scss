@@ -1,8 +1,20 @@
 @import '@/constants.scss';
 
-.detection-tile-preview-container-wrapper {
+.detection-tile-preview-wrapper {
     display: flex;
     flex-direction: column;
+
+    .detection-tile-preview-container {
+        position: relative;
+
+        .detection-tile-preview-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            gap: var(--mantine-spacing-xs);
+        }
+    }
 
     .detection-tile-preview-title {
         padding: 0 4px;

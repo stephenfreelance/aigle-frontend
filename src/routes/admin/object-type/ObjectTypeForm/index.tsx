@@ -12,7 +12,7 @@ import SelectItem from '@/components/ui/SelectItem';
 import { ObjectType, ObjectTypeDetail } from '@/models/object-type';
 import { ObjectTypeCategory } from '@/models/object-type-category';
 import api from '@/utils/api';
-import { Button, ColorInput, MultiSelect, TextInput } from '@mantine/core';
+import { Button, ColorInput, MultiSelect, NumberInput, TextInput } from '@mantine/core';
 import { UseFormReturnType, isNotEmpty, useForm } from '@mantine/form';
 import { IconCubePlus } from '@tabler/icons-react';
 import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query';
@@ -24,16 +24,21 @@ const BACK_URL = '/admin/object-types';
 interface FormValues {
     name: string;
     color: string;
+    prescriptionDurationYears: number | null;
     objectTypeCategoriesUuids: string[];
 }
 
 const postForm = async (values: FormValues, uuid?: string) => {
     let response: AxiosResponse<ObjectType>;
+    const values_ = {
+        ...values,
+        prescriptionDurationYears: values.prescriptionDurationYears ? Number(values.prescriptionDurationYears) : null,
+    };
 
     if (uuid) {
-        response = await api.patch(getObjectTypeDetailEndpoint(uuid), values);
+        response = await api.patch(getObjectTypeDetailEndpoint(uuid), values_);
     } else {
-        response = await api.post(OBJECT_TYPE_POST_ENDPOINT, values);
+        response = await api.post(OBJECT_TYPE_POST_ENDPOINT, values_);
     }
 
     return response.data;
@@ -115,6 +120,16 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, categories }) => {
                 key={form.key('objectTypeCategoriesUuids')}
                 {...form.getInputProps('objectTypeCategoriesUuids')}
             />
+            <NumberInput
+                mt="md"
+                label="Prescription (en années)"
+                description="Laisser vide si la prescription ne s'applique pas à ce type d'objet"
+                placeholder="5"
+                min={0}
+                allowNegative={false}
+                key={form.key('prescriptionDurationYears')}
+                {...form.getInputProps('prescriptionDurationYears')}
+            />
 
             <div className="form-actions">
                 <Button
@@ -138,6 +153,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, categories }) => {
 const EMPTY_FORM_VALUES: FormValues = {
     name: '',
     color: '',
+    prescriptionDurationYears: null,
     objectTypeCategoriesUuids: [],
 };
 

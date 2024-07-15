@@ -1,5 +1,5 @@
 import { GEO_COMMUNE_LIST_ENDPOINT, GEO_DEPARTMENT_LIST_ENDPOINT, GEO_REGION_LIST_ENDPOINT } from '@/api-endpoints';
-import { DetectionControlStatus, DetectionValidationStatus } from '@/models/detection';
+import { DetectionControlStatus, DetectionPrescriptionStatus, DetectionValidationStatus } from '@/models/detection';
 import { CollectivityType } from '@/models/geo/_common';
 import { TileSetStatus, TileSetType } from '@/models/tile-set';
 import { UserGroupRight, UserRole } from '@/models/user';
@@ -50,6 +50,13 @@ export const DETECTION_CONTROL_STATUSES_NAMES_MAP: {
     SIGNALED_COLLECTIVITY: 'Signalé à la collectivité',
     CONFIRMED_FIELD: 'Confirmé sur le terrain',
     INVALIDATED_FIELD: 'Infirmé sur le terrain',
+} as const;
+
+export const DETECTION_PRESCRIPTION_STATUSES_NAMES_MAP: {
+    [status in DetectionPrescriptionStatus]: string;
+} = {
+    PRESCRIBED: 'Prescrit',
+    NOT_PRESCRIBED: 'Non prescrit',
 } as const;
 
 export const DETECTION_VALIDATION_STATUSES_NAMES_MAP: {

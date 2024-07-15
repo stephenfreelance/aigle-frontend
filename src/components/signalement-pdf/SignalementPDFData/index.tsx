@@ -38,10 +38,10 @@ const getSignalementPDFDocumentName = (detectionObject: DetectionObjectDetail) =
 };
 
 interface DocumentContainerProps extends SignalementPDFDocumentProps {
-    onDownloadTriggered: () => void;
+    onGenerationFinished: (error?: string) => void;
 }
 
-const DocumentContainer: React.FC<DocumentContainerProps> = ({ onDownloadTriggered, ...pdfProps }) => {
+const DocumentContainer: React.FC<DocumentContainerProps> = ({ onGenerationFinished, ...pdfProps }) => {
     const pdfDocument = <SignalementPDFDocument {...pdfProps} />;
 
     const [instance] = usePDF({ document: pdfDocument });
@@ -59,7 +59,7 @@ const DocumentContainer: React.FC<DocumentContainerProps> = ({ onDownloadTrigger
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
 
-            onDownloadTriggered();
+            onGenerationFinished();
         }
     }, [instance.blob]);
 
@@ -85,10 +85,10 @@ const getPreviewId = (tileSetUuid: string) => `preview-${tileSetUuid}`;
 interface ComponentProps {
     detectionObject: DetectionObjectDetail;
     latLong: string;
-    onDownloadTriggered: () => void;
+    onGenerationFinished: (error?: string) => void;
 }
-const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onDownloadTriggered }: ComponentProps) => {
-    const [previewImages, setPreviewImages] = useState<PreviewImage[]>([]);
+const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onGenerationFinished }: ComponentProps) => {
+    const [previewImages, setPreviewImages] = useState<Record<string, PreviewImage>>({});
     const { data: parcel, isLoading: parcelIsLoading } = useQuery({
         queryKey: [getDetectionParcelDetailEndpoint(String(detectionObject.parcel?.uuid))],
         enabled: !!detectionObject.parcel?.uuid,
@@ -106,19 +106,29 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onDownl
         {},
     );
 
-    const getPreviewImage = useCallback((uuid: string, title: string, index: number) => {
+    const getPreviewImage = useCallback((uuid: string, title: string, index: number, retry = false) => {
         const id = getPreviewId(uuid);
         const canvas = document.querySelector(`#${id} canvas`);
+
+        if (!canvas) {
+            if (retry) {
+                onGenerationFinished('Veuillez réessayer et contacter le support si le problème persiste');
+                return;
+            }
+
+            setTimeout(() => getPreviewImage(uuid, title, index, true), 500);
+        }
+
         const src = (canvas as HTMLCanvasElement).toDataURL('image/png');
 
-        setPreviewImages((prev) => [
+        setPreviewImages((prev) => ({
             ...prev,
-            {
-                index,
-                src,
-                title,
+            [uuid]: {
+                index: index,
+                src: src,
+                title: title,
             },
-        ]);
+        }));
     }, []);
 
     if (parcelIsLoading) {
@@ -128,50 +138,54 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onDownl
     return (
         <div className={classes.container}>
             SignalementPDFdata {detectionObject.id} {latLong}
-            {tileSetsToRender.map(({ tileSet }, index) => (
+            {tileSetsToRender.map(({ tileSet }, index) =>
+                !previewImages[tileSet.uuid] ? (
+                    <DetectionTilePreview
+                        geometries={[
+                            ...(tileSetUuidsDetectionsMap[tileSet.uuid]?.geometry
+                                ? [
+                                      {
+                                          geometry: tileSetUuidsDetectionsMap[tileSet.uuid].geometry,
+                                          color: detectionObject.objectType.color,
+                                      },
+                                  ]
+                                : []),
+                            ...(parcel?.geometry ? [{ geometry: parcel.geometry, color: '#FF6F00' }] : []),
+                        ]}
+                        tileSet={tileSet}
+                        key={tileSet.uuid}
+                        bounds={previewBounds}
+                        classNames={{
+                            main: classes['detection-tile-preview-detail'],
+                            inner: classes['detection-tile-preview-inner'],
+                        }}
+                        id={getPreviewId(tileSet.uuid)}
+                        displayName={false}
+                        onIdle={() => getPreviewImage(tileSet.uuid, format(tileSet.date, DEFAULT_DATE_FORMAT), index)}
+                        extendedLevel={1}
+                    />
+                ) : null,
+            )}
+            {!previewImages[PLAN_URL_TILESET.uuid] ? (
                 <DetectionTilePreview
-                    geometries={[
-                        ...(tileSetUuidsDetectionsMap[tileSet.uuid]?.geometry
-                            ? [
-                                  {
-                                      geometry: tileSetUuidsDetectionsMap[tileSet.uuid].geometry,
-                                      color: detectionObject.objectType.color,
-                                  },
-                              ]
-                            : []),
-                        ...(parcel?.geometry ? [{ geometry: parcel.geometry, color: '#FF6F00' }] : []),
-                    ]}
-                    tileSet={tileSet}
-                    key={tileSet.uuid}
+                    tileSet={PLAN_URL_TILESET}
                     bounds={previewBounds}
                     classNames={{
                         main: classes['detection-tile-preview-detail'],
                         inner: classes['detection-tile-preview-inner'],
                     }}
-                    id={getPreviewId(tileSet.uuid)}
+                    id={getPreviewId(PLAN_URL_TILESET.uuid)}
                     displayName={false}
-                    onIdle={() => getPreviewImage(tileSet.uuid, format(tileSet.date, DEFAULT_DATE_FORMAT), index)}
-                    extended={true}
+                    onIdle={() => getPreviewImage(PLAN_URL_TILESET.uuid, 'Plan', tileSetsToRender.length)}
+                    extendedLevel={5}
                 />
-            ))}
-            <DetectionTilePreview
-                tileSet={PLAN_URL_TILESET}
-                bounds={previewBounds}
-                classNames={{
-                    main: classes['detection-tile-preview-detail'],
-                    inner: classes['detection-tile-preview-inner'],
-                }}
-                id={getPreviewId(PLAN_URL_TILESET.uuid)}
-                displayName={false}
-                onIdle={() => getPreviewImage(PLAN_URL_TILESET.uuid, 'Plan', tileSetsToRender.length)}
-                extended={true}
-            />
-            {previewImages.length === tileSetsToRender.length + 1 ? (
+            ) : null}
+            {Object.keys(previewImages).length === tileSetsToRender.length + 1 ? (
                 <DocumentContainer
                     detectionObject={detectionObject}
                     latLong={latLong}
-                    previewImages={previewImages.sort((a, b) => a.index - b.index)}
-                    onDownloadTriggered={onDownloadTriggered}
+                    previewImages={Object.values(previewImages).sort((a, b) => a.index - b.index)}
+                    onGenerationFinished={onGenerationFinished}
                 />
             ) : null}
         </div>

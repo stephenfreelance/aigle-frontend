@@ -11,7 +11,7 @@ import {
     DETECTION_VALIDATION_STATUSES_NAMES_MAP,
 } from '@/utils/constants';
 import { useMap } from '@/utils/map-context';
-import { ActionIcon, Badge, Checkbox, Group, MultiSelect, Stack } from '@mantine/core';
+import { ActionIcon, Badge, Button, Checkbox, Group, MultiSelect, Slider, Stack, Text } from '@mantine/core';
 import { UseFormReturnType, useForm } from '@mantine/form';
 import { IconFilter, IconX } from '@tabler/icons-react';
 import classes from './index.module.scss';
@@ -22,13 +22,19 @@ interface FormValues {
     objectTypesUuids: DetectionFilter['objectTypesUuids'];
     detectionValidationStatuses: DetectionFilter['detectionValidationStatuses'];
     detectionControlStatuses: DetectionFilter['detectionControlStatuses'];
+    score: DetectionFilter['score'];
+    prescripted: DetectionFilter['prescripted'];
 }
+
+const formatScore = (score: number) => Math.round(score * 100);
 
 interface ComponentInnerProps {
     objectTypes: ObjectType[];
     objectTypesUuidsSelected: DetectionFilter['objectTypesUuids'];
     detectionValidationStatusesSelected: DetectionFilter['detectionValidationStatuses'];
     detectionControlStatusesSelected: DetectionFilter['detectionControlStatuses'];
+    score: DetectionFilter['score'];
+    prescripted: DetectionFilter['prescripted'];
 }
 
 const ComponentInner: React.FC<ComponentInnerProps> = ({
@@ -36,6 +42,8 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
     objectTypesUuidsSelected,
     detectionValidationStatusesSelected,
     detectionControlStatusesSelected,
+    score,
+    prescripted,
 }) => {
     const { updateDetectionFilter } = useMap();
     const form: UseFormReturnType<FormValues> = useForm({
@@ -44,6 +52,8 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
             objectTypesUuids: objectTypesUuidsSelected,
             detectionValidationStatuses: detectionValidationStatusesSelected,
             detectionControlStatuses: detectionControlStatusesSelected,
+            score,
+            prescripted,
         },
     });
     form.watch('objectTypesUuids', ({ value }) => {
@@ -51,6 +61,8 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
             detectionValidationStatuses: form.getValues().detectionValidationStatuses,
             objectTypesUuids: value,
             detectionControlStatuses: form.getValues().detectionControlStatuses,
+            score: form.getValues().score,
+            prescripted: form.getValues().prescripted,
         });
     });
     form.watch('detectionValidationStatuses', ({ value }) => {
@@ -58,6 +70,8 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
             detectionValidationStatuses: value,
             objectTypesUuids: form.getValues().objectTypesUuids,
             detectionControlStatuses: form.getValues().detectionControlStatuses,
+            score: form.getValues().score,
+            prescripted: form.getValues().prescripted,
         });
     });
     form.watch('detectionControlStatuses', ({ value }) => {
@@ -65,6 +79,26 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
             detectionValidationStatuses: form.getValues().detectionValidationStatuses,
             objectTypesUuids: form.getValues().objectTypesUuids,
             detectionControlStatuses: value,
+            score: form.getValues().score,
+            prescripted: form.getValues().prescripted,
+        });
+    });
+    form.watch('score', ({ value }) => {
+        updateDetectionFilter({
+            detectionValidationStatuses: form.getValues().detectionValidationStatuses,
+            objectTypesUuids: form.getValues().objectTypesUuids,
+            detectionControlStatuses: form.getValues().detectionControlStatuses,
+            score: value,
+            prescripted: form.getValues().prescripted,
+        });
+    });
+    form.watch('prescripted', ({ value }) => {
+        updateDetectionFilter({
+            detectionValidationStatuses: form.getValues().detectionValidationStatuses,
+            objectTypesUuids: form.getValues().objectTypesUuids,
+            detectionControlStatuses: form.getValues().detectionControlStatuses,
+            score: form.getValues().score,
+            prescripted: value,
         });
     });
 
@@ -83,6 +117,55 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
     return (
         <form className={classes.form}>
             <h2>{CONTROL_LABEL}</h2>
+
+            <Text mt="md" className="input-label">
+                Score
+            </Text>
+            <div className={classes['score-slider-value-container']}>
+                <Slider
+                    className={classes['score-slider']}
+                    label={formatScore}
+                    min={0.3}
+                    max={1}
+                    step={0.05}
+                    key={form.key('score')}
+                    {...form.getInputProps('score')}
+                    onChange={undefined}
+                    onChangeEnd={(value) => form.setFieldValue('score', value)}
+                />
+                {formatScore(form.getValues().score)}
+            </div>
+
+            <Text mt="md" className="input-label">
+                Prescription
+            </Text>
+            <Button.Group className={classes['prescription-selection-container']}>
+                <Button
+                    fullWidth
+                    variant={form.getValues().prescripted === null ? 'filled' : 'outline'}
+                    type="button"
+                    onClick={() => form.setFieldValue('prescripted', null)}
+                >
+                    Tous les objets
+                </Button>
+                <Button
+                    fullWidth
+                    variant={form.getValues().prescripted === true ? 'filled' : 'outline'}
+                    type="button"
+                    onClick={() => form.setFieldValue('prescripted', true)}
+                >
+                    Prescrits
+                </Button>
+                <Button
+                    fullWidth
+                    variant={form.getValues().prescripted === false ? 'filled' : 'outline'}
+                    type="button"
+                    onClick={() => form.setFieldValue('prescripted', false)}
+                >
+                    Non-prescrits
+                </Button>
+            </Button.Group>
+
             <MultiSelect
                 className="multiselect-pills-hidden"
                 mt="md"
@@ -209,6 +292,8 @@ const Component: React.FC<ComponentProps> = ({ isShowed, setIsShowed }) => {
                 objectTypesUuidsSelected={detectionFilter.objectTypesUuids}
                 detectionValidationStatusesSelected={detectionFilter.detectionValidationStatuses}
                 detectionControlStatusesSelected={detectionFilter.detectionControlStatuses}
+                score={detectionFilter.score}
+                prescripted={detectionFilter.prescripted}
             />
         </MapControlCustom>
     );

@@ -1,11 +1,14 @@
 import { TileSet } from '@/models/tile-set';
 import { DEFAULT_DATE_FORMAT, MAPBOX_TOKEN } from '@/utils/constants';
 import { extendBbox } from '@/utils/geojson';
+import { ActionIcon, Overlay, Tooltip } from '@mantine/core';
+import { useHover } from '@mantine/hooks';
+import { IconPencil, IconZoomOut } from '@tabler/icons-react';
 import clsx from 'clsx';
 import { format } from 'date-fns';
 import { Polygon } from 'geojson';
-import React from 'react';
-import Map, { Layer, Source } from 'react-map-gl';
+import React, { useEffect, useRef, useState } from 'react';
+import Map, { Layer, MapRef, Source } from 'react-map-gl';
 import classes from './index.module.scss';
 
 interface PreviewGeometry {
@@ -19,6 +22,8 @@ interface ClassNames {
     inner?: string;
 }
 
+type PreviewControl = 'DEZOOM' | 'EDIT';
+
 interface ComponentProps {
     geometries?: PreviewGeometry[];
     tileSet: TileSet;
@@ -26,7 +31,9 @@ interface ComponentProps {
     classNames?: ClassNames;
     displayName?: boolean;
     strokedLine?: boolean;
-    extended?: boolean;
+    controlsDisplayed?: PreviewControl[];
+    editDetection?: () => void;
+    extendedLevel?: number;
     id?: string;
     onIdle?: () => void;
 }
@@ -38,22 +45,58 @@ const Component: React.FC<ComponentProps> = ({
     classNames,
     displayName = true,
     strokedLine = false,
-    extended = false,
+    controlsDisplayed,
+    editDetection,
+    extendedLevel = 0,
     id,
     onIdle,
 }) => {
-    const bounds_ = extended ? extendBbox(bounds) : bounds;
+    const mapRef = useRef<MapRef>();
+    const [currentExtendedLevel, setCurrentExtendedLevel] = useState(extendedLevel);
+    const bounds_ = currentExtendedLevel ? extendBbox(bounds, currentExtendedLevel) : bounds;
+
+    useEffect(() => {
+        if (!mapRef.current) {
+            return;
+        }
+
+        mapRef.current.fitBounds(bounds_);
+    }, [bounds_]);
+
+    const { hovered: previewHovered, ref: previewRef } = useHover();
 
     return (
-        <div className={clsx(classes['detection-tile-preview-container-wrapper'], classNames?.wrapper)}>
-            <div className={clsx(classes['detection-tile-preview-container'], classNames?.main)}>
+        <div className={clsx(classes['detection-tile-preview-wrapper'], classNames?.wrapper)}>
+            <div className={clsx(classes['detection-tile-preview-container'], classNames?.main)} ref={previewRef}>
+                {controlsDisplayed?.length && previewHovered ? (
+                    <Overlay blur={4} backgroundOpacity={0} className={classes['detection-tile-preview-controls']}>
+                        {controlsDisplayed.includes('DEZOOM') ? (
+                            <Tooltip label="Dézoomer l'aperçu" position="bottom">
+                                <ActionIcon
+                                    variant="filled"
+                                    onClick={() => setCurrentExtendedLevel((prev) => prev + 1)}
+                                >
+                                    <IconZoomOut size={16} />
+                                </ActionIcon>
+                            </Tooltip>
+                        ) : null}
+                        {controlsDisplayed.includes('EDIT') ? (
+                            <Tooltip label="Editer la détection" position="bottom">
+                                <ActionIcon variant="filled" onClick={() => editDetection && editDetection()}>
+                                    <IconPencil size={16} />
+                                </ActionIcon>
+                            </Tooltip>
+                        ) : null}
+                    </Overlay>
+                ) : null}
                 <div className={clsx(classes['detection-tile-preview'], classNames?.inner)}>
                     <Map
+                        ref={mapRef}
                         mapboxAccessToken={MAPBOX_TOKEN}
                         style={{ width: '100%', height: '100%' }}
                         mapStyle="mapbox://styles/mapbox/streets-v11"
-                        maxBounds={bounds_}
                         interactive={false}
+                        maxBounds={bounds_}
                         {...(id ? { id } : {})}
                         {...(onIdle ? { onIdle } : {})}
                     >
@@ -90,7 +133,6 @@ const Component: React.FC<ComponentProps> = ({
                             type="raster"
                             tiles={[tileSet.url]}
                             tileSize={256}
-                            bounds={bounds_}
                         >
                             <Layer
                                 beforeId={geometries ? 'geojson-layer' : undefined}

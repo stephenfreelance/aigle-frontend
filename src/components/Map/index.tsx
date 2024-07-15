@@ -139,7 +139,6 @@ const Component: React.FC<ComponentProps> = ({
     const [mapRef, setMapRef] = useState<mapboxgl.Map>();
 
     const handleMapRef = useCallback((node?: mapboxgl.Map) => {
-        console.log('handle map ref', node);
         if (!node) {
             return;
         }

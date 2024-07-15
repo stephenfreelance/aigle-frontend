@@ -67,7 +67,7 @@ const MapPreview: React.FC<MapPreviewProps> = ({ url, scheme, name, type, geomet
     return (
         <Card withBorder className={classes['map-preview-container']}>
             <h2>Aperçu du fond de carte</h2>
-            <InfoCard title="Paramètres de l'apperçu">
+            <InfoCard title="Paramètres de l'aperçu">
                 <p>
                     Le carré autour de la zone de limite définie la zone dans laquelle les tuiles seront chargées pour
                     l&apos;affichage de la carte
@@ -166,7 +166,9 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, initialGeoSelectedValu
                     return 'Le niveau zoom max doit être positif';
                 }
 
-                if (form.values.minZoom && value <= form.values.minZoom) {
+                const minZoom = form.getValues().minZoom;
+
+                if (minZoom && value <= minZoom) {
                     return 'Le niveau de zoom max doit être supérieur au niveau de zoom min';
                 }
 
@@ -181,7 +183,9 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, initialGeoSelectedValu
                     return 'Le niveau zoom min doit être positif';
                 }
 
-                if (form.values.maxZoom && value >= form.values.maxZoom) {
+                const maxZoom = form.getValues().maxZoom;
+
+                if (maxZoom && value >= maxZoom) {
                     return 'Le niveau de zoom min doit être inférieu au niveau de zoom max';
                 }
 

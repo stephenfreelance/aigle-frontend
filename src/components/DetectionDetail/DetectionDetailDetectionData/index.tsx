@@ -10,6 +10,7 @@ import {
     DetectionControlStatus,
     DetectionData,
     DetectionDetail,
+    DetectionPrescriptionStatus,
     DetectionValidationStatus,
     DetectionWithTile,
     detectionControlStatuses,
@@ -25,7 +26,7 @@ import {
     DETECTION_VALIDATION_STATUSES_NAMES_MAP,
 } from '@/utils/constants';
 import { useMap } from '@/utils/map-context';
-import { Button, LoadingOverlay, Loader as MantineLoader, Select } from '@mantine/core';
+import { Button, Checkbox, LoadingOverlay, Loader as MantineLoader, Select, Text } from '@mantine/core';
 import { UseFormReturnType, useForm } from '@mantine/form';
 import { UseMutationResult, useMutation, useQueryClient } from '@tanstack/react-query';
 import { bbox } from '@turf/turf';
@@ -38,6 +39,7 @@ import classes from './index.module.scss';
 interface FormValues {
     detectionControlStatus: DetectionControlStatus;
     detectionValidationStatus: DetectionValidationStatus;
+    detectionPrescriptionStatus: DetectionPrescriptionStatus | null;
 }
 
 const postForm = async (
@@ -68,13 +70,21 @@ const postForm = async (
 
 interface FormProps {
     detectionObjectUuid: string;
+    prescriptionDurationYears: number | null;
     tileSetUuid?: string;
     uuid?: string;
     geometry?: Polygon;
     initialValues: FormValues;
 }
 
-const Form: React.FC<FormProps> = ({ detectionObjectUuid, tileSetUuid, uuid, geometry, initialValues }) => {
+const Form: React.FC<FormProps> = ({
+    detectionObjectUuid,
+    prescriptionDurationYears,
+    tileSetUuid,
+    uuid,
+    geometry,
+    initialValues,
+}) => {
     const [error, setError] = useState<AxiosError>();
     const { eventEmitter } = useMap();
 
@@ -133,6 +143,7 @@ const Form: React.FC<FormProps> = ({ detectionObjectUuid, tileSetUuid, uuid, geo
     };
     form.watch('detectionControlStatus', submit);
     form.watch('detectionValidationStatus', submit);
+    form.watch('detectionPrescriptionStatus', submit);
 
     const handleSubmit = (values: FormValues) => {
         mutation.mutate(values);
@@ -153,8 +164,10 @@ const Form: React.FC<FormProps> = ({ detectionObjectUuid, tileSetUuid, uuid, geo
                     <p>Voir les indications ci-dessous pour plus d&apos;info</p>
                 </ErrorCard>
             ) : null}
+
             <Select
                 allowDeselect={false}
+                mt="md"
                 label="Statut du contrôle"
                 data={detectionControlStatuses.map((status) => ({
                     value: status,
@@ -166,10 +179,29 @@ const Form: React.FC<FormProps> = ({ detectionObjectUuid, tileSetUuid, uuid, geo
                 {...form.getInputProps('detectionControlStatus')}
             />
 
+            {prescriptionDurationYears ? (
+                <Checkbox
+                    mt="md"
+                    label={`Prescrit (durée : ${prescriptionDurationYears} ans)`}
+                    key={form.key('detectionPrescriptionStatus')}
+                    disabled={mutation.status === 'pending'}
+                    checked={form.getValues().detectionPrescriptionStatus === 'PRESCRIBED'}
+                    onChange={(event) =>
+                        form.setFieldValue(
+                            'detectionPrescriptionStatus',
+                            event.currentTarget.checked ? 'PRESCRIBED' : 'NOT_PRESCRIBED',
+                        )
+                    }
+                />
+            ) : null}
+
+            <Text mt="md" className="input-label">
+                Statut de validation
+            </Text>
             <div className={classes['detection-validation-status-select-container']}>
                 {detectionValidationStatuses.map((status) => (
                     <Button
-                        variant={form.values.detectionValidationStatus === status ? 'filled' : 'outline'}
+                        variant={form.getValues().detectionValidationStatus === status ? 'filled' : 'outline'}
                         color={DETECTION_VALIDATION_STATUSES_COLORS_MAP[status]}
                         key={status}
                         disabled={mutation.status === 'pending'}
@@ -186,16 +218,24 @@ const Form: React.FC<FormProps> = ({ detectionObjectUuid, tileSetUuid, uuid, geo
 const EMPTY_FORM_VALUES: FormValues = {
     detectionControlStatus: 'DETECTED',
     detectionValidationStatus: 'SUSPECT',
+    detectionPrescriptionStatus: null,
 };
 
 interface ComponentProps {
     detectionObject: DetectionObjectDetail;
     initialDetection: DetectionWithTile;
     detectionRefreshing: boolean;
+    tileSetSelected: TileSet;
+    setTileSetSelected: (tileSet: TileSet) => void;
 }
-const Component: React.FC<ComponentProps> = ({ detectionObject, initialDetection, detectionRefreshing }) => {
+const Component: React.FC<ComponentProps> = ({
+    detectionObject,
+    tileSetSelected,
+    setTileSetSelected,
+    initialDetection,
+    detectionRefreshing,
+}) => {
     const [detectionSelected, setDetectionSelected] = useState<DetectionWithTile | undefined>(initialDetection);
-    const [tileSetSelected, setTileSetSelected] = useState<TileSet>(initialDetection.tileSet);
 
     const previewBounds = useMemo(
         () => bbox(initialDetection.tile.geometry) as [number, number, number, number],
@@ -203,10 +243,14 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, initialDetection
     );
 
     useEffect(() => {
-        selectDetection(tileSetSelected.uuid);
+        selectTileSet(tileSetSelected.uuid);
     }, [detectionObject]);
 
-    const selectDetection = (tileSetUuid: string) => {
+    useEffect(() => {
+        selectDetection(tileSetSelected.uuid);
+    }, [tileSetSelected, detectionObject]);
+
+    const selectTileSet = (tileSetUuid: string) => {
         const tileSetPreview = detectionObject.tileSets.find(({ tileSet }) => tileSet.uuid === tileSetUuid);
 
         if (!tileSetPreview) {
@@ -214,7 +258,9 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, initialDetection
         }
 
         setTileSetSelected(tileSetPreview.tileSet);
+    };
 
+    const selectDetection = (tileSetUuid: string) => {
         const detection = detectionObject.detections.find((detection) => detection.tileSet.uuid === tileSetUuid);
 
         setDetectionSelected(detection);
@@ -231,7 +277,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, initialDetection
                     label: `${tileSet.name} - ${format(tileSet.date, DEFAULT_DATE_FORMAT)}`,
                 }))}
                 value={tileSetSelected.uuid}
-                onChange={(tileSetUuid) => selectDetection(String(tileSetUuid))}
+                onChange={(tileSetUuid) => selectTileSet(String(tileSetUuid))}
             />
 
             <div className={classes['detection-tile-preview-form-container']}>
@@ -239,6 +285,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, initialDetection
 
                 <div className={classes['detection-tile-preview-container']}>
                     <DetectionTilePreview
+                        controlsDisplayed={['DEZOOM']}
                         bounds={previewBounds}
                         geometries={[
                             {
@@ -257,14 +304,17 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, initialDetection
                 </div>
 
                 <Form
-                    key={tileSetSelected.uuid}
+                    key={detectionSelected?.uuid || tileSetSelected.uuid}
                     detectionObjectUuid={detectionObject.uuid}
+                    prescriptionDurationYears={detectionObject.objectType.prescriptionDurationYears}
                     uuid={detectionSelected?.detectionData.uuid}
                     initialValues={
                         detectionSelected
                             ? {
                                   detectionControlStatus: detectionSelected.detectionData.detectionControlStatus,
                                   detectionValidationStatus: detectionSelected.detectionData.detectionValidationStatus,
+                                  detectionPrescriptionStatus:
+                                      detectionSelected.detectionData.detectionPrescriptionStatus,
                               }
                             : EMPTY_FORM_VALUES
                     }

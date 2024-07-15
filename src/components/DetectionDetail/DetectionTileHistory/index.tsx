@@ -1,6 +1,7 @@
 import DetectionTilePreview from '@/components/DetectionDetail/DetectionTilePreview';
 import { DetectionWithTile } from '@/models/detection';
 import { DetectionObjectDetail } from '@/models/detection-object';
+import { TileSet } from '@/models/tile-set';
 import { Button } from '@mantine/core';
 import { bbox } from '@turf/turf';
 import clsx from 'clsx';
@@ -9,8 +10,9 @@ import classes from './index.module.scss';
 
 interface ComponentProps {
     detectionObject: DetectionObjectDetail;
+    setTileSetSelected: (tileSet: TileSet) => void;
 }
-const Component: React.FC<ComponentProps> = ({ detectionObject }) => {
+const Component: React.FC<ComponentProps> = ({ detectionObject, setTileSetSelected }) => {
     const [fullHistoryShowed, setFullHistoryShowed] = useState(false);
     const previewBounds = bbox(detectionObject.detections[0].tile.geometry) as [number, number, number, number];
     const tileSetUuidsDetectionsMap = detectionObject.detections.reduce<Record<string, DetectionWithTile>>(
@@ -36,6 +38,8 @@ const Component: React.FC<ComponentProps> = ({ detectionObject }) => {
             <div className={classes['detection-tile-previews-container']}>
                 {tileSetsShowed.map(({ tileSet, preview }) => (
                     <DetectionTilePreview
+                        controlsDisplayed={['DEZOOM', 'EDIT']}
+                        editDetection={() => setTileSetSelected(tileSet)}
                         bounds={previewBounds}
                         key={tileSet.uuid}
                         geometries={

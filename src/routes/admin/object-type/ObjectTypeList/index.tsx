@@ -11,7 +11,7 @@ import { ObjectType, ObjectTypeDetail } from '@/models/object-type';
 import { ObjectTypeCategory } from '@/models/object-type-category';
 import api from '@/utils/api';
 import { Button, ColorSwatch, Input, MultiSelect, Table } from '@mantine/core';
-import { IconCubePlus, IconSearch } from '@tabler/icons-react';
+import { IconCubePlus, IconSearch, IconX } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import isEqual from 'lodash/isEqual';
 import { Link, useNavigate } from 'react-router-dom';
@@ -92,6 +92,7 @@ const Component: React.FC = () => {
                     <Table.Th key="createdAt">Date création</Table.Th>,
                     <Table.Th key="color">Couleur</Table.Th>,
                     <Table.Th key="name">Nom</Table.Th>,
+                    <Table.Th key="prescription">Prescription</Table.Th>,
                     <Table.Th key="categories">Thématiques</Table.Th>,
                 ]}
                 tableBodyRenderFns={[
@@ -102,6 +103,9 @@ const Component: React.FC = () => {
                         </div>
                     ),
                     (item: ObjectTypeDetail) => item.name,
+                    (item: ObjectTypeDetail) => (
+                        <>{item.prescriptionDurationYears ? `${item.prescriptionDurationYears} ans` : <IconX />}</>
+                    ),
                     (item: ObjectTypeDetail) => (
                         <PillsDataCell<ObjectTypeCategory>
                             items={item.categories}

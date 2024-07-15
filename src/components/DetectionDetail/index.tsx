@@ -6,6 +6,7 @@ import SignalementPDFData from '@/components/signalement-pdf/SignalementPDFData'
 import DateInfo from '@/components/ui/DateInfo';
 import Loader from '@/components/ui/Loader';
 import { DetectionObjectDetail } from '@/models/detection-object';
+import { TileSet } from '@/models/tile-set';
 import api from '@/utils/api';
 import { formatParcel } from '@/utils/format';
 import { Accordion, ActionIcon, Loader as MantineLoader, ScrollArea, Tooltip } from '@mantine/core';
@@ -20,31 +21,25 @@ import classes from './index.module.scss';
 
 const getGoogleMapLink = (point: Position) => `https://www.google.com/maps/place/${point[1]},${point[0]}`;
 
-interface ComponentProps {
-    detectionObjectUuid: string;
+interface ComponentInnerProps {
+    detectionObject: DetectionObjectDetail;
+    detectionObjectRefreshing: boolean;
     detectionUuid: string;
     onClose: () => void;
 }
 
-const Component: React.FC<ComponentProps> = ({ detectionObjectUuid, detectionUuid, onClose }: ComponentProps) => {
+const ComponentInner: React.FC<ComponentInnerProps> = ({
+    detectionObject,
+    detectionObjectRefreshing,
+    detectionUuid,
+    onClose,
+}) => {
     const [signalementPdfLoading, setSignalementPdfLoading] = useState(false);
 
-    const fetchData = async () => {
-        const res = await api.get<DetectionObjectDetail>(getDetectionObjectDetailEndpoint(detectionObjectUuid));
-
-        return res.data;
-    };
-    const { data, isRefetching } = useQuery({
-        queryKey: [getDetectionObjectDetailEndpoint(String(detectionObjectUuid))],
-        queryFn: () => fetchData(),
-    });
-
-    if (!data) {
-        return <Loader className={classes.loader} />;
-    }
-
     const initialDetection =
-        data.detections.find((detection) => detection.uuid === detectionUuid) || data.detections[0];
+        detectionObject.detections.find((detection) => detection.uuid === detectionUuid) ||
+        detectionObject.detections[0];
+    const [tileSetSelected, setTileSetSelected] = useState<TileSet>(initialDetection.tileSet);
 
     const {
         geometry: { coordinates: centerPoint },
@@ -56,7 +51,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObjectUuid, detectionUui
         <ScrollArea scrollbars="y" offsetScrollbars={true} classNames={{ root: classes.container }}>
             <div className={classes.inner}>
                 <div className={classes['top-section']}>
-                    <h1>Objet détecté #{data.id}</h1>
+                    <h1>Objet détecté #{detectionObject.id}</h1>
 
                     {onClose ? (
                         <ActionIcon variant="transparent" onClick={onClose}>
@@ -84,9 +79,19 @@ const Component: React.FC<ComponentProps> = ({ detectionObjectUuid, detectionUui
 
                     {signalementPdfLoading ? (
                         <SignalementPDFData
-                            detectionObject={data}
+                            detectionObject={detectionObject}
                             latLong={latLong}
-                            onDownloadTriggered={() => setSignalementPdfLoading(false)}
+                            onGenerationFinished={(error?: string) => {
+                                if (error) {
+                                    notifications.show({
+                                        title: 'Erreur lors de la génération de la fiche de signalement',
+                                        message: error,
+                                        color: 'red',
+                                    });
+                                }
+
+                                setSignalementPdfLoading(false);
+                            }}
                         />
                     ) : null}
                 </div>
@@ -98,14 +103,14 @@ const Component: React.FC<ComponentProps> = ({ detectionObjectUuid, detectionUui
                             <p className={classes['general-informations-content-item']}>
                                 <IconRoute size={16} />
                                 <span className={classes['general-informations-content-item-text']}>
-                                    {data.address ? data.address : <i>Adresse non-spécifiée</i>}
+                                    {detectionObject.address ? detectionObject.address : <i>Adresse non-spécifiée</i>}
                                 </span>
                             </p>
                             <p className={classes['general-informations-content-item']}>
                                 <IconCalendarClock size={16} />{' '}
                                 <span className={classes['general-informations-content-item-text']}>
                                     Dernière mise à jour :&nbsp;
-                                    <DateInfo date={data.updatedAt} />
+                                    <DateInfo date={detectionObject.updatedAt} />
                                 </span>
                             </p>
                             <p className={classes['general-informations-content-item']}>
@@ -122,8 +127,8 @@ const Component: React.FC<ComponentProps> = ({ detectionObjectUuid, detectionUui
                             <p className={classes['general-informations-content-item']}>
                                 <IconMap size={16} />
                                 <span className={classes['general-informations-content-item-text']}>
-                                    {data.parcel ? (
-                                        `Parcelle : ${formatParcel(data.parcel)}`
+                                    {detectionObject.parcel ? (
+                                        `Parcelle : ${formatParcel(detectionObject.parcel)}`
                                     ) : (
                                         <i>Parcelle non-spécifiée</i>
                                     )}
@@ -132,15 +137,48 @@ const Component: React.FC<ComponentProps> = ({ detectionObjectUuid, detectionUui
                         </Accordion.Panel>
                     </Accordion.Item>
                 </Accordion>
-                <DetectionDetailDetectionObject detectionObject={data} />
-                <DetectionTileHistory detectionObject={data} />
+                <DetectionDetailDetectionObject detectionObject={detectionObject} />
+                <DetectionTileHistory detectionObject={detectionObject} setTileSetSelected={setTileSetSelected} />
                 <DetectionDetailDetectionData
-                    detectionObject={data}
-                    detectionRefreshing={isRefetching}
+                    detectionObject={detectionObject}
+                    detectionRefreshing={detectionObjectRefreshing}
                     initialDetection={initialDetection}
+                    tileSetSelected={tileSetSelected}
+                    setTileSetSelected={setTileSetSelected}
                 />
             </div>
         </ScrollArea>
+    );
+};
+
+interface ComponentProps {
+    detectionObjectUuid: string;
+    detectionUuid: string;
+    onClose: () => void;
+}
+
+const Component: React.FC<ComponentProps> = ({ detectionObjectUuid, detectionUuid, onClose }: ComponentProps) => {
+    const fetchData = async () => {
+        const res = await api.get<DetectionObjectDetail>(getDetectionObjectDetailEndpoint(detectionObjectUuid));
+
+        return res.data;
+    };
+    const { data: detectionObject, isRefetching: detectionObjectRefreshing } = useQuery({
+        queryKey: [getDetectionObjectDetailEndpoint(String(detectionObjectUuid))],
+        queryFn: () => fetchData(),
+    });
+
+    if (!detectionObject) {
+        return <Loader className={classes.loader} />;
+    }
+
+    return (
+        <ComponentInner
+            detectionObject={detectionObject}
+            detectionObjectRefreshing={detectionObjectRefreshing}
+            detectionUuid={detectionUuid}
+            onClose={onClose}
+        />
     );
 };
 

@@ -71,6 +71,8 @@ const useMap = create<MapState>()((set, get) => ({
                 objectTypesUuids: allObjectTypes.map((type) => type.uuid),
                 detectionValidationStatuses: [...detectionValidationStatuses],
                 detectionControlStatuses: [...detectionControlStatuses],
+                score: 0.6,
+                prescripted: null,
             },
         }));
     },

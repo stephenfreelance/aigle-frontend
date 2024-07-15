@@ -22,6 +22,9 @@ export const detectionValidationStatuses = [
 ] as const;
 export type DetectionValidationStatus = (typeof detectionValidationStatuses)[number];
 
+export const detectionPrescriptionStatuses = ['PRESCRIBED', 'NOT_PRESCRIBED'] as const;
+export type DetectionPrescriptionStatus = (typeof detectionPrescriptionStatuses)[number];
+
 export const detectionSources = ['INTERFACE_DRAWN', 'ANALYSIS'];
 export type DetectionSource = (typeof detectionSources)[number];
 
@@ -32,6 +35,7 @@ export interface DetectionProperties {
     objectTypeColor: string;
     detectionControlStatus: DetectionControlStatus;
     detectionValidationStatus: DetectionValidationStatus;
+    detectionPrescriptionStatus: DetectionPrescriptionStatus | null;
 }
 
 export interface DetectionGeojsonData extends FeatureCollection<Polygon, DetectionProperties> {}
@@ -39,6 +43,7 @@ export interface DetectionGeojsonData extends FeatureCollection<Polygon, Detecti
 export interface DetectionData extends Uuided, Timestamped {
     detectionControlStatus: DetectionControlStatus;
     detectionValidationStatus: DetectionValidationStatus;
+    detectionPrescriptionStatus: DetectionPrescriptionStatus | null;
     userLastUpdateUuid: string;
 }
 

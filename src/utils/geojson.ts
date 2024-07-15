@@ -12,15 +12,17 @@ export const geoCollectivityToGeoOption = (geoCollectivity: GeoCollectivity): Se
     label: geoCollectivity.name,
 });
 
-export const extendBbox = (bbox: [number, number, number, number]): [number, number, number, number] => {
+export const extendBbox = (
+    bbox: [number, number, number, number],
+    level: number = 1,
+): [number, number, number, number] => {
     const width = bbox[2] - bbox[0];
     const height = bbox[3] - bbox[1];
 
-    // Calculate the new bbox by extending it by 100%
     return [
-        bbox[0] - width, // minX - width
-        bbox[1] - height, // minY - height
-        bbox[2] + width, // maxX + width
-        bbox[3] + height, // maxY + height
+        bbox[0] - level * width,
+        bbox[1] - level * height, // minY - height
+        bbox[2] + level * width, // maxX + width
+        bbox[3] + level * height, // maxY + height
     ];
 };
