@@ -31,7 +31,11 @@ const FieldPossibleValues: React.FC<ImportsElementProps> = ({ items }) => {
 };
 
 const CSV_FIELDS: { name: string; required?: boolean; description: string; valueName?: string }[] = [
+    { name: 'id', required: true, description: 'ID externe' },
+    { name: 'batch_id', required: true, description: "ID du batch d'import, il est spécifié lors de l'import" },
     { name: 'score', required: true, description: 'Score de la détection' },
+    { name: 'tile_x', description: 'Pour les détections sur les tuiles qui ne sont pas encore en bdd' },
+    { name: 'tile_y', description: 'Pour les détections sur les tuiles qui ne sont pas encore en bdd' },
     { name: 'address', description: 'Adresse' },
     { name: 'object_type', required: true, description: "Type de l'objet", valueName: 'objectTypes' },
     { name: 'geometry', required: true, description: 'Geometry (polygon) de la détection' },
