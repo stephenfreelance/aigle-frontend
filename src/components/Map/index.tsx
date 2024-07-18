@@ -4,6 +4,7 @@ import Map, { Layer, Source, ViewStateChangeEvent } from 'react-map-gl';
 import { getDetectionListEndpoint } from '@/api-endpoints';
 import DetectionDetail from '@/components/DetectionDetail';
 import MapAddAnnotationModal from '@/components/Map/MapAddAnnotationModal';
+import MapControlBackgroundSlider from '@/components/Map/controls/MapControlBackgroundSlider';
 import MapControlFilterDetection from '@/components/Map/controls/MapControlFilterDetection';
 import MapControlLayerDisplay from '@/components/Map/controls/MapControlLayerDisplay';
 import MapControlLegend from '@/components/Map/controls/MapControlLegend';
@@ -13,6 +14,7 @@ import { MapLayer } from '@/models/map-layer';
 import api from '@/utils/api';
 import { MAPBOX_TOKEN } from '@/utils/constants';
 import { useMap } from '@/utils/map-context';
+import { Loader as MantineLoader } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
@@ -24,7 +26,6 @@ import { FeatureCollection, Geometry, Polygon } from 'geojson';
 import mapboxgl from 'mapbox-gl';
 import DrawRectangle, { DrawStyles } from 'mapbox-gl-draw-rectangle-restrict-area';
 import classes from './index.module.scss';
-import MapControlBackgroundSlider from '@/components/Map/controls/MapControlBackgroundSlider';
 
 const MAP_INITIAL_VIEW_STATE = {
     longitude: 3.95657,
@@ -287,7 +288,11 @@ const Component: React.FC<ComponentProps> = ({
         });
         return res.data;
     };
-    const { data, refetch } = useQuery({
+    const {
+        data,
+        refetch,
+        isFetching: isDetectionsFetching,
+    } = useQuery({
         queryKey: [
             DETECTION_ENDPOINT,
             ...Object.values(mapBounds || {}),
@@ -459,6 +464,11 @@ const Component: React.FC<ComponentProps> = ({
                             hide={() => setAddAnnotationPolygon(undefined)}
                             polygon={addAnnotationPolygon}
                         />
+                        {isDetectionsFetching ? (
+                            <div className={classes['detections-loader-container']}>
+                                <MantineLoader size="sm" />
+                            </div>
+                        ) : null}
                     </>
                 ) : null}
                 {displayLayersGeometry ? (

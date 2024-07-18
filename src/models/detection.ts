@@ -5,11 +5,11 @@ import { TileSet } from '@/models/tile-set';
 import { FeatureCollection, Polygon } from 'geojson';
 
 export const detectionControlStatuses = [
-    'DETECTED',
+    'NOT_CONTROLLED',
     'SIGNALED_INTERNALLY',
     'SIGNALED_COLLECTIVITY',
-    'CONFIRMED_FIELD',
-    'INVALIDATED_FIELD',
+    'VERBALIZED',
+    'REHABILITATED',
 ] as const;
 export type DetectionControlStatus = (typeof detectionControlStatuses)[number];
 
@@ -18,7 +18,7 @@ export const detectionValidationStatuses = [
     'SUSPECT',
     'LEGITIMATE',
     'INVALIDATED',
-    'CONTROLLED',
+    'DISAPPEARED',
 ] as const;
 export type DetectionValidationStatus = (typeof detectionValidationStatuses)[number];
 

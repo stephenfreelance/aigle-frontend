@@ -29,6 +29,10 @@ export interface TileSetDetail extends TileSet {
     communes: GeoCommune[];
     departments: GeoDepartment[];
     regions: GeoRegion[];
+
+    id: number;
+    lastImportEndedAt: string | null;
+    lastImportStartedAt: string | null;
 }
 
 export interface TileSetDetailWithGeometry extends TileSetDetail {

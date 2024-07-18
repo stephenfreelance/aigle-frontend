@@ -6,10 +6,11 @@ import DataTable from '@/components/admin/DataTable';
 import FiltersSection from '@/components/admin/FiltersSection';
 import LayoutAdminBase from '@/components/admin/LayoutAdminBase';
 import DateInfo from '@/components/ui/DateInfo';
-import { TileSet, TileSetScheme, TileSetStatus, tileSetSchemes, tileSetStatuses } from '@/models/tile-set';
-import { TILE_SET_STATUSES_NAMES_MAP, TILE_SET_TYPES_NAMES_MAP } from '@/utils/constants';
+import { TileSetDetail, TileSetScheme, TileSetStatus, tileSetSchemes, tileSetStatuses } from '@/models/tile-set';
+import { DEFAULT_DATETIME_FORMAT, TILE_SET_STATUSES_NAMES_MAP, TILE_SET_TYPES_NAMES_MAP } from '@/utils/constants';
 import { Button, Checkbox, Input, Stack, Table, Tooltip } from '@mantine/core';
-import { IconLink, IconMapPlus, IconSearch } from '@tabler/icons-react';
+import { IconLink, IconMapPlus, IconSearch, IconX } from '@tabler/icons-react';
+import { format } from 'date-fns';
 import isEqual from 'lodash/isEqual';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -50,7 +51,7 @@ const Component: React.FC = () => {
                     plan).
                 </p>
             </InfoCard>
-            <DataTable<TileSet, DataFilter>
+            <DataTable<TileSetDetail, DataFilter>
                 endpoint={TILE_SET_LIST_ENDPOINT}
                 filter={filter}
                 filtersSection={
@@ -109,20 +110,23 @@ const Component: React.FC = () => {
                     </FiltersSection>
                 }
                 tableHeader={[
+                    <Table.Th key="id">ID</Table.Th>,
                     <Table.Th key="date">Date</Table.Th>,
                     <Table.Th key="name">Nom</Table.Th>,
                     <Table.Th key="type">Type</Table.Th>,
                     <Table.Th key="status">Statut</Table.Th>,
                     <Table.Th key="scheme">Scheme</Table.Th>,
                     <Table.Th key="url">URL</Table.Th>,
+                    <Table.Th key="infosImport">Infos import</Table.Th>,
                 ]}
                 tableBodyRenderFns={[
-                    (item: TileSet) => <DateInfo date={item.date} hideTooltip={true} />,
-                    (item: TileSet) => item.name,
-                    (item: TileSet) => TILE_SET_TYPES_NAMES_MAP[item.tileSetType],
-                    (item: TileSet) => TILE_SET_STATUSES_NAMES_MAP[item.tileSetStatus],
-                    (item: TileSet) => item.tileSetScheme,
-                    (item: TileSet) => (
+                    (item: TileSetDetail) => item.id,
+                    (item: TileSetDetail) => <DateInfo date={item.date} hideTooltip={true} />,
+                    (item: TileSetDetail) => item.name,
+                    (item: TileSetDetail) => TILE_SET_TYPES_NAMES_MAP[item.tileSetType],
+                    (item: TileSetDetail) => TILE_SET_STATUSES_NAMES_MAP[item.tileSetStatus],
+                    (item: TileSetDetail) => item.tileSetScheme,
+                    (item: TileSetDetail) => (
                         <Tooltip label={item.url}>
                             <Button
                                 onClick={(e) => e.stopPropagation()}
@@ -139,6 +143,21 @@ const Component: React.FC = () => {
                             </Button>
                         </Tooltip>
                     ),
+                    (item: TileSetDetail) => {
+                        if (!item.lastImportEndedAt && !item.lastImportStartedAt) {
+                            return <IconX />;
+                        }
+
+                        if (item.lastImportStartedAt && !item.lastImportEndedAt) {
+                            return <>En cours, débuté le {format(item.lastImportStartedAt, DEFAULT_DATETIME_FORMAT)}</>;
+                        }
+
+                        if (item.lastImportStartedAt && item.lastImportEndedAt) {
+                            return (
+                                <>Dernier import terminé le {format(item.lastImportEndedAt, DEFAULT_DATETIME_FORMAT)}</>
+                            );
+                        }
+                    },
                 ]}
                 onItemClick={({ uuid }) => navigate(`/admin/tile-sets/form/${uuid}`)}
             />

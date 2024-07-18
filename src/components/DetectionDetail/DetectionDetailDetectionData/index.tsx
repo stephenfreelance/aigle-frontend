@@ -216,7 +216,7 @@ const Form: React.FC<FormProps> = ({
 };
 
 const EMPTY_FORM_VALUES: FormValues = {
-    detectionControlStatus: 'DETECTED',
+    detectionControlStatus: 'NOT_CONTROLLED',
     detectionValidationStatus: 'SUSPECT',
     detectionPrescriptionStatus: null,
 };

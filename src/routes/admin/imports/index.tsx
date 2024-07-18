@@ -1,10 +1,9 @@
 import { IMPORTS_INFOS_ENDPOINT } from '@/api-endpoints';
-import InfoCard from '@/components/InfoCard';
 import LayoutAdminBase from '@/components/admin/LayoutAdminBase';
 import Loader from '@/components/ui/Loader';
 import { ImportsInfos } from '@/models/info-imports';
 import api from '@/utils/api';
-import { Code } from '@mantine/core';
+import { Code, Table } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
 import React from 'react';
 import classes from './index.module.scss';
@@ -15,14 +14,13 @@ const fetchImportInfos = async (): Promise<ImportsInfos> => {
 };
 
 interface ImportsElementProps {
-    title: string;
     items: string[];
 }
 
-const ImportElement: React.FC<ImportsElementProps> = ({ title, items }) => {
+const FieldPossibleValues: React.FC<ImportsElementProps> = ({ items }) => {
     return (
         <>
-            <h2>{title}</h2>
+            <p>Valeurs possibles :</p>
             <Code block mb="md">
                 {items.map((item) => (
                     <div key={item}>{item}</div>
@@ -31,6 +29,35 @@ const ImportElement: React.FC<ImportsElementProps> = ({ title, items }) => {
         </>
     );
 };
+
+const CSV_FIELDS: { name: string; required?: boolean; description: string; valueName?: string }[] = [
+    { name: 'score', required: true, description: 'Score de la détection' },
+    { name: 'address', description: 'Adresse' },
+    { name: 'object_type', required: true, description: "Type de l'objet", valueName: 'objectTypes' },
+    { name: 'geometry', required: true, description: 'Geometry (polygon) de la détection' },
+    {
+        name: 'detection_source',
+        description: 'Source de la détection, si non-spécifiée, la source sera ANALYSIS',
+        valueName: 'detectionSources',
+    },
+    {
+        name: 'detection_control_status',
+        description: 'Le statut de contrôle, si non-spécifiée, la statut sera DETECTED',
+        valueName: 'detectionControlStatuses',
+    },
+    {
+        name: 'detection_validation_status',
+        description: 'Le statut de validation, si non-spécifiée, la statut sera DETECTED_NOT_VERIFIED',
+        valueName: 'detectionValidationStatuses',
+    },
+    {
+        name: 'detection_prescription_status',
+        description:
+            'Le statut de prescription, si non-spécifiée, le statut sera calculé automatiquement en fonction des détections liées.',
+        valueName: 'detectionPrescriptionStatuses',
+    },
+    { name: 'user_reviewed', description: 'true si un utilisateur a validé la détection' },
+];
 
 const Component: React.FC = () => {
     const { data, isLoading } = useQuery<ImportsInfos>({
@@ -46,27 +73,36 @@ const Component: React.FC = () => {
                 <div className={classes.container}>
                     <h1>Informations pour lancer un import</h1>
 
-                    <InfoCard withCloseButton={false}>
-                        Les champs suivants sont à renseigner dans le CSV pour lancer un import:
-                        <Code block>
-                            <div>score</div>
-                            <div>address</div>
-                            <div>objectType</div>
-                            <div>geometry</div>
-                            <div>score</div>
-                            <div>tileSet</div>
-                            <div>detectionSource</div>
-                            <div>detectionControlStatus</div>
-                            <div>detectionValidationStatus</div>
-                            <div>detectionPrescriptionStatus</div>
-                            <div>userReviewed</div>
-                        </Code>
-                        Les valeurs possibles sont décrites ci-dessous pour les champs concernés.
-                    </InfoCard>
+                    <p>
+                        Pour lancer un import, vous devez fournir une table dans un schema autre que <Code>public</Code>{' '}
+                        OU un fichier CSV avec les données à importer.
+                    </p>
+                    <p>Voici la liste des champs à renseigner :</p>
 
-                    {Object.keys(data).map((key) => (
-                        <ImportElement key={key} title={key} items={data[key as keyof ImportsInfos] as string[]} />
-                    ))}
+                    <Table mt="md" mb="md">
+                        <Table.Thead>
+                            <Table.Tr>
+                                <Table.Th>Champ</Table.Th>
+                                <Table.Th>Description</Table.Th>
+                            </Table.Tr>
+                        </Table.Thead>
+
+                        <Table.Tbody>
+                            {CSV_FIELDS.map(({ name, required, description, valueName }) => (
+                                <Table.Tr key={name}>
+                                    <Table.Td>
+                                        <Code>{name}</Code> {required ? ' (requis)' : null}
+                                    </Table.Td>
+                                    <Table.Td>
+                                        <p>{description}</p>
+                                        {valueName ? (
+                                            <FieldPossibleValues items={data[valueName as keyof ImportsInfos]} />
+                                        ) : null}
+                                    </Table.Td>
+                                </Table.Tr>
+                            ))}
+                        </Table.Tbody>
+                    </Table>
                 </div>
             )}
         </LayoutAdminBase>

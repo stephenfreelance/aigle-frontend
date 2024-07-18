@@ -20,7 +20,6 @@ const Component: React.FC = () => {
         >
             <SegmentedControl
                 className={classes['controller']}
-                size="md"
                 fullWidth
                 color="#21e19b"
                 orientation="vertical"

@@ -45,11 +45,11 @@ export const TILE_SET_TYPES_NAMES_MAP: {
 export const DETECTION_CONTROL_STATUSES_NAMES_MAP: {
     [status in DetectionControlStatus]: string;
 } = {
-    DETECTED: 'Détecté par Aigle',
+    NOT_CONTROLLED: 'Non contrôlé',
     SIGNALED_INTERNALLY: 'Signalé en interne',
     SIGNALED_COLLECTIVITY: 'Signalé à la collectivité',
-    CONFIRMED_FIELD: 'Confirmé sur le terrain',
-    INVALIDATED_FIELD: 'Infirmé sur le terrain',
+    VERBALIZED: 'Verbalisé',
+    REHABILITATED: 'Remis en état',
 } as const;
 
 export const DETECTION_PRESCRIPTION_STATUSES_NAMES_MAP: {
@@ -66,7 +66,7 @@ export const DETECTION_VALIDATION_STATUSES_NAMES_MAP: {
     SUSPECT: 'Suspect',
     LEGITIMATE: 'Légitime',
     INVALIDATED: 'Invalidé',
-    CONTROLLED: 'Contrôlé',
+    DISAPPEARED: 'Disparu',
 } as const;
 
 export const DETECTION_VALIDATION_STATUSES_COLORS_MAP: {
@@ -76,7 +76,7 @@ export const DETECTION_VALIDATION_STATUSES_COLORS_MAP: {
     SUSPECT: '#FFC107',
     LEGITIMATE: '#4CAF50',
     INVALIDATED: '#E53935',
-    CONTROLLED: '#009688',
+    DISAPPEARED: '#009688',
 } as const;
 
 export const USER_GROUP_RIGHTS_ORDERED: UserGroupRight[] = ['WRITE', 'ANNOTATE', 'READ'] as const;
