@@ -106,18 +106,13 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onGener
         {},
     );
 
-    const getPreviewImage = useCallback((uuid: string, title: string, index: number, retry = false) => {
+    const getPreviewImage = useCallback((uuid: string, title: string, index: number) => {
+        if (previewImages[uuid]) {
+            return;
+        }
+
         const id = getPreviewId(uuid);
         const canvas = document.querySelector(`#${id} canvas`);
-
-        if (!canvas) {
-            if (retry) {
-                onGenerationFinished('Veuillez réessayer et contacter le support si le problème persiste');
-                return;
-            }
-
-            setTimeout(() => getPreviewImage(uuid, title, index, true), 500);
-        }
 
         const src = (canvas as HTMLCanvasElement).toDataURL('image/png');
 
@@ -161,7 +156,12 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onGener
                         }}
                         id={getPreviewId(tileSet.uuid)}
                         displayName={false}
-                        onIdle={() => getPreviewImage(tileSet.uuid, format(tileSet.date, DEFAULT_DATE_FORMAT), index)}
+                        onIdle={() => {
+                            setTimeout(
+                                () => getPreviewImage(tileSet.uuid, format(tileSet.date, DEFAULT_DATE_FORMAT), index),
+                                250,
+                            );
+                        }}
                         extendedLevel={1}
                     />
                 ) : null,
