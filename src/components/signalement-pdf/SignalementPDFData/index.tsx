@@ -114,7 +114,13 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onGener
         const id = getPreviewId(uuid);
         const canvas = document.querySelector(`#${id} canvas`);
 
-        const src = (canvas as HTMLCanvasElement).toDataURL('image/png');
+        let src;
+
+        try {
+            src = (canvas as HTMLCanvasElement).toDataURL('image/png');
+        } catch {
+            return;
+        }
 
         setPreviewImages((prev) => ({
             ...prev,
