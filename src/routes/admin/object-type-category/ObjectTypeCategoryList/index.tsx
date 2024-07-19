@@ -11,12 +11,11 @@ import { Uuided } from '@/models/data';
 import { ObjectType } from '@/models/object-type';
 import { ObjectTypeCategoryDetail, ObjectTypeCategoryObjectType } from '@/models/object-type-category';
 import api from '@/utils/api';
-import { Button, Group, Input, MultiSelect, ScrollArea, Table } from '@mantine/core';
+import { Button, Input, MultiSelect, Table } from '@mantine/core';
 import { IconCategoryPlus, IconEye, IconEyeOff, IconSearch } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import isEqual from 'lodash/isEqual';
 import { Link, useNavigate } from 'react-router-dom';
-import classes from './index.module.scss';
 
 interface DataFilter {
     q: string;

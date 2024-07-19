@@ -1,5 +1,7 @@
 import { DETECTION_OBJECT_POST_ENDPOINT, getDetectionObjectDetailEndpoint } from '@/api-endpoints';
+import SelectItem from '@/components/ui/SelectItem';
 import { DetectionObjectDetail } from '@/models/detection-object';
+import { ObjectType } from '@/models/object-type';
 import api from '@/utils/api';
 import { useMap } from '@/utils/map-context';
 import { Loader as MantineLoader, Select } from '@mantine/core';
@@ -9,8 +11,6 @@ import { UseMutationResult, useMutation, useQueryClient } from '@tanstack/react-
 import { AxiosError } from 'axios';
 import React, { useMemo } from 'react';
 import classes from './index.module.scss';
-import SelectItem from '@/components/ui/SelectItem';
-import { ObjectType } from '@/models/object-type';
 
 interface FormValues {
     objectTypeUuid: string;

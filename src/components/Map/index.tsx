@@ -27,6 +27,7 @@ import mapboxgl from 'mapbox-gl';
 import DrawRectangle, { DrawStyles } from 'mapbox-gl-draw-rectangle-restrict-area';
 import classes from './index.module.scss';
 
+const ZOOM_LIMIT_TO_DISPLAY_DETECTIONS = 15;
 const MAP_INITIAL_VIEW_STATE = {
     longitude: 3.95657,
     latitude: 43.61951,
@@ -275,6 +276,10 @@ const Component: React.FC<ComponentProps> = ({
 
     const fetchDetections = async (signal: AbortSignal, mapBounds?: MapBounds) => {
         if (!displayDetections || !mapBounds || !detectionFilter) {
+            return null;
+        }
+
+        if (mapRef && mapRef.getZoom() <= ZOOM_LIMIT_TO_DISPLAY_DETECTIONS) {
             return null;
         }
 
