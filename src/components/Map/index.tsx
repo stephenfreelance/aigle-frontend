@@ -54,6 +54,7 @@ const MAP_CONTROLS: {
     control: mapboxgl.Control | mapboxgl.IControl;
     position: 'top-left' | 'bottom-right' | 'top-right' | 'bottom-left';
     hideWhenNoDetection?: boolean;
+    needsWritePermission?: boolean;
 }[] = [
     // search bar
     {

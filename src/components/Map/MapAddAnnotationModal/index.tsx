@@ -110,8 +110,8 @@ const Form: React.FC<FormProps> = ({ objectTypes, layers, polygon, hide }) => {
                 form.setErrors(error.response?.data);
                 notifications.show({
                     color: 'red',
-                    title: 'Erreur',
-                    message: 'Une erreur est survenue lors de la création de la détection',
+                    title: 'Une erreur est survenue lors de la création de la détection',
+                    message: ((error.response?.data as any)?.detail as string) || '',
                 });
             }
         },

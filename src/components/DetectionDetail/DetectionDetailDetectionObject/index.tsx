@@ -101,7 +101,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject }) => {
                         label: type.name,
                     }))}
                     key={form.key('objectTypeUuid')}
-                    disabled={mutation.status === 'pending'}
+                    disabled={mutation.status === 'pending' || !detectionObject.userGroupRights.includes('WRITE')}
                     rightSection={mutation.status === 'pending' ? <MantineLoader size="xs" /> : null}
                     {...form.getInputProps('objectTypeUuid')}
                 />

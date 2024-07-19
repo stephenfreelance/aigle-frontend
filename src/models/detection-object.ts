@@ -3,6 +3,7 @@ import { DetectionWithTile, DetectionWithTileMinimal } from '@/models/detection'
 import { ObjectType } from '@/models/object-type';
 import { ParcelMinimal } from '@/models/parcel';
 import { TileSet } from '@/models/tile-set';
+import { UserGroupRight } from '@/models/user';
 
 interface DetectionObjectDetailTilesetPreview {
     preview: boolean;
@@ -16,6 +17,7 @@ export interface DetectionObjectDetail extends Uuided, Timestamped {
     detections: DetectionWithTile[];
     tileSets: DetectionObjectDetailTilesetPreview[];
     parcel: ParcelMinimal;
+    userGroupRights: UserGroupRight[];
 }
 
 export interface DetectionObjectHistoryItem {

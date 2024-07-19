@@ -1,6 +1,8 @@
 import { CollectivityType } from '@/models/geo/_common';
 import { GeoZone } from '@/models/geo/geo-zone';
 import { SelectOption } from '@/models/ui/select-option';
+import { bboxPolygon, booleanWithin } from '@turf/turf';
+import { Polygon } from 'geojson';
 
 export type LngLat = [number, number];
 
@@ -26,4 +28,20 @@ export const extendBbox = (
         bbox[2] + level * width, // maxX + width
         bbox[3] + level * height, // maxY + height
     ];
+};
+
+const MAX_LEVEL_FIT = 5;
+
+export const getBoundsFitGeometryExtendedLevel = (geometry: Polygon, bounds: [number, number, number, number]) => {
+    let currentExtendedLevel = 0;
+
+    while (true) {
+        const extendedBounds = extendBbox(bounds, currentExtendedLevel);
+
+        if (currentExtendedLevel === MAX_LEVEL_FIT || booleanWithin(geometry, bboxPolygon(extendedBounds))) {
+            return extendedBounds;
+        }
+
+        currentExtendedLevel++;
+    }
 };

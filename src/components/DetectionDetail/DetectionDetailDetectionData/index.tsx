@@ -31,6 +31,7 @@ import { UseFormReturnType, useForm } from '@mantine/form';
 import { UseMutationResult, useMutation, useQueryClient } from '@tanstack/react-query';
 import { bbox } from '@turf/turf';
 import { AxiosError } from 'axios';
+import clsx from 'clsx';
 import { format } from 'date-fns';
 import { Polygon } from 'geojson';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -75,6 +76,7 @@ interface FormProps {
     uuid?: string;
     geometry?: Polygon;
     initialValues: FormValues;
+    disabled?: boolean;
 }
 
 const Form: React.FC<FormProps> = ({
@@ -84,6 +86,7 @@ const Form: React.FC<FormProps> = ({
     uuid,
     geometry,
     initialValues,
+    disabled,
 }) => {
     const [error, setError] = useState<AxiosError>();
     const { eventEmitter } = useMap();
@@ -154,7 +157,7 @@ const Form: React.FC<FormProps> = ({
             {!uuid ? (
                 <InfoCard title="Ajout d'un objet" withCloseButton={false}>
                     <p>Cet objet n&apos;exsite pas acutellement. Vous êtes sur le point de le créer.</p>
-                    <Button mt="xs" type="submit" fullWidth>
+                    <Button mt="xs" type="submit" fullWidth disabled={disabled}>
                         Créer l&apos;objet
                     </Button>
                 </InfoCard>
@@ -174,7 +177,7 @@ const Form: React.FC<FormProps> = ({
                     label: DETECTION_CONTROL_STATUSES_NAMES_MAP[status],
                 }))}
                 key={form.key('detectionControlStatus')}
-                disabled={mutation.status === 'pending'}
+                disabled={disabled || mutation.status === 'pending'}
                 rightSection={mutation.status === 'pending' ? <MantineLoader size="xs" /> : null}
                 {...form.getInputProps('detectionControlStatus')}
             />
@@ -184,7 +187,7 @@ const Form: React.FC<FormProps> = ({
                     mt="md"
                     label={`Prescrit (durée : ${prescriptionDurationYears} ans)`}
                     key={form.key('detectionPrescriptionStatus')}
-                    disabled={mutation.status === 'pending'}
+                    disabled={disabled || mutation.status === 'pending'}
                     checked={form.getValues().detectionPrescriptionStatus === 'PRESCRIBED'}
                     onChange={(event) =>
                         form.setFieldValue(
@@ -198,7 +201,11 @@ const Form: React.FC<FormProps> = ({
             <Text mt="md" className="input-label">
                 Statut de validation
             </Text>
-            <div className={classes['detection-validation-status-select-container']}>
+            <div
+                className={clsx(classes['detection-validation-status-select-container'], {
+                    [classes.disabled]: disabled,
+                })}
+            >
                 {detectionValidationStatuses.map((status) => (
                     <Button
                         variant={form.getValues().detectionValidationStatus === status ? 'filled' : 'outline'}
@@ -318,6 +325,7 @@ const Component: React.FC<ComponentProps> = ({
                               }
                             : EMPTY_FORM_VALUES
                     }
+                    disabled={!detectionObject.userGroupRights.includes('WRITE')}
                     geometry={initialDetection.geometry}
                     tileSetUuid={tileSetSelected.uuid}
                 />
