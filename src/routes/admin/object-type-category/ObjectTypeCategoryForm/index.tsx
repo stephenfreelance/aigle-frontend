@@ -10,20 +10,31 @@ import ErrorCard from '@/components/ui/ErrorCard';
 import Loader from '@/components/ui/Loader';
 import SelectItem from '@/components/ui/SelectItem';
 import { ObjectType } from '@/models/object-type';
-import { ObjectTypeCategory, ObjectTypeCategoryDetail } from '@/models/object-type-category';
+import {
+    ObjectTypeCategory,
+    ObjectTypeCategoryDetail,
+    ObjectTypeCategoryObjectTypeStatus,
+    objectTypeCategoryObjectTypeStatuses,
+} from '@/models/object-type-category';
 import api from '@/utils/api';
-import { Button, MultiSelect, TextInput } from '@mantine/core';
+import { OBJECT_TYPE_CATEGROY_OBJECT_TYPE_STATUSES_NAMES_MAP } from '@/utils/constants';
+import { ActionIcon, Autocomplete, Button, Group, Select, Table, TextInput } from '@mantine/core';
 import { UseFormReturnType, isNotEmpty, useForm } from '@mantine/form';
-import { IconCubePlus } from '@tabler/icons-react';
+import { IconCubePlus, IconTrash } from '@tabler/icons-react';
 import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 const BACK_URL = '/admin/object-type-categories';
 
+interface ObjectTypeCategoryObjectTypeInput {
+    objectTypeUuid: string;
+    objectTypeCategoryObjectTypeStatus: ObjectTypeCategoryObjectTypeStatus;
+}
+
 interface FormValues {
     name: string;
-    objectTypesUuids: string[];
+    objectTypeCategoryObjectTypes: ObjectTypeCategoryObjectTypeInput[];
 }
 
 const postForm = async (values: FormValues, uuid?: string) => {
@@ -47,6 +58,8 @@ interface FormProps {
 const Form: React.FC<FormProps> = ({ uuid, initialValues, objectTypes }) => {
     const [error, setError] = useState<AxiosError>();
     const navigate = useNavigate();
+
+    const [searchObjectTypeValue, setSearchObjectTypeValue] = useState('');
 
     const form: UseFormReturnType<FormValues> = useForm({
         mode: 'uncontrolled',
@@ -76,17 +89,25 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, objectTypes }) => {
 
     const label = uuid ? 'Modifier une thématique' : 'Ajouter une thématique';
 
-    const objectTypesUuidsColorsMap: Record<string, string> = useMemo(() => {
-        return (
-            objectTypes?.reduce(
-                (prev, curr) => ({
-                    ...prev,
-                    [curr.uuid]: curr.color,
-                }),
-                {},
-            ) || {}
+    const objectTypesMap: Record<string, ObjectType> = useMemo(() => {
+        return (objectTypes || []).reduce(
+            (prev, curr) => ({
+                ...prev,
+                [curr.uuid]: curr,
+            }),
+            {},
         );
     }, [objectTypes]);
+
+    const objectTypeCategoryObjectTypesUuidsSelected = form
+        .getValues()
+        .objectTypeCategoryObjectTypes.map(({ objectTypeUuid }) => objectTypeUuid);
+    const objectTypesOptions = (objectTypes || [])
+        .filter((ot) => !objectTypeCategoryObjectTypesUuidsSelected.includes(ot.uuid))
+        .map(({ name, uuid }) => ({
+            value: uuid,
+            label: name,
+        }));
 
     return (
         <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -104,19 +125,76 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, objectTypes }) => {
                 key={form.key('name')}
                 {...form.getInputProps('name')}
             />
-            <MultiSelect
+
+            <h2 className="form-sub-title">Types d&apos;objets associés</h2>
+            <Autocomplete
                 mt="md"
-                label="Types d'objets"
-                placeholder="Caravane, piscine,..."
-                searchable
-                data={(objectTypes || []).map(({ name, uuid }) => ({
-                    value: uuid,
-                    label: name,
-                }))}
-                renderOption={(item) => <SelectItem item={item} color={objectTypesUuidsColorsMap[item.option.value]} />}
-                key={form.key('objectTypesUuids')}
-                {...form.getInputProps('objectTypesUuids')}
+                label="Ajouter un type d'objet"
+                placeholder="Rechercher un type d'objet"
+                data={objectTypesOptions}
+                onOptionSubmit={(value) => {
+                    form.setFieldValue('objectTypeCategoryObjectTypes', [
+                        ...form.getValues().objectTypeCategoryObjectTypes,
+                        { objectTypeUuid: value, objectTypeCategoryObjectTypeStatus: 'VISIBLE' },
+                    ]);
+                    setSearchObjectTypeValue('');
+                }}
+                renderOption={(item) => <SelectItem item={item} color={objectTypesMap[item.option.value].color} />}
+                value={searchObjectTypeValue}
+                onChange={setSearchObjectTypeValue}
             />
+
+            <h3 className="form-sub-sub-title">Types d&apos; objets et leur statuts</h3>
+
+            {objectTypes ? (
+                <Table withRowBorders={false} layout="fixed">
+                    <Table.Tbody>
+                        {form.getValues().objectTypeCategoryObjectTypes.map(({ objectTypeUuid }, index) => (
+                            <Table.Tr key={objectTypeUuid}>
+                                <Table.Td>{objectTypesMap[objectTypeUuid].name}</Table.Td>
+                                <Table.Td colSpan={2}>
+                                    <Group align="flex-end">
+                                        <Select
+                                            flex={1}
+                                            mt="md"
+                                            label="Statut"
+                                            placeholder="Visible, caché,..."
+                                            renderOption={(item) => <SelectItem item={item} />}
+                                            data={objectTypeCategoryObjectTypeStatuses.map((status) => ({
+                                                value: status,
+                                                label: OBJECT_TYPE_CATEGROY_OBJECT_TYPE_STATUSES_NAMES_MAP[status],
+                                            }))}
+                                            key={form.key(
+                                                `objectTypeCategoryObjectTypes.${index}.objectTypeCategoryObjectTypeStatus`,
+                                            )}
+                                            {...form.getInputProps(
+                                                `objectTypeCategoryObjectTypes.${index}.objectTypeCategoryObjectTypeStatus`,
+                                            )}
+                                        />
+
+                                        <ActionIcon
+                                            variant="transparent"
+                                            onClick={() => form.removeListItem('objectTypeCategoryObjectTypes', index)}
+                                        >
+                                            <IconTrash />
+                                        </ActionIcon>
+                                    </Group>
+                                </Table.Td>
+                            </Table.Tr>
+                        ))}
+
+                        {form.getValues().objectTypeCategoryObjectTypes.length === 0 ? (
+                            <Table.Tr>
+                                <Table.Td className="empty-results-cell" colSpan={3}>
+                                    Cet thématique n&apos;a aucune type d&apos;objet associé
+                                </Table.Td>
+                            </Table.Tr>
+                        ) : null}
+                    </Table.Tbody>
+                </Table>
+            ) : (
+                <Loader />
+            )}
 
             <div className="form-actions">
                 <Button
@@ -139,7 +217,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, objectTypes }) => {
 
 const EMPTY_FORM_VALUES: FormValues = {
     name: '',
-    objectTypesUuids: [],
+    objectTypeCategoryObjectTypes: [],
 } as const;
 
 const ComponentInner: React.FC = () => {
@@ -152,8 +230,13 @@ const ComponentInner: React.FC = () => {
 
         const res = await api.get<ObjectTypeCategoryDetail>(getObjectTypeCategoryDetailEndpoint(uuid));
         const initialValues: FormValues = {
-            objectTypesUuids: res.data.objectTypes.map((type) => type.uuid),
             ...res.data,
+            objectTypeCategoryObjectTypes: res.data.objectTypeCategoryObjectTypes.map(
+                ({ objectType, objectTypeCategoryObjectTypeStatus }) => ({
+                    objectTypeUuid: objectType.uuid,
+                    objectTypeCategoryObjectTypeStatus,
+                }),
+            ),
         };
 
         return initialValues;

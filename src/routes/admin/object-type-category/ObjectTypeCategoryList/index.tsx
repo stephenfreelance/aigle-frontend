@@ -4,13 +4,15 @@ import { OBJECT_TYPE_CATEGORY_LIST_ENDPOINT, OBJECT_TYPE_LIST_ENDPOINT } from '@
 import DataTable from '@/components/admin/DataTable';
 import FiltersSection from '@/components/admin/FiltersSection';
 import LayoutAdminBase from '@/components/admin/LayoutAdminBase';
+import PillsDataCell from '@/components/admin/data-cells/PillsDataCell';
 import DateInfo from '@/components/ui/DateInfo';
 import SelectItem from '@/components/ui/SelectItem';
+import { Uuided } from '@/models/data';
 import { ObjectType } from '@/models/object-type';
-import { ObjectTypeCategoryDetail } from '@/models/object-type-category';
+import { ObjectTypeCategoryDetail, ObjectTypeCategoryObjectType } from '@/models/object-type-category';
 import api from '@/utils/api';
 import { Button, Group, Input, MultiSelect, ScrollArea, Table } from '@mantine/core';
-import { IconCategoryPlus, IconSearch } from '@tabler/icons-react';
+import { IconCategoryPlus, IconEye, IconEyeOff, IconSearch } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import isEqual from 'lodash/isEqual';
 import { Link, useNavigate } from 'react-router-dom';
@@ -25,6 +27,10 @@ const DATA_FILTER_INITIAL_VALUE: DataFilter = {
     q: '',
     objectTypesUuids: [],
 };
+
+interface ObjectTypeCategoryObjectTypePill extends Uuided {
+    objectTypeCategoryObjectType: ObjectTypeCategoryObjectType;
+}
 
 const Component: React.FC = () => {
     const navigate = useNavigate();
@@ -106,25 +112,26 @@ const Component: React.FC = () => {
                     (item: ObjectTypeCategoryDetail) => <DateInfo date={item.createdAt} />,
                     (item: ObjectTypeCategoryDetail) => item.name,
                     (item: ObjectTypeCategoryDetail) => (
-                        <ScrollArea scrollbars="x" offsetScrollbars>
-                            <Group gap="xs" className={classes['object-types-cell']}>
-                                {item.objectTypes.map((type) => (
-                                    <Button
-                                        component={Link}
-                                        autoContrast
-                                        radius={100}
-                                        key={type.uuid}
-                                        color={type.color}
-                                        to={`/admin/object-types/form/${type.uuid}`}
-                                        onClick={(e) => e.stopPropagation()}
-                                        target="_blank"
-                                        size="compact-xs"
-                                    >
-                                        {type.name}
-                                    </Button>
-                                ))}
-                            </Group>
-                        </ScrollArea>
+                        <PillsDataCell<ObjectTypeCategoryObjectTypePill>
+                            items={item.objectTypeCategoryObjectTypes.map((objectTypeCategoryObjectType) => ({
+                                uuid: objectTypeCategoryObjectType.objectType.uuid,
+                                objectTypeCategoryObjectType,
+                            }))}
+                            getLabel={(item) => item.objectTypeCategoryObjectType.objectType.name}
+                            toLink={(item) =>
+                                `/admin/object-types/form/${item.objectTypeCategoryObjectType.objectType.uuid}`
+                            }
+                            getLeftSection={(item) => (
+                                <>
+                                    {item.objectTypeCategoryObjectType.objectTypeCategoryObjectTypeStatus ===
+                                    'VISIBLE' ? (
+                                        <IconEye size={14} />
+                                    ) : (
+                                        <IconEyeOff size={14} />
+                                    )}
+                                </>
+                            )}
+                        />
                     ),
                 ]}
                 onItemClick={({ uuid }) => navigate(`/admin/object-type-categories/form/${uuid}`)}

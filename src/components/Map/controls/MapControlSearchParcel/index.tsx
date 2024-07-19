@@ -12,7 +12,7 @@ import { GeoCommune } from '@/models/geo/geo-commune';
 import { Parcel } from '@/models/parcel';
 import { SelectOption } from '@/models/ui/select-option';
 import api from '@/utils/api';
-import { geoCollectivityToGeoOption } from '@/utils/geojson';
+import { geoZoneToGeoOption } from '@/utils/geojson';
 import { useMap } from '@/utils/map-context';
 import { Autocomplete, Button, Loader as MantineLoader } from '@mantine/core';
 import { UseFormReturnType, isNotEmpty, useForm } from '@mantine/form';
@@ -34,7 +34,7 @@ const searchCommune = async (q: string): Promise<SelectOption[]> => {
         },
     });
 
-    return res.data.results.map((com) => geoCollectivityToGeoOption(com));
+    return res.data.results.map((com) => geoZoneToGeoOption(com));
 };
 
 const searchParcel = async (q: string, searchType: 'SECTION' | 'NUM_PARCEL', values: FormValues): Promise<string[]> => {

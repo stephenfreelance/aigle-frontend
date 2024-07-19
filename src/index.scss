@@ -100,6 +100,15 @@ html {
     gap: var(--mantine-spacing-md);
 }
 
+.form-sub-title {
+    margin-top: var(--mantine-spacing-xl);
+}
+
+.form-sub-sub-title {
+    margin-top: var(--mantine-spacing-md);
+}
+
+
 form {
     padding-bottom: var(--mantine-spacing-xl);
 

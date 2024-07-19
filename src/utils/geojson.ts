@@ -1,4 +1,5 @@
-import { CollectivityType, GeoCollectivity } from '@/models/geo/_common';
+import { CollectivityType } from '@/models/geo/_common';
+import { GeoZone } from '@/models/geo/geo-zone';
 import { SelectOption } from '@/models/ui/select-option';
 
 export type LngLat = [number, number];
@@ -7,9 +8,9 @@ export type GeoValues = {
     [key in CollectivityType]: SelectOption[];
 };
 
-export const geoCollectivityToGeoOption = (geoCollectivity: GeoCollectivity): SelectOption => ({
-    value: geoCollectivity.uuid,
-    label: geoCollectivity.name,
+export const geoZoneToGeoOption = (geoZone: GeoZone): SelectOption => ({
+    value: geoZone.uuid,
+    label: geoZone.name,
 });
 
 export const extendBbox = (

@@ -7,8 +7,10 @@ import { UseFormReturnType, useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { UseMutationResult, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
-import React from 'react';
+import React, { useMemo } from 'react';
 import classes from './index.module.scss';
+import SelectItem from '@/components/ui/SelectItem';
+import { ObjectType } from '@/models/object-type';
 
 interface FormValues {
     objectTypeUuid: string;
@@ -32,6 +34,16 @@ const Component: React.FC<ComponentProps> = ({ detectionObject }) => {
         const formValues = form.getValues();
         handleSubmit(formValues);
     });
+
+    const objectTypesMap: Record<string, ObjectType> = useMemo(() => {
+        return (objectTypes || []).reduce(
+            (prev, curr) => ({
+                ...prev,
+                [curr.uuid]: curr,
+            }),
+            {},
+        );
+    }, [objectTypes]);
 
     const queryClient = useQueryClient();
 
@@ -83,6 +95,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject }) => {
                 <Select
                     allowDeselect={false}
                     label="Type d'objet"
+                    renderOption={(item) => <SelectItem item={item} color={objectTypesMap[item.option.value].color} />}
                     data={objectTypes.map((type) => ({
                         value: type.uuid,
                         label: type.name,

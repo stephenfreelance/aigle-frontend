@@ -28,7 +28,6 @@ import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query'
 import { AxiosError, AxiosResponse } from 'axios';
 import omit from 'lodash/omit';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import classes from './index.module.scss';
 
 const BACK_URL = '/admin/users';
 
@@ -188,7 +187,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, userGroups }) => {
                 {...form.getInputProps('userRole')}
             />
 
-            <h2 className={classes['sub-title']}>Groupes</h2>
+            <h2 className="form-sub-title">Groupes</h2>
             <Autocomplete
                 mt="md"
                 label="Ajouter un groupe"
@@ -205,19 +204,16 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, userGroups }) => {
                 onChange={setSearchGroupValue}
             />
 
-            <h3 className={classes['sub-sub-title']}>Groupes de l&apos;utilisateur</h3>
-            <Table className={classes['user-groups']} withRowBorders={false} layout="fixed">
+            <h3 className="form-sub-sub-title">Groupes de l&apos;utilisateur</h3>
+            <Table withRowBorders={false} layout="fixed">
                 <Table.Tbody>
                     {form.getValues().userUserGroups.map((userUserGroup, index) => (
-                        <Table.Tr className={classes['user-groups-group']} key={userUserGroup.userGroupUuid}>
-                            <Table.Td className={classes['user-groups-label']}>
-                                {userUserGroupsMap[userUserGroup.userGroupUuid].name}
-                            </Table.Td>
+                        <Table.Tr key={userUserGroup.userGroupUuid}>
+                            <Table.Td>{userUserGroupsMap[userUserGroup.userGroupUuid].name}</Table.Td>
                             <Table.Td colSpan={2}>
                                 <Group align="flex-end">
                                     <MultiSelect
                                         flex={1}
-                                        className={classes['user-groups-select']}
                                         mt="md"
                                         label="Droits"
                                         placeholder="Lecture, écriture,..."

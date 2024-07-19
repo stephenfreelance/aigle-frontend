@@ -52,13 +52,16 @@ const useMap = create<MapState>()((set, get) => ({
         const allObjectTypes: ObjectType[] = [];
         const objectTypesUuids = new Set<string>();
 
-        settings.objectTypes.forEach((objectType) => {
+        settings.objectTypeSettings.forEach(({ objectType, objectTypeCategoryObjectTypeStatus }) => {
             if (objectTypesUuids.has(objectType.uuid)) {
                 return;
             }
 
             allObjectTypes.push(objectType);
-            objectTypesUuids.add(objectType.uuid);
+
+            if (objectTypeCategoryObjectTypeStatus === 'VISIBLE') {
+                objectTypesUuids.add(objectType.uuid);
+            }
         });
 
         const layers = getInitialLayers(settings);
@@ -68,7 +71,7 @@ const useMap = create<MapState>()((set, get) => ({
             layers,
             objectTypes: allObjectTypes,
             detectionFilter: {
-                objectTypesUuids: allObjectTypes.map((type) => type.uuid),
+                objectTypesUuids: Array.from(objectTypesUuids),
                 detectionValidationStatuses: [...detectionValidationStatuses],
                 detectionControlStatuses: [...detectionControlStatuses],
                 score: 0.6,

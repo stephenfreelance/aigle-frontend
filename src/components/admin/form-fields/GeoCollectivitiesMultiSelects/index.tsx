@@ -6,7 +6,7 @@ import { GeoDepartment } from '@/models/geo/geo-department';
 import { GeoRegion } from '@/models/geo/geo-region';
 import { SelectOption } from '@/models/ui/select-option';
 import api from '@/utils/api';
-import { GeoValues, geoCollectivityToGeoOption } from '@/utils/geojson';
+import { GeoValues, geoZoneToGeoOption } from '@/utils/geojson';
 import { Loader as MantineLoader, MultiSelect } from '@mantine/core';
 import { UseFormReturnType } from '@mantine/form';
 import { useDebouncedValue } from '@mantine/hooks';
@@ -65,7 +65,7 @@ const getGeoMultiSelectValues = (
             ...geoSelectedValues[collectivityType],
             ...(geoResults[collectivityType] || [])
                 .filter((geo) => !geoSelectedUuids[collectivityType].includes(geo.uuid))
-                .map((geo) => geoCollectivityToGeoOption(geo)),
+                .map((geo) => geoZoneToGeoOption(geo)),
         ];
     });
 
@@ -139,7 +139,7 @@ const Component = <T extends GeoCollectivitiesFormValues>({ form, initialGeoSele
 
         setGeoSelectedValues((prev) => ({
             ...prev,
-            [collectivityType]: [...prev[collectivityType], geoCollectivityToGeoOption(option)],
+            [collectivityType]: [...prev[collectivityType], geoZoneToGeoOption(option)],
         }));
     };
 

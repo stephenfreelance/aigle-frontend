@@ -1,18 +1,12 @@
 import React, { useState } from 'react';
 
-import {
-    OBJECT_TYPE_CATEGORY_LIST_ENDPOINT,
-    OBJECT_TYPE_POST_ENDPOINT,
-    getObjectTypeDetailEndpoint,
-} from '@/api-endpoints';
+import { OBJECT_TYPE_POST_ENDPOINT, getObjectTypeDetailEndpoint } from '@/api-endpoints';
 import LayoutAdminForm from '@/components/admin/LayoutAdminForm';
 import ErrorCard from '@/components/ui/ErrorCard';
 import Loader from '@/components/ui/Loader';
-import SelectItem from '@/components/ui/SelectItem';
 import { ObjectType, ObjectTypeDetail } from '@/models/object-type';
-import { ObjectTypeCategory } from '@/models/object-type-category';
 import api from '@/utils/api';
-import { Button, ColorInput, MultiSelect, NumberInput, TextInput } from '@mantine/core';
+import { Button, ColorInput, NumberInput, TextInput } from '@mantine/core';
 import { UseFormReturnType, isNotEmpty, useForm } from '@mantine/form';
 import { IconCubePlus } from '@tabler/icons-react';
 import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query';
@@ -25,7 +19,6 @@ interface FormValues {
     name: string;
     color: string;
     prescriptionDurationYears: number | null;
-    objectTypeCategoriesUuids: string[];
 }
 
 const postForm = async (values: FormValues, uuid?: string) => {
@@ -47,10 +40,9 @@ const postForm = async (values: FormValues, uuid?: string) => {
 interface FormProps {
     uuid?: string;
     initialValues: FormValues;
-    categories?: ObjectTypeCategory[];
 }
 
-const Form: React.FC<FormProps> = ({ uuid, initialValues, categories }) => {
+const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
     const [error, setError] = useState<AxiosError>();
     const navigate = useNavigate();
 
@@ -107,19 +99,6 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, categories }) => {
                 key={form.key('color')}
                 {...form.getInputProps('color')}
             />
-            <MultiSelect
-                mt="md"
-                label="Thématiques"
-                placeholder="Déchets, constructions,..."
-                searchable
-                data={(categories || []).map(({ name, uuid }) => ({
-                    value: uuid,
-                    label: name,
-                }))}
-                renderOption={(item) => <SelectItem item={item} />}
-                key={form.key('objectTypeCategoriesUuids')}
-                {...form.getInputProps('objectTypeCategoriesUuids')}
-            />
             <NumberInput
                 mt="md"
                 label="Prescription (en années)"
@@ -154,7 +133,6 @@ const EMPTY_FORM_VALUES: FormValues = {
     name: '',
     color: '',
     prescriptionDurationYears: null,
-    objectTypeCategoriesUuids: [],
 };
 
 const ComponentInner: React.FC = () => {
@@ -166,12 +144,8 @@ const ComponentInner: React.FC = () => {
         }
 
         const res = await api.get<ObjectTypeDetail>(getObjectTypeDetailEndpoint(uuid));
-        const initialValues: FormValues = {
-            objectTypeCategoriesUuids: res.data.categories.map((cat) => cat.uuid),
-            ...res.data,
-        };
 
-        return initialValues;
+        return res.data;
     };
 
     const {
@@ -184,16 +158,6 @@ const ComponentInner: React.FC = () => {
         queryFn: () => fetchData(),
     });
 
-    const fetchObjectTypeCategories = async () => {
-        const res = await api.get<ObjectTypeCategory[]>(OBJECT_TYPE_CATEGORY_LIST_ENDPOINT);
-        return res.data;
-    };
-
-    const { data: categories } = useQuery({
-        queryKey: [OBJECT_TYPE_CATEGORY_LIST_ENDPOINT],
-        queryFn: () => fetchObjectTypeCategories(),
-    });
-
     if (isLoading) {
         return <Loader />;
     }
@@ -202,7 +166,7 @@ const ComponentInner: React.FC = () => {
         return <ErrorCard>{error.message}</ErrorCard>;
     }
 
-    return <Form uuid={uuid} initialValues={initialValues || EMPTY_FORM_VALUES} categories={categories} />;
+    return <Form uuid={uuid} initialValues={initialValues || EMPTY_FORM_VALUES} />;
 };
 
 const Component: React.FC = () => {

@@ -20,7 +20,7 @@ import {
 } from '@/models/tile-set';
 import api from '@/utils/api';
 import { TILE_SET_STATUSES_NAMES_MAP, TILE_SET_TYPES_NAMES_MAP } from '@/utils/constants';
-import { GeoValues, geoCollectivityToGeoOption } from '@/utils/geojson';
+import { GeoValues, geoZoneToGeoOption } from '@/utils/geojson';
 import { Button, Card, NumberInput, Select, TextInput } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { UseFormReturnType, isNotEmpty, useForm } from '@mantine/form';
@@ -386,9 +386,9 @@ const ComponentInner: React.FC = () => {
             regionsUuids: res.data.regions.map((region) => region.uuid),
         };
         const initialGeoSelectedValues: GeoValues = {
-            region: res.data.regions.map((region) => geoCollectivityToGeoOption(region)),
-            department: res.data.departments.map((department) => geoCollectivityToGeoOption(department)),
-            commune: res.data.communes.map((commune) => geoCollectivityToGeoOption(commune)),
+            region: res.data.regions.map((region) => geoZoneToGeoOption(region)),
+            department: res.data.departments.map((department) => geoZoneToGeoOption(department)),
+            commune: res.data.communes.map((commune) => geoZoneToGeoOption(commune)),
         };
 
         return { initialValues, initialGeoSelectedValues, geometry: res.data.geometry };

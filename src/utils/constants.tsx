@@ -1,6 +1,7 @@
 import { GEO_COMMUNE_LIST_ENDPOINT, GEO_DEPARTMENT_LIST_ENDPOINT, GEO_REGION_LIST_ENDPOINT } from '@/api-endpoints';
 import { DetectionControlStatus, DetectionPrescriptionStatus, DetectionValidationStatus } from '@/models/detection';
 import { CollectivityType } from '@/models/geo/_common';
+import { ObjectTypeCategoryObjectTypeStatus } from '@/models/object-type-category';
 import { TileSetStatus, TileSetType } from '@/models/tile-set';
 import { UserGroupRight, UserRole } from '@/models/user';
 
@@ -86,6 +87,13 @@ export const USER_GROUP_RIGHTS_NAMES_MAP: {
     WRITE: 'Ecriture',
     ANNOTATE: 'Annotation',
     READ: 'Lecture',
+} as const;
+
+export const OBJECT_TYPE_CATEGROY_OBJECT_TYPE_STATUSES_NAMES_MAP: {
+    [status in ObjectTypeCategoryObjectTypeStatus]: string;
+} = {
+    VISIBLE: 'Visible par défaut',
+    HIDDEN: 'Caché par défaut',
 } as const;
 
 export const COLLECTIVITY_TYPES_ENDPOINTS_MAP: {

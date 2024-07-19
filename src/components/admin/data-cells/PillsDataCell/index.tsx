@@ -50,7 +50,7 @@ const Component = <T extends Uuided>({ items, toLink, getLabel, getLeftSection }
         <ScrollArea scrollbars="x" offsetScrollbars>
             <Group
                 gap="xs"
-                className={clsx(classes['categories-cell'], {
+                className={clsx(classes['pills-cell'], {
                     [classes['not-clickable']]: !toLink,
                 })}
             >

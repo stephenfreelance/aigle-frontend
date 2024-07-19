@@ -16,7 +16,7 @@ import { ObjectType } from '@/models/object-type';
 import { ObjectTypeCategory } from '@/models/object-type-category';
 import { UserGroupDetail } from '@/models/user-group';
 import api from '@/utils/api';
-import { GeoValues, geoCollectivityToGeoOption } from '@/utils/geojson';
+import { GeoValues, geoZoneToGeoOption } from '@/utils/geojson';
 import { Button, MultiSelect, TextInput } from '@mantine/core';
 import { UseFormReturnType, isNotEmpty, useForm } from '@mantine/form';
 import { IconUserPlus } from '@tabler/icons-react';
@@ -128,7 +128,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, initialGeoSelectedValu
                 {...form.getInputProps('objectTypeCategoriesUuids')}
             />
 
-            <h2 className={classes['sub-title']}>Collectivités accessibles par le groupe</h2>
+            <h2 className="form-sub-title">Collectivités accessibles par le groupe</h2>
 
             <GeoCollectivitiesMultiSelects form={form} initialGeoSelectedValues={initialGeoSelectedValues} />
 
@@ -180,9 +180,9 @@ const ComponentInner: React.FC = () => {
             ),
         };
         const initialGeoSelectedValues: GeoValues = {
-            region: res.data.regions.map((region) => geoCollectivityToGeoOption(region)),
-            department: res.data.departments.map((department) => geoCollectivityToGeoOption(department)),
-            commune: res.data.communes.map((commune) => geoCollectivityToGeoOption(commune)),
+            region: res.data.regions.map((region) => geoZoneToGeoOption(region)),
+            department: res.data.departments.map((department) => geoZoneToGeoOption(department)),
+            commune: res.data.communes.map((commune) => geoZoneToGeoOption(commune)),
         };
 
         return { initialValues, initialGeoSelectedValues };
