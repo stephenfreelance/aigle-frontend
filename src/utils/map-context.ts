@@ -1,6 +1,6 @@
 import { detectionControlStatuses, detectionValidationStatuses } from '@/models/detection';
 import { DetectionFilter } from '@/models/detection-filter';
-import { MapLayer } from '@/models/map-layer';
+import { MapGeoCustomZoneLayer, MapTileSetLayer } from '@/models/map-layer';
 import { MapSettings } from '@/models/map-settings';
 import { ObjectType } from '@/models/object-type';
 import { TileSet, TileSetStatus, TileSetType } from '@/models/tile-set';
@@ -8,7 +8,7 @@ import EventEmitter from 'eventemitter3';
 import { create } from 'zustand';
 
 const getInitialLayers = (settings: MapSettings) => {
-    const layers: MapLayer[] = [];
+    const layers: MapTileSetLayer[] = [];
     let backgroundSet = false;
 
     settings.tileSetSettings.forEach(({ tileSet, geometry }) => {
@@ -33,7 +33,8 @@ const getInitialLayers = (settings: MapSettings) => {
 type MapEventType = 'UPDATE_DETECTIONS' | 'JUMP_TO';
 
 interface MapState {
-    layers?: MapLayer[];
+    layers?: MapTileSetLayer[];
+    customZoneLayers?: MapGeoCustomZoneLayer[];
     objectTypes?: ObjectType[];
     detectionFilter?: DetectionFilter;
     settings?: MapSettings;
@@ -43,6 +44,7 @@ interface MapState {
     updateDetectionFilter: (detectionFilter: DetectionFilter) => void;
     getDisplayedTileSetUrls: () => string[];
     setTileSetVisibility: (uuid: string, visible: boolean) => void;
+    setCustomZoneVisibility: (uuid: string, visible: boolean) => void;
     getTileSets: (tileSetTypes: TileSetType[], tileSetStatuses: TileSetStatus[]) => TileSet[];
     eventEmitter: EventEmitter<MapEventType>;
 }
@@ -69,6 +71,10 @@ const useMap = create<MapState>()((set, get) => ({
         set(() => ({
             settings,
             layers,
+            customZoneLayers: settings.geoCustomZones.map((geoCustomZone) => ({
+                geoCustomZone,
+                displayed: true,
+            })),
             objectTypes: allObjectTypes,
             detectionFilter: {
                 objectTypesUuids: Array.from(objectTypesUuids),
@@ -76,6 +82,7 @@ const useMap = create<MapState>()((set, get) => ({
                 detectionControlStatuses: [...detectionControlStatuses],
                 score: 0.6,
                 prescripted: null,
+                customZonesUuids: settings.geoCustomZones.map(({ properties }) => properties.uuid),
             },
         }));
     },
@@ -132,6 +139,27 @@ const useMap = create<MapState>()((set, get) => ({
 
             return {
                 layers: state.layers,
+            };
+        });
+    },
+    setCustomZoneVisibility: (uuid: string, visible: boolean) => {
+        set((state) => {
+            if (!state.customZoneLayers) {
+                return {};
+            }
+
+            const layerIndex = state.customZoneLayers.findIndex(
+                (layer) => layer.geoCustomZone.properties.uuid === uuid,
+            );
+
+            if (layerIndex === -1) {
+                return {};
+            }
+
+            state.customZoneLayers[layerIndex].displayed = visible;
+
+            return {
+                customZoneLayers: state.customZoneLayers,
             };
         });
     },

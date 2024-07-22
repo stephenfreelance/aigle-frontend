@@ -1,38 +1,24 @@
 import { DETECTION_POST_ENDPOINT } from '@/api-endpoints';
 import InfoCard from '@/components/InfoCard';
 import Loader from '@/components/ui/Loader';
-import { MapLayer } from '@/models/map-layer';
+import { MapTileSetLayer } from '@/models/map-layer';
 import { ObjectType } from '@/models/object-type';
 import api from '@/utils/api';
-import { DEFAULT_DATE_FORMAT, MAPBOX_TOKEN } from '@/utils/constants';
-import { LngLat } from '@/utils/geojson';
+import { DEFAULT_DATE_FORMAT } from '@/utils/constants';
+import { getAddressFromPolygon } from '@/utils/geojson';
 import { useMap } from '@/utils/map-context';
 import { Button, Modal, Select } from '@mantine/core';
 import { UseFormReturnType, useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { IconShape } from '@tabler/icons-react';
 import { UseMutationResult, useMutation } from '@tanstack/react-query';
-import { area, booleanWithin, centroid, getCoord } from '@turf/turf';
+import { area, booleanWithin, centroid } from '@turf/turf';
 import { AxiosError } from 'axios';
 import clsx from 'clsx';
 import { format } from 'date-fns';
 import { Polygon } from 'geojson';
 import React, { useEffect, useMemo, useState } from 'react';
 import classes from './index.module.scss';
-
-const getAddressFromLatLng = async ([lng, lat]: LngLat): Promise<string | null> => {
-    const response = await fetch(
-        `https://api.mapbox.com/search/geocode/v6/reverse?longitude=${lng}&latitude=${lat}&access_token=${MAPBOX_TOKEN}`,
-    );
-    const data = await response.json();
-
-    if (data.features && data.features.length > 0) {
-        const address = data.features[0].properties.name_preferred;
-        return address;
-    } else {
-        return null;
-    }
-};
 
 interface FormValues {
     objectTypeUuid: string;
@@ -51,7 +37,7 @@ const postForm = async (values: FormValues, tileSetUuid: string, polygon: Polygo
 
 interface FormProps {
     objectTypes: ObjectType[];
-    layers: MapLayer[];
+    layers: MapTileSetLayer[];
     polygon: Polygon;
     hide: () => void;
 }
@@ -66,8 +52,7 @@ const Form: React.FC<FormProps> = ({ objectTypes, layers, polygon, hide }) => {
     const [address, setAddress] = useState<string | null | undefined>();
     useEffect(() => {
         const getAddress = async () => {
-            const polygonCenter = getCoord(centroid(polygon)) as LngLat;
-            const address = await getAddressFromLatLng(polygonCenter);
+            const address = await getAddressFromPolygon(polygon);
             setAddress(address);
         };
 

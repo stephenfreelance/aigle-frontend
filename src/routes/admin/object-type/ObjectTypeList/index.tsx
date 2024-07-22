@@ -15,7 +15,6 @@ import { IconCubePlus, IconSearch, IconX } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import isEqual from 'lodash/isEqual';
 import { Link, useNavigate } from 'react-router-dom';
-import classes from './index.module.scss';
 
 interface DataFilter {
     q: string;
@@ -98,7 +97,7 @@ const Component: React.FC = () => {
                 tableBodyRenderFns={[
                     (item: ObjectTypeDetail) => <DateInfo date={item.createdAt} />,
                     (item: ObjectTypeDetail) => (
-                        <div className={classes['color-cell']}>
+                        <div className="color-cell">
                             <ColorSwatch color={item.color} size={24} /> {item.color}
                         </div>
                     ),

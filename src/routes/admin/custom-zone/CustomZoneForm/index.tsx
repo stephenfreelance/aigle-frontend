@@ -5,10 +5,10 @@ import Map from '@/components/Map';
 import LayoutAdminForm from '@/components/admin/LayoutAdminForm';
 import ErrorCard from '@/components/ui/ErrorCard';
 import Loader from '@/components/ui/Loader';
-import { MapLayer } from '@/models/map-layer';
+import { MapTileSetLayer } from '@/models/map-layer';
 import api from '@/utils/api';
 import { TILES_URL_FALLBACK } from '@/utils/constants';
-import { Button, Card, JsonInput, TextInput } from '@mantine/core';
+import { Button, Card, ColorInput, JsonInput, TextInput } from '@mantine/core';
 import { UseFormReturnType, isNotEmpty, useForm } from '@mantine/form';
 import { IconHexagonPlus2 } from '@tabler/icons-react';
 import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query';
@@ -31,7 +31,7 @@ interface MapPreviewProps {
 
 const MapPreview: React.FC<MapPreviewProps> = ({ name, geometry }) => {
     const fakeDate = formatISO(new Date());
-    const layers: MapLayer[] = [
+    const layers: MapTileSetLayer[] = [
         {
             displayed: true,
             tileSet: {
@@ -67,6 +67,7 @@ const MapPreview: React.FC<MapPreviewProps> = ({ name, geometry }) => {
 
 interface FormValues {
     name: string;
+    color: string;
     geometry: string;
 }
 
@@ -187,6 +188,14 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
                 key={form.key('name')}
                 {...form.getInputProps('name')}
             />
+            <ColorInput
+                mt="md"
+                withAsterisk
+                label="Couleur de la zone"
+                placeholder="#000000"
+                key={form.key('color')}
+                {...form.getInputProps('color')}
+            />
             <JsonInput
                 mt="md"
                 label="Géométrie de la zone"
@@ -225,6 +234,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
 
 const EMPTY_FORM_VALUES: FormValues = {
     name: '',
+    color: '',
     geometry: '',
 };
 
@@ -241,6 +251,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ uuid }) => {
         const res = await api.get<GeoCustomZoneDetail>(getGeoCustomZoneDetailEndpoint(uuid));
         const initialValues: FormValues = {
             name: res.data.name,
+            color: res.data.color,
             geometry: JSON.stringify(res.data.geometry, null, 2),
         };
 

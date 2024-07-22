@@ -10,7 +10,7 @@ import MapControlLayerDisplay from '@/components/Map/controls/MapControlLayerDis
 import MapControlLegend from '@/components/Map/controls/MapControlLegend';
 import MapControlSearchParcel from '@/components/Map/controls/MapControlSearchParcel';
 import { DetectionGeojsonData, DetectionProperties } from '@/models/detection';
-import { MapLayer } from '@/models/map-layer';
+import { MapTileSetLayer } from '@/models/map-layer';
 import api from '@/utils/api';
 import { MAPBOX_TOKEN } from '@/utils/constants';
 import { useMap } from '@/utils/map-context';
@@ -21,7 +21,7 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { bbox, bboxPolygon, centroid, feature, getCoord } from '@turf/turf';
+import { bbox, bboxPolygon, centroid, feature, featureCollection, getCoord } from '@turf/turf';
 import { FeatureCollection, Geometry, Polygon } from 'geojson';
 import mapboxgl from 'mapbox-gl';
 import DrawRectangle, { DrawStyles } from 'mapbox-gl-draw-rectangle-restrict-area';
@@ -86,13 +86,15 @@ const MAP_CONTROLS: {
     },
 ] as const;
 
-const getSourceId = (layer: MapLayer) => `source-${layer.tileSet.uuid}`;
-const getLayerId = (layer: MapLayer) => `layer-${layer.tileSet.uuid}`;
+const getSourceId = (layer: MapTileSetLayer) => `source-${layer.tileSet.uuid}`;
+const getLayerId = (layer: MapTileSetLayer) => `layer-${layer.tileSet.uuid}`;
 
 const DETECTION_ENDPOINT = getDetectionListEndpoint();
 
-const GEOJSON_LAYER_ID = 'geojson-layer';
-const GEOJSON_LAYER_OUTLINE_ID = 'geojson-layer-outline';
+const GEOJSON_CUSTOM_ZONES_LAYER_ID = 'custom-zones-geojson-layer';
+const GEOJSON_CUSTOM_ZONES_LAYER_OUTLINE_ID = 'custom-zones-geojson-layer-outline';
+const GEOJSON_DETECTIONS_LAYER_ID = 'detections-geojson-layer';
+const GEOJSON_DETECTIONS_LAYER_OUTLINE_ID = 'detections-geojson-layer-outline';
 const GEOJSON_LAYER_EXTRA_ID = 'geojson-layer-data-extra';
 const GEOJSON_LAYER_EXTRA_BOUNDINGS_ID = 'geojson-layer-data-extra-boundings';
 
@@ -113,7 +115,7 @@ interface MapBounds {
 }
 
 interface ComponentProps {
-    layers: MapLayer[];
+    layers: MapTileSetLayer[];
     displayDetections?: boolean;
     displayLayersGeometry?: boolean;
     fitBoundsFirstLayer?: boolean;
@@ -137,7 +139,7 @@ const Component: React.FC<ComponentProps> = ({
 
     const [addAnnotationPolygon, setAddAnnotationPolygon] = useState<Polygon>();
 
-    const { eventEmitter, detectionFilter, resetLayers, settings } = useMap();
+    const { eventEmitter, detectionFilter, resetLayers, settings, customZoneLayers } = useMap();
 
     const [cursor, setCursor] = useState<string>();
     const [mapRef, setMapRef] = useState<mapboxgl.Map>();
@@ -411,7 +413,7 @@ const Component: React.FC<ComponentProps> = ({
         }
 
         if (displayDetections) {
-            return GEOJSON_LAYER_OUTLINE_ID;
+            return GEOJSON_CUSTOM_ZONES_LAYER_OUTLINE_ID;
         }
 
         if (displayLayersGeometry) {
@@ -430,7 +432,7 @@ const Component: React.FC<ComponentProps> = ({
                 initialViewState={MAP_INITIAL_VIEW_STATE}
                 onLoad={loadDataFromBounds}
                 onMoveEnd={loadDataFromBounds}
-                interactiveLayerIds={[GEOJSON_LAYER_ID]}
+                interactiveLayerIds={[GEOJSON_DETECTIONS_LAYER_ID]}
                 onClick={onMapClick}
                 onMouseEnter={onPolygonMouseEnter}
                 onMouseLeave={onPolygonMouseLeave}
@@ -535,9 +537,9 @@ const Component: React.FC<ComponentProps> = ({
                         </Source>
                     </>
                 ) : null}
-                <Source id="geojson-data" type="geojson" data={data || EMPTY_GEOJSON_FEATURE_COLLECTION}>
+                <Source id="detections-geojson-data" type="geojson" data={data || EMPTY_GEOJSON_FEATURE_COLLECTION}>
                     <Layer
-                        id={GEOJSON_LAYER_ID}
+                        id={GEOJSON_DETECTIONS_LAYER_ID}
                         beforeId={displayLayersGeometry ? GEOJSON_LAYER_EXTRA_ID : undefined}
                         type="fill"
                         paint={{
@@ -545,8 +547,8 @@ const Component: React.FC<ComponentProps> = ({
                         }}
                     />
                     <Layer
-                        id={GEOJSON_LAYER_OUTLINE_ID}
-                        beforeId={GEOJSON_LAYER_ID}
+                        id={GEOJSON_DETECTIONS_LAYER_OUTLINE_ID}
+                        beforeId={GEOJSON_DETECTIONS_LAYER_ID}
                         type="line"
                         paint={{
                             'line-color': ['get', 'objectTypeColor'],
@@ -560,6 +562,36 @@ const Component: React.FC<ComponentProps> = ({
                                 4, // width for the selected polygon
                                 2, // width for other polygons
                             ],
+                        }}
+                    />
+                </Source>
+                <Source
+                    id="custom-zones-geojson-data"
+                    type="geojson"
+                    data={featureCollection(
+                        (customZoneLayers || [])
+                            ?.filter(({ displayed }) => displayed)
+                            .map((layer) => layer.geoCustomZone),
+                    )}
+                >
+                    <Layer
+                        id={GEOJSON_CUSTOM_ZONES_LAYER_ID}
+                        beforeId={GEOJSON_DETECTIONS_LAYER_OUTLINE_ID}
+                        type="fill"
+                        paint={{
+                            'fill-color': ['get', 'color'],
+                            'fill-opacity': 0.2,
+                        }}
+                    />
+                    <Layer
+                        id={GEOJSON_CUSTOM_ZONES_LAYER_OUTLINE_ID}
+                        beforeId={GEOJSON_CUSTOM_ZONES_LAYER_ID}
+                        type="line"
+                        paint={{
+                            'line-color': ['get', 'color'],
+                            'line-opacity': 0.4,
+                            'line-width': 2,
+                            'line-dasharray': [2, 2],
                         }}
                     />
                 </Source>

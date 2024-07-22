@@ -1,7 +1,8 @@
 import { CollectivityType } from '@/models/geo/_common';
 import { GeoZone } from '@/models/geo/geo-zone';
 import { SelectOption } from '@/models/ui/select-option';
-import { bboxPolygon, booleanWithin } from '@turf/turf';
+import { MAPBOX_TOKEN } from '@/utils/constants';
+import { bboxPolygon, booleanWithin, centroid, getCoord } from '@turf/turf';
 import { Polygon } from 'geojson';
 
 export type LngLat = [number, number];
@@ -43,5 +44,21 @@ export const getBoundsFitGeometryExtendedLevel = (geometry: Polygon, bounds: [nu
         }
 
         currentExtendedLevel++;
+    }
+};
+
+export const getAddressFromPolygon = async (polygon: Polygon): Promise<string | null> => {
+    const [lng, lat] = getCoord(centroid(polygon)) as LngLat;
+
+    const response = await fetch(
+        `https://api.mapbox.com/search/geocode/v6/reverse?longitude=${lng}&latitude=${lat}&access_token=${MAPBOX_TOKEN}`,
+    );
+    const data = await response.json();
+
+    if (data.features && data.features.length > 0) {
+        const address = data.features[0].properties.name_preferred;
+        return address;
+    } else {
+        return null;
     }
 };

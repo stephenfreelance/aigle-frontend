@@ -9,17 +9,24 @@ import { DetectionObjectDetail } from '@/models/detection-object';
 import { TileSet } from '@/models/tile-set';
 import api from '@/utils/api';
 import { formatParcel } from '@/utils/format';
+import { getAddressFromPolygon } from '@/utils/geojson';
 import { Accordion, ActionIcon, Loader as MantineLoader, ScrollArea, Tooltip } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconCalendarClock, IconDownload, IconMap, IconMapPin, IconRoute, IconX } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { centroid } from '@turf/turf';
 import { Position } from 'geojson';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import classes from './index.module.scss';
 
 const getGoogleMapLink = (point: Position) => `https://www.google.com/maps/place/${point[1]},${point[0]}`;
+
+const updateAdress = (objectTypeUuid: string, address: string) => {
+    return api.patch(getDetectionObjectDetailEndpoint(objectTypeUuid), {
+        address,
+    });
+};
 
 interface ComponentInnerProps {
     detectionObject: DetectionObjectDetail;
@@ -46,6 +53,24 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
     } = centroid(initialDetection.geometry);
 
     const latLong = `${centerPoint[1].toFixed(5)}, ${centerPoint[0].toFixed(5)}`;
+    const [address, setAddress] = useState<string | null | undefined>(detectionObject.address || undefined);
+
+    useEffect(() => {
+        if (detectionObject.address) {
+            return;
+        }
+
+        const getAddress = async () => {
+            const address = await getAddressFromPolygon(detectionObject.detections[0].geometry);
+            setAddress(address);
+
+            if (address) {
+                await updateAdress(detectionObject.uuid, address);
+            }
+        };
+
+        getAddress();
+    }, []);
 
     return (
         <ScrollArea scrollbars="y" offsetScrollbars={true} classNames={{ root: classes.container }}>
@@ -103,7 +128,20 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                             <p className={classes['general-informations-content-item']}>
                                 <IconRoute size={16} />
                                 <span className={classes['general-informations-content-item-text']}>
-                                    {detectionObject.address ? detectionObject.address : <i>Adresse non-spécifiée</i>}
+                                    {address ? (
+                                        address
+                                    ) : (
+                                        <>
+                                            {address === undefined ? (
+                                                <>
+                                                    <i>Chargement de l&apos;adresse...</i>
+                                                    <MantineLoader ml="xs" size="xs" />
+                                                </>
+                                            ) : (
+                                                <i>Adresse non-spécifiée</i>
+                                            )}
+                                        </>
+                                    )}
                                 </span>
                             </p>
                             <p className={classes['general-informations-content-item']}>

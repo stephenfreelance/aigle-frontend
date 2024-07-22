@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 
 import MapControlCustom from '@/components/Map/controls/MapControlCustom';
-import { MapLayer } from '@/models/map-layer';
+import { MapGeoCustomZoneLayer, MapTileSetLayer } from '@/models/map-layer';
 import { TileSetType, tileSetTypes } from '@/models/tile-set';
 import { TILE_SET_TYPES_NAMES_MAP } from '@/utils/constants';
 import { useMap } from '@/utils/map-context';
@@ -11,14 +11,15 @@ import classes from './index.module.scss';
 
 const CONTROL_LABEL = 'Affichage des couches';
 
-type LayersMap = Record<TileSetType, MapLayer[]>;
+type LayersMap = Record<TileSetType, MapTileSetLayer[]>;
 
 interface ComponentInnerProps {
-    layers: MapLayer[];
+    layers: MapTileSetLayer[];
+    customZoneLayers: MapGeoCustomZoneLayer[];
 }
 
-const ComponentInner: React.FC<ComponentInnerProps> = ({ layers }) => {
-    const { setTileSetVisibility } = useMap();
+const ComponentInner: React.FC<ComponentInnerProps> = ({ layers, customZoneLayers }) => {
+    const { setTileSetVisibility, setCustomZoneVisibility } = useMap();
 
     const layersMap: LayersMap = useMemo(
         () =>
@@ -48,7 +49,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ layers }) => {
                         value={backgroundTileSetUuidDisplayed}
                         onChange={(uuid) => setTileSetVisibility(uuid, true)}
                     >
-                        <Stack className={classes['layers-section-group']}>
+                        <Stack className={classes['layers-section-group']} gap="xs">
                             {layersMap.BACKGROUND.map((layer) => (
                                 <Radio key={layer.tileSet.uuid} label={layer.tileSet.name} value={layer.tileSet.uuid} />
                             ))}
@@ -62,7 +63,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ layers }) => {
                     layersMap[type].length ? (
                         <div key={type} className={classes['layers-section']}>
                             <h3 className={classes['layers-section-title']}>{TILE_SET_TYPES_NAMES_MAP[type]}</h3>
-                            <Stack className={classes['layers-section-group']}>
+                            <Stack className={classes['layers-section-group']} gap="xs">
                                 {layersMap[type].map((layer) => (
                                     <Checkbox
                                         key={layer.tileSet.uuid}
@@ -77,6 +78,25 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ layers }) => {
                         </div>
                     ) : null,
                 )}
+            <div className={classes['layers-section']}>
+                <h3 className={classes['layers-section-title']}>Contours des zones à enjeux</h3>
+                <Stack className={classes['layers-section-group']} gap="xs">
+                    {customZoneLayers.map((customZoneLayer) => (
+                        <Checkbox
+                            key={customZoneLayer.geoCustomZone.properties.uuid}
+                            checked={customZoneLayer.displayed}
+                            label={customZoneLayer.geoCustomZone.properties.name}
+                            color={customZoneLayer.geoCustomZone.properties.color}
+                            onChange={(event) =>
+                                setCustomZoneVisibility(
+                                    customZoneLayer.geoCustomZone.properties.uuid,
+                                    event.currentTarget.checked,
+                                )
+                            }
+                        />
+                    ))}
+                </Stack>
+            </div>
         </>
     );
 };
@@ -88,9 +108,9 @@ interface ComponentProps {
 }
 
 const Component: React.FC<ComponentProps> = ({ isShowed, setIsShowed, disabled }) => {
-    const { layers } = useMap();
+    const { layers, customZoneLayers } = useMap();
 
-    if (!layers) {
+    if (!layers || !customZoneLayers) {
         return null;
     }
 
@@ -104,7 +124,7 @@ const Component: React.FC<ComponentProps> = ({ isShowed, setIsShowed, disabled }
             label={CONTROL_LABEL}
             disabled={disabled}
         >
-            <ComponentInner layers={layers} />
+            <ComponentInner layers={layers} customZoneLayers={customZoneLayers} />
         </MapControlCustom>
     );
 };

@@ -6,7 +6,7 @@ import LayoutAdminForm from '@/components/admin/LayoutAdminForm';
 import ErrorCard from '@/components/ui/ErrorCard';
 import Loader from '@/components/ui/Loader';
 import { CollectivityType, GeoCollectivity, GeoCollectivityDetail, collectivityTypes } from '@/models/geo/_common';
-import { MapLayer } from '@/models/map-layer';
+import { MapTileSetLayer } from '@/models/map-layer';
 import api from '@/utils/api';
 import { COLLECTIVITY_TYPES_NAMES_MAP, TILES_URL_FALLBACK } from '@/utils/constants';
 import { Button, Card, TextInput } from '@mantine/core';
@@ -35,7 +35,7 @@ interface MapPreviewProps {
 
 const MapPreview: React.FC<MapPreviewProps> = ({ name, geometry }) => {
     const fakeDate = formatISO(new Date());
-    const layers: MapLayer[] = [
+    const layers: MapTileSetLayer[] = [
         {
             displayed: true,
             tileSet: {

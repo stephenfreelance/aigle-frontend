@@ -16,30 +16,41 @@
     }
 }
 
-.object-type-legends {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
+.legends-container {
+    display: flex;
+    flex-direction: row;
+    gap: var(--mantine-spacing-sm);
 
-    margin-top: var(--mantine-spacing-sm);
-
-    .object-type-legend-item {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 8px;
-
-        &:not(:last-of-type) {
-            margin-bottom: var(--mantine-spacing-xs);
-        }
-
-        .object-type-legend-item-square {
-            border: 2px solid;
-
-            width: 16px;
-            height: 16px;
+    .legends {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    
+        margin-top: var(--mantine-spacing-sm);
+    
+        .legend-item {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+    
+            &:not(:last-of-type) {
+                margin-bottom: var(--mantine-spacing-xs);
+            }
+    
+            .legend-item-square {
+                border: 2px solid;
+    
+                width: 16px;
+                height: 16px;
+            }
+    
+            .legend-item-square-custom-zone {
+                border-style: dashed;
+            }
         }
     }
+
 }
 
 .container {

@@ -7,7 +7,7 @@ import LayoutAdminForm from '@/components/admin/LayoutAdminForm';
 import GeoCollectivitiesMultiSelects from '@/components/admin/form-fields/GeoCollectivitiesMultiSelects';
 import ErrorCard from '@/components/ui/ErrorCard';
 import Loader from '@/components/ui/Loader';
-import { MapLayer } from '@/models/map-layer';
+import { MapTileSetLayer } from '@/models/map-layer';
 import {
     TileSet,
     TileSetDetailWithGeometry,
@@ -44,7 +44,7 @@ interface MapPreviewProps {
 
 const MapPreview: React.FC<MapPreviewProps> = ({ url, scheme, name, type, geometry }) => {
     const fakeDate = formatISO(new Date());
-    const layers: MapLayer[] = [
+    const layers: MapTileSetLayer[] = [
         {
             displayed: true,
             tileSet: {

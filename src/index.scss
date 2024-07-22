@@ -124,6 +124,13 @@ table {
     .empty-results-cell {
         text-align: center;
     }
+
+    .color-cell {
+        display: flex;
+        align-items: center;
+    
+        gap: 8px;
+    }    
 }
 
 a:focus {

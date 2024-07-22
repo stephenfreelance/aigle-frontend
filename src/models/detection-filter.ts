@@ -6,4 +6,5 @@ export interface DetectionFilter {
     detectionControlStatuses: DetectionControlStatus[];
     score: number;
     prescripted: boolean | null;
+    customZonesUuids: string[];
 }

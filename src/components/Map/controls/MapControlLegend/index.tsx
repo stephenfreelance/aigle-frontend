@@ -1,8 +1,11 @@
 import React from 'react';
 
 import MapControlCustom from '@/components/Map/controls/MapControlCustom';
+import { GeoCustomZoneGeojsonData } from '@/models/geo/geo-custom-zone';
+import { MapGeoCustomZoneLayer } from '@/models/map-layer';
 import { ObjectType } from '@/models/object-type';
 import { useMap } from '@/utils/map-context';
+import clsx from 'clsx';
 import classes from './index.module.scss';
 
 interface ObjectTypeLegendProps {
@@ -11,9 +14,9 @@ interface ObjectTypeLegendProps {
 
 const ObjectTypeLegend: React.FC<ObjectTypeLegendProps> = ({ objectType }) => {
     return (
-        <li className={classes['object-type-legend-item']}>
+        <li className={classes['legend-item']}>
             <div
-                className={classes['object-type-legend-item-square']}
+                className={classes['legend-item-square']}
                 style={{
                     borderColor: objectType.color,
                 }}
@@ -23,21 +26,52 @@ const ObjectTypeLegend: React.FC<ObjectTypeLegendProps> = ({ objectType }) => {
     );
 };
 
-interface ComponentInnerProps {
-    objectTypes: ObjectType[];
+interface CustomZoneLegendProps {
+    geoCustomZone: GeoCustomZoneGeojsonData;
 }
 
-const ComponentInner: React.FC<ComponentInnerProps> = ({ objectTypes }) => {
+const CustomZoneLegend: React.FC<CustomZoneLegendProps> = ({ geoCustomZone }) => {
     return (
-        <>
-            <h2>Types d&apos;objets</h2>
+        <li className={classes['legend-item']}>
+            <div
+                className={clsx(classes['legend-item-square'], classes['legend-item-square-custom-zone'])}
+                style={{
+                    borderColor: `${geoCustomZone.properties.color}66`,
+                    backgroundColor: `${geoCustomZone.properties.color}33`,
+                }}
+            />
+            {geoCustomZone.properties.name}
+        </li>
+    );
+};
 
-            <ul className={classes['object-type-legends']}>
-                {objectTypes.map((type) => (
-                    <ObjectTypeLegend key={type.uuid} objectType={type} />
-                ))}
-            </ul>
-        </>
+interface ComponentInnerProps {
+    objectTypes: ObjectType[];
+    customZoneLayers: MapGeoCustomZoneLayer[];
+}
+
+const ComponentInner: React.FC<ComponentInnerProps> = ({ objectTypes, customZoneLayers }) => {
+    return (
+        <div className={classes['legends-container']}>
+            <div>
+                <h2>Types d&apos;objets</h2>
+
+                <ul className={classes['legends']}>
+                    {objectTypes.map((type) => (
+                        <ObjectTypeLegend key={type.uuid} objectType={type} />
+                    ))}
+                </ul>
+            </div>
+            <div>
+                <h2>Zones à enjeux</h2>
+
+                <ul className={classes['legends']}>
+                    {customZoneLayers.map(({ geoCustomZone }) => (
+                        <CustomZoneLegend key={geoCustomZone.properties.uuid} geoCustomZone={geoCustomZone} />
+                    ))}
+                </ul>
+            </div>
+        </div>
     );
 };
 
@@ -47,9 +81,9 @@ interface ComponentProps {
 }
 
 const Component: React.FC<ComponentProps> = ({ isShowed, setIsShowed }) => {
-    const { objectTypes } = useMap();
+    const { objectTypes, customZoneLayers } = useMap();
 
-    if (!objectTypes) {
+    if (!objectTypes || !customZoneLayers) {
         return null;
     }
 
@@ -63,7 +97,7 @@ const Component: React.FC<ComponentProps> = ({ isShowed, setIsShowed }) => {
             isShowed={isShowed}
             setIsShowed={setIsShowed}
         >
-            <ComponentInner objectTypes={objectTypes} />
+            <ComponentInner objectTypes={objectTypes} customZoneLayers={customZoneLayers} />
         </MapControlCustom>
     );
 };
