@@ -423,6 +423,8 @@ const Component: React.FC<ComponentProps> = ({
         return undefined;
     };
 
+    console.log({customZoneLayers});
+
     return (
         <div className={classes.container}>
             <Map
