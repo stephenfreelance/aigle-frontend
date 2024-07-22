@@ -303,10 +303,10 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                             <Stack gap="xs" mt="sm">
                                 {customZoneLayers.map((zoneLayer) => (
                                     <Checkbox
-                                        key={zoneLayer.geoCustomZone.properties.uuid}
-                                        value={zoneLayer.geoCustomZone.properties.uuid}
-                                        label={zoneLayer.geoCustomZone.properties.name}
-                                        color={zoneLayer.geoCustomZone.properties.color}
+                                        key={zoneLayer.geoCustomZone.uuid}
+                                        value={zoneLayer.geoCustomZone.uuid}
+                                        label={zoneLayer.geoCustomZone.name}
+                                        color={zoneLayer.geoCustomZone.color}
                                     />
                                 ))}
                             </Stack>

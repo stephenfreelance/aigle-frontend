@@ -1,7 +1,7 @@
 import React from 'react';
 
 import MapControlCustom from '@/components/Map/controls/MapControlCustom';
-import { GeoCustomZoneGeojsonData } from '@/models/geo/geo-custom-zone';
+import { GeoCustomZone } from '@/models/geo/geo-custom-zone';
 import { MapGeoCustomZoneLayer } from '@/models/map-layer';
 import { ObjectType } from '@/models/object-type';
 import { useMap } from '@/utils/map-context';
@@ -27,7 +27,7 @@ const ObjectTypeLegend: React.FC<ObjectTypeLegendProps> = ({ objectType }) => {
 };
 
 interface CustomZoneLegendProps {
-    geoCustomZone: GeoCustomZoneGeojsonData;
+    geoCustomZone: GeoCustomZone;
 }
 
 const CustomZoneLegend: React.FC<CustomZoneLegendProps> = ({ geoCustomZone }) => {
@@ -36,11 +36,11 @@ const CustomZoneLegend: React.FC<CustomZoneLegendProps> = ({ geoCustomZone }) =>
             <div
                 className={clsx(classes['legend-item-square'], classes['legend-item-square-custom-zone'])}
                 style={{
-                    borderColor: `${geoCustomZone.properties.color}66`,
-                    backgroundColor: `${geoCustomZone.properties.color}33`,
+                    borderColor: `${geoCustomZone.color}66`,
+                    backgroundColor: `${geoCustomZone.color}33`,
                 }}
             />
-            {geoCustomZone.properties.name}
+            {geoCustomZone.name}
         </li>
     );
 };
@@ -67,7 +67,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ objectTypes, customZone
 
                 <ul className={classes['legends']}>
                     {customZoneLayers.map(({ geoCustomZone }) => (
-                        <CustomZoneLegend key={geoCustomZone.properties.uuid} geoCustomZone={geoCustomZone} />
+                        <CustomZoneLegend key={geoCustomZone.uuid} geoCustomZone={geoCustomZone} />
                     ))}
                 </ul>
             </div>

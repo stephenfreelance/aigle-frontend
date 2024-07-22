@@ -1,4 +1,4 @@
-import { GeoCustomZoneGeojsonData } from '@/models/geo/geo-custom-zone';
+import { GeoCustomZone } from '@/models/geo/geo-custom-zone';
 import { TileSet } from '@/models/tile-set';
 
 interface MapLayer {
@@ -10,5 +10,5 @@ export interface MapTileSetLayer extends MapLayer {
 }
 
 export interface MapGeoCustomZoneLayer extends MapLayer {
-    geoCustomZone: GeoCustomZoneGeojsonData;
+    geoCustomZone: GeoCustomZone;
 }

@@ -1,74 +1,31 @@
 import React, { useState } from 'react';
 
 import { GEO_CUSTOM_ZONE_POST_ENDPOINT, getGeoCustomZoneDetailEndpoint } from '@/api-endpoints';
-import Map from '@/components/Map';
 import LayoutAdminForm from '@/components/admin/LayoutAdminForm';
 import ErrorCard from '@/components/ui/ErrorCard';
 import Loader from '@/components/ui/Loader';
-import { MapTileSetLayer } from '@/models/map-layer';
 import api from '@/utils/api';
-import { TILES_URL_FALLBACK } from '@/utils/constants';
-import { Button, Card, ColorInput, JsonInput, TextInput } from '@mantine/core';
+import { Button, ColorInput, Select, TextInput } from '@mantine/core';
 import { UseFormReturnType, isNotEmpty, useForm } from '@mantine/form';
 import { IconHexagonPlus2 } from '@tabler/icons-react';
 import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
-import { formatISO } from 'date-fns';
-import { Geometry } from 'geojson';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
-import { GeoCustomZoneDetail } from '@/models/geo/geo-custom-zone';
-import { geojsonType } from '@turf/turf';
-import classes from './index.module.scss';
+import {
+    GeoCustomZone,
+    GeoCustomZoneDetail,
+    GeoCustomZoneStatus,
+    geoCustomZoneStatuses,
+} from '@/models/geo/geo-custom-zone';
+import { GEO_CUSTOM_ZONE_STATUSES_NAMES_MAP } from '@/utils/constants';
 
 const BACK_URL = '/admin/custom-zones';
-
-interface MapPreviewProps {
-    key: string;
-    name: string;
-    geometry: Geometry;
-}
-
-const MapPreview: React.FC<MapPreviewProps> = ({ name, geometry }) => {
-    const fakeDate = formatISO(new Date());
-    const layers: MapTileSetLayer[] = [
-        {
-            displayed: true,
-            tileSet: {
-                createdAt: fakeDate,
-                updatedAt: fakeDate,
-                uuid: 'fake-uuid',
-                date: fakeDate,
-                name: name,
-                url: TILES_URL_FALLBACK,
-                tileSetStatus: 'VISIBLE',
-                tileSetScheme: 'xyz',
-                tileSetType: 'BACKGROUND',
-                geometry,
-            },
-        },
-    ];
-
-    return (
-        <Card withBorder className={classes['map-preview-container']}>
-            <h2>Aperçu des limites</h2>
-            <div className={classes['map-preview-content']}>
-                <Map
-                    displayDetections={false}
-                    layers={layers}
-                    displayLayersGeometry={true}
-                    boundLayers={false}
-                    fitBoundsFirstLayer={true}
-                />
-            </div>
-        </Card>
-    );
-};
 
 interface FormValues {
     name: string;
     color: string;
-    geometry: string;
+    geoCustomZoneStatus: GeoCustomZoneStatus;
 }
 
 const postForm = async (values: FormValues, uuid?: string) => {
@@ -89,68 +46,14 @@ interface FormProps {
 const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
     const [error, setError] = useState<AxiosError>();
     const navigate = useNavigate();
-    const [mapPreviewProps, setMapPreviewProps] = useState<MapPreviewProps>({
-        name: initialValues.name,
-        geometry: initialValues.geometry ? JSON.parse(initialValues.geometry) : null,
-        key: crypto.randomUUID(),
-    });
 
     const form: UseFormReturnType<FormValues> = useForm({
         mode: 'uncontrolled',
         initialValues,
         validate: {
             name: isNotEmpty("Le nom d'de la zone est requis"),
-            geometry: (value) => {
-                if (!value) {
-                    return null;
-                }
-
-                let isValid = false;
-                let valueParsed: object;
-
-                const error = 'Le format de la geométrie est invalide';
-
-                try {
-                    valueParsed = JSON.parse(value);
-                } catch {
-                    return error;
-                }
-
-                try {
-                    geojsonType(valueParsed, 'Polygon', 'isGeoJsonPolygon');
-                    isValid = true;
-                } catch {}
-
-                try {
-                    geojsonType(valueParsed, 'MultiPolygon', 'isGeoJsonMultiPolygon');
-                    isValid = true;
-                } catch {}
-
-                if (!isValid) {
-                    return error;
-                }
-
-                return null;
-            },
         },
     });
-    form.watch('geometry', ({ value }) =>
-        setMapPreviewProps((prev) => {
-            const newGeometry = form.isValid('geometry') && value ? JSON.parse(value) : null;
-
-            return {
-                ...prev,
-                geometry: newGeometry,
-                key: newGeometry !== prev.geometry ? crypto.randomUUID() : prev.key,
-            };
-        }),
-    );
-    form.watch('name', ({ value }) =>
-        setMapPreviewProps((prev) => ({
-            ...prev,
-            name: value,
-        })),
-    );
 
     const mutation: UseMutationResult<GeoCustomZoneDetail, AxiosError, FormValues> = useMutation({
         mutationFn: (values: FormValues) => postForm(values, uuid),
@@ -196,22 +99,19 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
                 key={form.key('color')}
                 {...form.getInputProps('color')}
             />
-            <JsonInput
-                mt="md"
-                label="Géométrie de la zone"
-                description="GeoJson de type 'Polygon' correspondant aux limites du fond de carte."
-                formatOnBlur
-                autosize
-                resize="vertical"
-                minRows={4}
-                maxRows={8}
-                mb="md"
-                validationError="Le format de la geométrie est invalide"
-                key={form.key('geometry')}
-                {...form.getInputProps('geometry')}
-            />
 
-            <MapPreview {...mapPreviewProps} key={mapPreviewProps.key} />
+            <Select
+                allowDeselect={false}
+                label="Statut"
+                withAsterisk
+                mt="md"
+                data={geoCustomZoneStatuses.map((role) => ({
+                    value: role,
+                    label: GEO_CUSTOM_ZONE_STATUSES_NAMES_MAP[role],
+                }))}
+                key={form.key('geoCustomZoneStatus')}
+                {...form.getInputProps('geoCustomZoneStatus')}
+            />
 
             <div className="form-actions">
                 <Button
@@ -235,7 +135,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues }) => {
 const EMPTY_FORM_VALUES: FormValues = {
     name: '',
     color: '',
-    geometry: '',
+    geoCustomZoneStatus: 'ACTIVE',
 };
 
 interface ComponentInnerProps {
@@ -248,11 +148,11 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ uuid }) => {
             return;
         }
 
-        const res = await api.get<GeoCustomZoneDetail>(getGeoCustomZoneDetailEndpoint(uuid));
+        const res = await api.get<GeoCustomZone>(getGeoCustomZoneDetailEndpoint(uuid));
         const initialValues: FormValues = {
             name: res.data.name,
             color: res.data.color,
-            geometry: JSON.stringify(res.data.geometry, null, 2),
+            geoCustomZoneStatus: res.data.geoCustomZoneStatus,
         };
 
         return initialValues;

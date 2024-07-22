@@ -1,5 +1,6 @@
 import { detectionControlStatuses, detectionValidationStatuses } from '@/models/detection';
 import { DetectionFilter } from '@/models/detection-filter';
+import { GeoCustomZoneGeojsonData } from '@/models/geo/geo-custom-zone';
 import { MapGeoCustomZoneLayer, MapTileSetLayer } from '@/models/map-layer';
 import { MapSettings } from '@/models/map-settings';
 import { ObjectType } from '@/models/object-type';
@@ -38,7 +39,11 @@ interface MapState {
     objectTypes?: ObjectType[];
     detectionFilter?: DetectionFilter;
     settings?: MapSettings;
+    geoCustomZoneUuidGeoCustomZoneGeojsonDataMap: Record<string, GeoCustomZoneGeojsonData>;
+    geoCustomZonesGeojsonLoading: string[];
 
+    setGeoCustomZoneGeojsonLoading: (geoCustomZoneUuid: string, loading: boolean) => void;
+    setGeoCustomZoneGeojson: (geoCustomZoneGeojson: GeoCustomZoneGeojsonData) => void;
     setMapSettings: (settings: MapSettings) => void;
     resetLayers: () => void;
     updateDetectionFilter: (detectionFilter: DetectionFilter) => void;
@@ -50,6 +55,35 @@ interface MapState {
 }
 
 const useMap = create<MapState>()((set, get) => ({
+    setGeoCustomZoneGeojson: (geoCustomZoneGeojson: GeoCustomZoneGeojsonData) => {
+        set(() => ({
+            geoCustomZoneUuidGeoCustomZoneGeojsonDataMap: {
+                ...get().geoCustomZoneUuidGeoCustomZoneGeojsonDataMap,
+                [geoCustomZoneGeojson.properties.uuid]: geoCustomZoneGeojson,
+            },
+        }));
+        get().setGeoCustomZoneGeojsonLoading(geoCustomZoneGeojson.properties.uuid, false);
+    },
+    geoCustomZonesGeojsonLoading: [],
+    setGeoCustomZoneGeojsonLoading: (geoCustomZoneUuid: string, loading: boolean) => {
+        set((state) => {
+            let geoCustomZonesGeojsonLoading: string[];
+
+            if (loading) {
+                geoCustomZonesGeojsonLoading = Array.from(
+                    new Set([...state.geoCustomZonesGeojsonLoading, geoCustomZoneUuid]),
+                );
+            } else {
+                geoCustomZonesGeojsonLoading = state.geoCustomZonesGeojsonLoading.filter(
+                    (uuid) => uuid !== geoCustomZoneUuid,
+                );
+            }
+
+            return {
+                geoCustomZonesGeojsonLoading,
+            };
+        });
+    },
     setMapSettings: (settings: MapSettings) => {
         const allObjectTypes: ObjectType[] = [];
         const objectTypesUuids = new Set<string>();
@@ -73,7 +107,7 @@ const useMap = create<MapState>()((set, get) => ({
             layers,
             customZoneLayers: settings.geoCustomZones.map((geoCustomZone) => ({
                 geoCustomZone,
-                displayed: true,
+                displayed: false,
             })),
             objectTypes: allObjectTypes,
             detectionFilter: {
@@ -82,7 +116,7 @@ const useMap = create<MapState>()((set, get) => ({
                 detectionControlStatuses: [...detectionControlStatuses],
                 score: 0.6,
                 prescripted: null,
-                customZonesUuids: settings.geoCustomZones.map(({ properties }) => properties.uuid),
+                customZonesUuids: settings.geoCustomZones.map(({ uuid }) => uuid),
             },
         }));
     },
@@ -148,9 +182,7 @@ const useMap = create<MapState>()((set, get) => ({
                 return {};
             }
 
-            const layerIndex = state.customZoneLayers.findIndex(
-                (layer) => layer.geoCustomZone.properties.uuid === uuid,
-            );
+            const layerIndex = state.customZoneLayers.findIndex((layer) => layer.geoCustomZone.uuid === uuid);
 
             if (layerIndex === -1) {
                 return {};
@@ -172,6 +204,7 @@ const useMap = create<MapState>()((set, get) => ({
             )
             .map((layer) => layer.tileSet);
     },
+    geoCustomZoneUuidGeoCustomZoneGeojsonDataMap: {},
     eventEmitter: new EventEmitter<MapEventType>(),
 }));
 

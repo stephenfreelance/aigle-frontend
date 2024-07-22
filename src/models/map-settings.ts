@@ -1,4 +1,4 @@
-import { GeoCustomZoneGeojsonData } from '@/models/geo/geo-custom-zone';
+import { GeoCustomZone } from '@/models/geo/geo-custom-zone';
 import { ObjectType } from '@/models/object-type';
 import { ObjectTypeCategoryObjectTypeStatus } from '@/models/object-type-category';
 import { TileSet } from '@/models/tile-set';
@@ -18,5 +18,5 @@ export interface MapSettings {
     objectTypeSettings: ObjectTypeSetting[];
     tileSetSettings: TileSetSetting[];
     globalGeometry: Geometry | null;
-    geoCustomZones: GeoCustomZoneGeojsonData[];
+    geoCustomZones: GeoCustomZone[];
 }

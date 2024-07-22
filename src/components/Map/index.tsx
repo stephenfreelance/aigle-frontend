@@ -139,7 +139,14 @@ const Component: React.FC<ComponentProps> = ({
 
     const [addAnnotationPolygon, setAddAnnotationPolygon] = useState<Polygon>();
 
-    const { eventEmitter, detectionFilter, resetLayers, settings, customZoneLayers } = useMap();
+    const {
+        eventEmitter,
+        detectionFilter,
+        resetLayers,
+        settings,
+        customZoneLayers,
+        geoCustomZoneUuidGeoCustomZoneGeojsonDataMap,
+    } = useMap();
 
     const [cursor, setCursor] = useState<string>();
     const [mapRef, setMapRef] = useState<mapboxgl.Map>();
@@ -423,7 +430,7 @@ const Component: React.FC<ComponentProps> = ({
         return undefined;
     };
 
-    console.log({customZoneLayers});
+    console.log({ customZoneLayers });
 
     return (
         <div className={classes.container}>
@@ -572,8 +579,11 @@ const Component: React.FC<ComponentProps> = ({
                     type="geojson"
                     data={featureCollection(
                         (customZoneLayers || [])
-                            ?.filter(({ displayed }) => displayed)
-                            .map((layer) => layer.geoCustomZone),
+                            ?.filter(
+                                ({ displayed, geoCustomZone }) =>
+                                    displayed && geoCustomZoneUuidGeoCustomZoneGeojsonDataMap[geoCustomZone.uuid],
+                            )
+                            .map((layer) => geoCustomZoneUuidGeoCustomZoneGeojsonDataMap[layer.geoCustomZone.uuid]),
                     )}
                 >
                     <Layer
