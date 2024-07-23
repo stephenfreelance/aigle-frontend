@@ -377,25 +377,23 @@ const Component: React.FC<ComponentProps> = ({
         };
     }, []);
 
-    const onMapClick = ({ features, target }: mapboxgl.MapLayerMouseEvent) => {
-        if (!features || !features.length) {
-            setDetectionDetailsShowed(null);
-            setLeftSectionShowed(undefined);
-            target.setPadding({
+    const closeDetectionDetail = useCallback(() => {
+        setDetectionDetailsShowed(null);
+        setLeftSectionShowed(undefined);
+        mapRef?.easeTo({
+            padding: {
                 top: 0,
                 right: 0,
                 bottom: 0,
                 left: 0,
-            });
-            target.easeTo({
-                padding: {
-                    top: 0,
-                    right: 0,
-                    bottom: 0,
-                    left: 0,
-                },
-                duration: 250,
-            });
+            },
+            duration: 250,
+        });
+    }, [mapRef]);
+
+    const onMapClick = ({ features, target }: mapboxgl.MapLayerMouseEvent) => {
+        if (!features || !features.length) {
+            closeDetectionDetail();
             return;
         }
 
@@ -662,7 +660,7 @@ const Component: React.FC<ComponentProps> = ({
                         <DetectionDetail
                             detectionObjectUuid={detectionDetailsShowed.detectionObjectUuid}
                             detectionUuid={detectionDetailsShowed.detectionUuid}
-                            onClose={() => setDetectionDetailsShowed(null)}
+                            onClose={() => closeDetectionDetail()}
                         />
                     </div>
                 ) : undefined}
