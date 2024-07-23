@@ -8,7 +8,7 @@ import { Document, Image, Page, StyleSheet, Text, View } from '@react-pdf/render
 import { format } from 'date-fns';
 import React from 'react';
 
-const countSuspectObjectsParcel = (parcel: ParcelDetail, excludeObjectUuid: string): Record<string, number> => {
+const countSuspectObjectsParcel = (parcel: ParcelDetail, excludeObjectUuid: string): Record<string, number> | null => {
     const suspectObjectsMap: Record<string, number> = {};
 
     parcel.detectionObjects.forEach((detectionObject) => {
@@ -26,6 +26,10 @@ const countSuspectObjectsParcel = (parcel: ParcelDetail, excludeObjectUuid: stri
 
         suspectObjectsMap[detectionObject.objectType.name] += 1;
     });
+
+    if (Object.keys(suspectObjectsMap).length === 0) {
+        return null;
+    }
 
     return suspectObjectsMap;
 };
@@ -59,16 +63,16 @@ const styles = StyleSheet.create({
     },
     topSectionLogo: {},
     subTitleContainer: {
-        marginTop: '8px',
+        marginTop: '6px',
     },
     subTitle: {
         fontFamily: 'Courier-Oblique',
     },
     mainSection: {
-        marginTop: '16px',
+        marginTop: '12px',
     },
     tilePreviews: {
-        marginTop: '16px',
+        marginTop: '12px',
 
         display: 'flex',
         flexDirection: 'row',
@@ -84,7 +88,7 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     tilePreviewTitle: {
-        marginTop: '4px',
+        marginTop: '2px',
         width: '100%',
         fontSize: 8,
         textAlign: 'center',

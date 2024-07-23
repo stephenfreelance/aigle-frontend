@@ -59,7 +59,6 @@ const MAP_CONTROLS: {
     // search bar
     {
         control: MAPBOX_GEOCODER,
-
         position: 'top-left',
     },
     // scale
