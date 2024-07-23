@@ -143,6 +143,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, preview
                     </Text>
                     <Text>Coordonnées GPS : {latLong}</Text>
                     <Text>Objet signalé : {detectionObject.objectType.name}</Text>
+                    <Text>Zones à enjeux : {parcel?.customGeoZones.map((zone) => zone.name).join(', ')}</Text>
                     <Text>
                         Statut:{' '}
                         {
