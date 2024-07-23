@@ -8,13 +8,14 @@ import Loader from '@/components/ui/Loader';
 import { DetectionObjectDetail } from '@/models/detection-object';
 import { TileSet } from '@/models/tile-set';
 import api from '@/utils/api';
-import { formatParcel } from '@/utils/format';
+import { formatCommune, formatParcel } from '@/utils/format';
 import { getAddressFromPolygon } from '@/utils/geojson';
 import { Accordion, ActionIcon, Loader as MantineLoader, ScrollArea, Tooltip } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconCalendarClock, IconDownload, IconMap, IconMapPin, IconRoute, IconX } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { centroid } from '@turf/turf';
+import clsx from 'clsx';
 import { Position } from 'geojson';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -127,22 +128,34 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                         <Accordion.Panel className={classes['general-informations-content']}>
                             <p className={classes['general-informations-content-item']}>
                                 <IconRoute size={16} />
-                                <span className={classes['general-informations-content-item-text']}>
-                                    {address ? (
-                                        address
-                                    ) : (
-                                        <>
-                                            {address === undefined ? (
-                                                <>
-                                                    <i>Chargement de l&apos;adresse...</i>
-                                                    <MantineLoader ml="xs" size="xs" />
-                                                </>
-                                            ) : (
-                                                <i>Adresse non-spécifiée</i>
-                                            )}
-                                        </>
-                                    )}
-                                </span>
+                                <div>
+                                    <span className={classes['general-informations-content-item-text']}>
+                                        {address ? (
+                                            address
+                                        ) : (
+                                            <>
+                                                {address === undefined ? (
+                                                    <>
+                                                        <i>Chargement de l&apos;adresse...</i>
+                                                        <MantineLoader ml="xs" size="xs" />
+                                                    </>
+                                                ) : (
+                                                    <i>Adresse non-spécifiée</i>
+                                                )}
+                                            </>
+                                        )}
+                                    </span>
+                                    <span
+                                        className={clsx(
+                                            classes['general-informations-content-item-text'],
+                                            classes['general-informations-content-item-text-grey'],
+                                        )}
+                                    >
+                                        {detectionObject.parcel ? (
+                                            <>{formatCommune(detectionObject.parcel.commune)}</>
+                                        ) : null}
+                                    </span>
+                                </div>
                             </p>
                             <p className={classes['general-informations-content-item']}>
                                 <IconCalendarClock size={16} />{' '}

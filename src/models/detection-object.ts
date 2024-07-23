@@ -10,13 +10,16 @@ interface DetectionObjectDetailTilesetPreview {
     tileSet: TileSet;
 }
 
-export interface DetectionObjectDetail extends Uuided, Timestamped {
+export interface DetectionObjectMinimal extends Uuided, Timestamped {
     id: number;
     address: string;
     objectType: ObjectType;
+}
+
+export interface DetectionObjectDetail extends DetectionObjectMinimal {
     detections: DetectionWithTile[];
     tileSets: DetectionObjectDetailTilesetPreview[];
-    parcel: ParcelMinimal;
+    parcel: ParcelMinimal | null;
     userGroupRights: UserGroupRight[];
 }
 

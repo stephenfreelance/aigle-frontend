@@ -1,4 +1,7 @@
 import { Timestamped, Uuided } from '@/models/data';
+import { DetectionWithTile } from '@/models/detection';
+import { DetectionObjectMinimal } from '@/models/detection-object';
+import { GeoCommune } from '@/models/geo/geo-commune';
 import { Polygon } from 'geojson';
 
 export interface ParcelMinimal extends Uuided, Timestamped {
@@ -6,10 +9,17 @@ export interface ParcelMinimal extends Uuided, Timestamped {
     prefix: string;
     section: string;
     numParcel: string;
+    commune: GeoCommune;
 }
 
 export interface Parcel extends ParcelMinimal {
     geometry: Polygon;
 }
 
-export interface ParcelDetail extends Parcel {}
+export interface ParcelDetectionObject extends DetectionObjectMinimal {
+    detection: DetectionWithTile | null;
+}
+
+export interface ParcelDetail extends Parcel {
+    detectionObjects: ParcelDetectionObject[];
+}

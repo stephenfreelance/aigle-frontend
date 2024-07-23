@@ -32,6 +32,10 @@
                     display: flex;
                     align-items: center;
                     justify-content: flex-start;
+
+                    &.general-informations-content-item-text-grey {
+                        color: var(--mantine-color-gray-7);
+                    }
                 }
             }
         }

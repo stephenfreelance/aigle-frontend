@@ -381,6 +381,12 @@ const Component: React.FC<ComponentProps> = ({
         if (!features || !features.length) {
             setDetectionDetailsShowed(null);
             setLeftSectionShowed(undefined);
+            target.setPadding({
+                top: 0,
+                right: 0,
+                bottom: 0,
+                left: 0,
+            });
             target.easeTo({
                 padding: {
                     top: 0,

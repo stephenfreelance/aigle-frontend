@@ -1,17 +1,40 @@
 import logoImg from '@/assets/logo.png';
 import prefetHeraultImg from '@/assets/signalement-pdf/prefet_herault.jpg';
 import { DetectionObjectDetail } from '@/models/detection-object';
+import { ParcelDetail } from '@/models/parcel';
 import { DEFAULT_DATE_FORMAT, DETECTION_CONTROL_STATUSES_NAMES_MAP } from '@/utils/constants';
-import { formatParcel } from '@/utils/format';
+import { formatCommune, formatParcel } from '@/utils/format';
 import { Document, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import { format } from 'date-fns';
 import React from 'react';
+
+const countSuspectObjectsParcel = (parcel: ParcelDetail, excludeObjectUuid: string): Record<string, number> => {
+    const suspectObjectsMap: Record<string, number> = {};
+
+    parcel.detectionObjects.forEach((detectionObject) => {
+        if (
+            detectionObject.uuid === excludeObjectUuid ||
+            !detectionObject.detection ||
+            detectionObject.detection.detectionData.detectionValidationStatus !== 'SUSPECT'
+        ) {
+            return;
+        }
+
+        if (!suspectObjectsMap[detectionObject.objectType.name]) {
+            suspectObjectsMap[detectionObject.objectType.name] = 0;
+        }
+
+        suspectObjectsMap[detectionObject.objectType.name] += 1;
+    });
+
+    return suspectObjectsMap;
+};
 
 // Create styles
 const styles = StyleSheet.create({
     page: {
         padding: '32px 16px',
-        fontSize: 12,
+        fontSize: 10,
     },
     topSection: {
         flexDirection: 'row',
@@ -63,7 +86,7 @@ const styles = StyleSheet.create({
     tilePreviewTitle: {
         marginTop: '4px',
         width: '100%',
-        fontSize: 10,
+        fontSize: 8,
         textAlign: 'center',
     },
 });
@@ -78,10 +101,13 @@ export interface ComponentProps {
     detectionObject: DetectionObjectDetail;
     latLong: string;
     previewImages: PreviewImage[];
+    parcel?: ParcelDetail | null;
 }
 
 // Create Document Component
-const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, previewImages }) => {
+const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, previewImages, parcel }) => {
+    const suspectObjectsCount = parcel ? countSuspectObjectsParcel(parcel, detectionObject.uuid) : null;
+
     return (
         <Document>
             <Page size="A4" style={styles.page}>
@@ -105,7 +131,16 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, preview
                 </View>
 
                 <View style={styles.mainSection}>
-                    <Text>Parcelle : {formatParcel(detectionObject.parcel || 'Parcelle non-spécifiée')}</Text>
+                    <Text>
+                        Commune de{' '}
+                        {detectionObject.parcel?.commune
+                            ? formatCommune(detectionObject.parcel.commune, 'CODE_AFTER_NAME')
+                            : 'Commune non-spécifiée'}
+                    </Text>
+                    <Text>
+                        Parcelle :{' '}
+                        {detectionObject.parcel ? formatParcel(detectionObject.parcel) : 'Parcelle non-spécifiée'}
+                    </Text>
                     <Text>Coordonnées GPS : {latLong}</Text>
                     <Text>Objet signalé : {detectionObject.objectType.name}</Text>
                     <Text>
@@ -119,6 +154,14 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, preview
                     <Text>
                         Date de la dernière modification : {format(detectionObject.updatedAt, DEFAULT_DATE_FORMAT)}
                     </Text>
+                    {suspectObjectsCount ? (
+                        <Text>
+                            Autre objets suspects sur la parcelle :{' '}
+                            {Object.keys(suspectObjectsCount)
+                                .map((key) => `${key} : ${suspectObjectsCount[key]}`)
+                                .join(', ')}
+                        </Text>
+                    ) : null}
                 </View>
 
                 <View style={styles.tilePreviews}>

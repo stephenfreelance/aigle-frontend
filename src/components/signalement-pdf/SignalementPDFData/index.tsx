@@ -19,8 +19,12 @@ import { bbox } from '@turf/turf';
 import { format } from 'date-fns';
 import classes from './index.module.scss';
 
-const fetchParcelDetail = async (uuid: string) => {
-    const res = await api.get<ParcelDetail>(getDetectionParcelDetailEndpoint(uuid));
+const fetchParcelDetail = async (uuid: string, tileSetUuid: string) => {
+    const res = await api.get<ParcelDetail>(getDetectionParcelDetailEndpoint(uuid), {
+        params: {
+            tileSetUuid,
+        },
+    });
 
     return res.data;
 };
@@ -89,14 +93,17 @@ interface ComponentProps {
 }
 const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onGenerationFinished }: ComponentProps) => {
     const [previewImages, setPreviewImages] = useState<Record<string, PreviewImage>>({});
+
+    const tileSetsToRender = detectionObject.tileSets.filter(({ preview }) => preview).reverse();
+    const lastTileSetUuid = tileSetsToRender[0].tileSet.uuid;
+
     const { data: parcel, isLoading: parcelIsLoading } = useQuery({
         queryKey: [getDetectionParcelDetailEndpoint(String(detectionObject.parcel?.uuid))],
         enabled: !!detectionObject.parcel?.uuid,
-        queryFn: () => fetchParcelDetail(detectionObject.parcel?.uuid),
+        queryFn: () => fetchParcelDetail(detectionObject.parcel?.uuid, lastTileSetUuid),
     });
 
     const previewBounds = bbox(detectionObject.detections[0].tile.geometry) as [number, number, number, number];
-    const tileSetsToRender = detectionObject.tileSets.filter(({ preview }) => preview).reverse();
 
     const tileSetUuidsDetectionsMap = detectionObject.detections.reduce<Record<string, DetectionWithTile>>(
         (prev, curr) => {
@@ -165,7 +172,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onGener
                         onIdle={() => {
                             setTimeout(
                                 () => getPreviewImage(tileSet.uuid, format(tileSet.date, DEFAULT_DATE_FORMAT), index),
-                                250,
+                                1000,
                             );
                         }}
                         extendedLevel={1}
@@ -192,6 +199,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onGener
                     latLong={latLong}
                     previewImages={Object.values(previewImages).sort((a, b) => a.index - b.index)}
                     onGenerationFinished={onGenerationFinished}
+                    parcel={parcel}
                 />
             ) : null}
         </div>
