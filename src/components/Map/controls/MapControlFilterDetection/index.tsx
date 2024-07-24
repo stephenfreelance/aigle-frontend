@@ -150,7 +150,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                         <Slider
                             className={classes['score-slider']}
                             label={formatScore}
-                            min={0.3}
+                            min={0}
                             max={1}
                             step={0.05}
                             key={form.key('score')}
