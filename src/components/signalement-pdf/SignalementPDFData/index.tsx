@@ -11,7 +11,7 @@ import { DetectionObjectDetail } from '@/models/detection-object';
 import { ParcelDetail } from '@/models/parcel';
 import { TileSet } from '@/models/tile-set';
 import api from '@/utils/api';
-import { DEFAULT_DATE_FORMAT } from '@/utils/constants';
+import { DEFAULT_DATE_FORMAT, PARCEL_COLOR } from '@/utils/constants';
 import { formatParcel } from '@/utils/format';
 import { usePDF } from '@react-pdf/renderer';
 import { useQuery } from '@tanstack/react-query';
@@ -158,7 +158,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onGener
                                       },
                                   ]
                                 : []),
-                            ...(parcel?.geometry ? [{ geometry: parcel.geometry, color: '#FF6F00' }] : []),
+                            ...(parcel?.geometry ? [{ geometry: parcel.geometry, color: PARCEL_COLOR }] : []),
                         ]}
                         tileSet={tileSet}
                         key={tileSet.uuid}

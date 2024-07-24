@@ -31,7 +31,7 @@ const getInitialLayers = (settings: MapSettings) => {
     return layers;
 };
 
-type MapEventType = 'UPDATE_DETECTIONS' | 'JUMP_TO';
+type MapEventType = 'UPDATE_DETECTIONS' | 'JUMP_TO' | 'DISPLAY_PARCEL';
 
 interface MapState {
     layers?: MapTileSetLayer[];
@@ -41,6 +41,7 @@ interface MapState {
     settings?: MapSettings;
     geoCustomZoneUuidGeoCustomZoneGeojsonDataMap: Record<string, GeoCustomZoneGeojsonData>;
     geoCustomZonesGeojsonLoading: string[];
+    userLastPosition?: GeoJSON.Position | null;
 
     setGeoCustomZoneGeojsonLoading: (geoCustomZoneUuid: string, loading: boolean) => void;
     setGeoCustomZoneGeojson: (geoCustomZoneGeojson: GeoCustomZoneGeojsonData) => void;
@@ -118,6 +119,7 @@ const useMap = create<MapState>()((set, get) => ({
                 prescripted: null,
                 customZonesUuids: settings.geoCustomZones.map(({ uuid }) => uuid),
             },
+            userLastPosition: settings.userLastPosition,
         }));
     },
     resetLayers: () => {

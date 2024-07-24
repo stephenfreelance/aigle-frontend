@@ -19,4 +19,5 @@ export interface MapSettings {
     tileSetSettings: TileSetSetting[];
     globalGeometry: Geometry | null;
     geoCustomZones: GeoCustomZone[];
+    userLastPosition: GeoJSON.Position | null;
 }

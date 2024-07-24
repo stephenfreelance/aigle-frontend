@@ -72,8 +72,8 @@ const fetchParcel = async (values: FormValues): Promise<Parcel | null> => {
     const res = await api.get<Paginated<Parcel>>(PARCEL_LIST_ENDPOINT, {
         params: {
             communeUuids: [values.commune?.value],
-            sectionQ: values.section,
-            numParcelQ: values.numParcel,
+            section: values.section,
+            numParcel: values.numParcel,
             limit: 1,
             offset: 0,
         },
@@ -159,6 +159,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ setIsShowed }) => {
         }
 
         eventEmitter.emit('JUMP_TO', getCoord(centroid(parcel.geometry)));
+        eventEmitter.emit('DISPLAY_PARCEL', parcel.geometry);
         form.setValues({
             section: '',
             numParcel: '',

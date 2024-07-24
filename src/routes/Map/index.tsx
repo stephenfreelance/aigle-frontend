@@ -12,7 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import classes from './index.module.scss';
 
 const Component: React.FC = () => {
-    const { setMapSettings, layers } = useMap();
+    const { setMapSettings, layers, userLastPosition } = useMap();
     const fetchMapSettings = async () => {
         const res = await api.get<MapSettings>(MAP_SETTINGS_ENDPOINT);
         setMapSettings(res.data);
@@ -28,7 +28,11 @@ const Component: React.FC = () => {
         <>
             <Header />
             <div className={classes['map-container']}>
-                {layers ? <MapComponent layers={layers} /> : <Loader className={classes.loader} />}
+                {layers ? (
+                    <MapComponent layers={layers} initialPosition={userLastPosition} />
+                ) : (
+                    <Loader className={classes.loader} />
+                )}
             </div>
         </>
     );

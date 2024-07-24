@@ -19,7 +19,13 @@
 .legends-container {
     display: flex;
     flex-direction: row;
-    gap: var(--mantine-spacing-sm);
+    gap: var(--mantine-spacing-md);
+
+    .legends-column {
+        display: flex;
+        flex-direction: column;
+        gap: var(--mantine-spacing-md);
+    }
 
     .legends {
         list-style-type: none;
@@ -45,7 +51,7 @@
                 height: 16px;
             }
     
-            .legend-item-square-custom-zone {
+            .legend-item-square-dashed {
                 border-style: dashed;
             }
         }

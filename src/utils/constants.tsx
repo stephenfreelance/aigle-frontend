@@ -17,6 +17,8 @@ export const PASSWORD_MIN_LENGTH = 8;
 
 export const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
+export const PARCEL_COLOR = '#FF6F00';
+
 export const ROLES_NAMES_MAP: { [role in UserRole]: string } = {
     SUPER_ADMIN: 'super admin',
     ADMIN: 'admin',

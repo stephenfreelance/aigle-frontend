@@ -3,7 +3,8 @@
 $margin-sides: 10px;
 
 .content {
-    width: calc(100% - 2*$margin-sides);
+    max-width: calc(100% - 2*$margin-sides);
+    width: 1000px;
 
     top: 58px; // 10px margin of searchar bar + 48px total size of search bar
 

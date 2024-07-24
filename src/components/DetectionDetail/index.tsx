@@ -10,6 +10,7 @@ import { TileSet } from '@/models/tile-set';
 import api from '@/utils/api';
 import { formatCommune, formatParcel } from '@/utils/format';
 import { getAddressFromPolygon } from '@/utils/geojson';
+import { useMap } from '@/utils/map-context';
 import { Accordion, ActionIcon, Loader as MantineLoader, ScrollArea, Tooltip } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconCalendarClock, IconDownload, IconMap, IconMapPin, IconRoute, IconX } from '@tabler/icons-react';
@@ -42,6 +43,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
     detectionUuid,
     onClose,
 }) => {
+    const { eventEmitter } = useMap();
     const [signalementPdfLoading, setSignalementPdfLoading] = useState(false);
 
     const initialDetection =
@@ -179,7 +181,20 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                                 <IconMap size={16} />
                                 <span className={classes['general-informations-content-item-text']}>
                                     {detectionObject.parcel ? (
-                                        `Parcelle : ${formatParcel(detectionObject.parcel)}`
+                                        <>
+                                            Parcelle :&nbsp;
+                                            <Link
+                                                to=""
+                                                onClick={() => {
+                                                    eventEmitter.emit(
+                                                        'DISPLAY_PARCEL',
+                                                        detectionObject.parcel.geometry,
+                                                    );
+                                                }}
+                                            >
+                                                {formatParcel(detectionObject.parcel)}
+                                            </Link>
+                                        </>
                                     ) : (
                                         <i>Parcelle non-spécifiée</i>
                                     )}

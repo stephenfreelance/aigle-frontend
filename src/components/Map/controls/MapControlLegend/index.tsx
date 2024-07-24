@@ -4,6 +4,7 @@ import MapControlCustom from '@/components/Map/controls/MapControlCustom';
 import { GeoCustomZone } from '@/models/geo/geo-custom-zone';
 import { MapGeoCustomZoneLayer } from '@/models/map-layer';
 import { ObjectType } from '@/models/object-type';
+import { PARCEL_COLOR } from '@/utils/constants';
 import { useMap } from '@/utils/map-context';
 import clsx from 'clsx';
 import classes from './index.module.scss';
@@ -34,7 +35,7 @@ const CustomZoneLegend: React.FC<CustomZoneLegendProps> = ({ geoCustomZone }) =>
     return (
         <li className={classes['legend-item']}>
             <div
-                className={clsx(classes['legend-item-square'], classes['legend-item-square-custom-zone'])}
+                className={clsx(classes['legend-item-square'], classes['legend-item-square-dashed'])}
                 style={{
                     borderColor: `${geoCustomZone.color}66`,
                     backgroundColor: `${geoCustomZone.color}33`,
@@ -62,14 +63,31 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ objectTypes, customZone
                     ))}
                 </ul>
             </div>
-            <div>
-                <h2>Zones à enjeux</h2>
+            <div className={classes['legends-column']}>
+                <div>
+                    <h2>Zones à enjeux</h2>
 
-                <ul className={classes['legends']}>
-                    {customZoneLayers.map(({ geoCustomZone }) => (
-                        <CustomZoneLegend key={geoCustomZone.uuid} geoCustomZone={geoCustomZone} />
-                    ))}
-                </ul>
+                    <ul className={classes['legends']}>
+                        {customZoneLayers.map(({ geoCustomZone }) => (
+                            <CustomZoneLegend key={geoCustomZone.uuid} geoCustomZone={geoCustomZone} />
+                        ))}
+                    </ul>
+                </div>
+                <div>
+                    <h2>Indications</h2>
+
+                    <ul className={classes['legends']}>
+                        <li className={classes['legend-item']}>
+                            <div
+                                className={clsx(classes['legend-item-square'], classes['legend-item-square-dashed'])}
+                                style={{
+                                    borderColor: PARCEL_COLOR,
+                                }}
+                            />
+                            Parcelle
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     );

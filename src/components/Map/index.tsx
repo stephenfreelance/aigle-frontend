@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import Map, { Layer, Source, ViewStateChangeEvent } from 'react-map-gl';
+import Map, { GeolocateControl, Layer, Source, ViewStateChangeEvent } from 'react-map-gl';
 
 import { getDetectionListEndpoint } from '@/api-endpoints';
 import DetectionDetail from '@/components/DetectionDetail';
@@ -12,7 +12,7 @@ import MapControlSearchParcel from '@/components/Map/controls/MapControlSearchPa
 import { DetectionGeojsonData, DetectionProperties } from '@/models/detection';
 import { MapTileSetLayer } from '@/models/map-layer';
 import api from '@/utils/api';
-import { MAPBOX_TOKEN } from '@/utils/constants';
+import { MAPBOX_TOKEN, PARCEL_COLOR } from '@/utils/constants';
 import { useMap } from '@/utils/map-context';
 import { Loader as MantineLoader } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
@@ -28,7 +28,7 @@ import DrawRectangle, { DrawStyles } from 'mapbox-gl-draw-rectangle-restrict-are
 import classes from './index.module.scss';
 
 const ZOOM_LIMIT_TO_DISPLAY_DETECTIONS = 15;
-const MAP_INITIAL_VIEW_STATE = {
+const MAP_INITIAL_VIEW_STATE_DEFAULT = {
     longitude: 3.95657,
     latitude: 43.61951,
     zoom: 16,
@@ -96,6 +96,7 @@ const GEOJSON_DETECTIONS_LAYER_ID = 'detections-geojson-layer';
 const GEOJSON_DETECTIONS_LAYER_OUTLINE_ID = 'detections-geojson-layer-outline';
 const GEOJSON_LAYER_EXTRA_ID = 'geojson-layer-data-extra';
 const GEOJSON_LAYER_EXTRA_BOUNDINGS_ID = 'geojson-layer-data-extra-boundings';
+const GEOJSON_PARCEL_LAYER_ID = 'parcel-geojson-layer';
 
 const GEOJSON_LAYER_EXTRA_COLOR = '#FF0000';
 
@@ -119,6 +120,7 @@ interface ComponentProps {
     displayLayersGeometry?: boolean;
     fitBoundsFirstLayer?: boolean;
     boundLayers?: boolean;
+    initialPosition?: GeoJSON.Position | null;
 }
 
 const Component: React.FC<ComponentProps> = ({
@@ -127,6 +129,7 @@ const Component: React.FC<ComponentProps> = ({
     fitBoundsFirstLayer = false,
     displayDetections = true,
     boundLayers = true,
+    initialPosition,
 }) => {
     const [mapBounds, setMapBounds] = useState<MapBounds>();
     const [detectionDetailsShowed, setDetectionDetailsShowed] = useState<{
@@ -135,6 +138,8 @@ const Component: React.FC<ComponentProps> = ({
     } | null>(null);
     const [leftSectionShowed, setLeftSectionShowed] = useState<LeftSection>();
     const [drawMode, setDrawMode] = useState<boolean>(false);
+
+    const [parcelPolygonDisplayed, setParcelPolygonDisplayed] = useState<Polygon>();
 
     const [addAnnotationPolygon, setAddAnnotationPolygon] = useState<Polygon>();
 
@@ -166,56 +171,6 @@ const Component: React.FC<ComponentProps> = ({
                 node.addControl(control, position);
             }
         });
-
-        // change labels
-
-        for (const { querySelector, title } of [
-            {
-                querySelector: '.mapbox-gl-draw_polygon',
-                title: 'Dessiner un objet',
-            },
-            {
-                querySelector: '.mapboxgl-ctrl-fullscreen',
-                title: 'Plein écran',
-            },
-            {
-                querySelector: '.mapboxgl-ctrl-fullscreen > .mapboxgl-ctrl-icon',
-                title: 'Plein écran',
-            },
-            {
-                querySelector: '.mapboxgl-ctrl-zoom-in',
-                title: 'Zoomer',
-            },
-            {
-                querySelector: '.mapboxgl-ctrl-zoom-in > .mapboxgl-ctrl-icon',
-                title: 'Zoomer',
-            },
-            {
-                querySelector: '.mapboxgl-ctrl-zoom-out',
-                title: 'Dézoomer',
-            },
-            {
-                querySelector: '.mapboxgl-ctrl-zoom-out > .mapboxgl-ctrl-icon',
-                title: 'Dézoomer',
-            },
-            {
-                querySelector: '.mapboxgl-ctrl-compass',
-                title: 'Boussole',
-            },
-            {
-                querySelector: '.mapboxgl-ctrl-compass > .mapboxgl-ctrl-icon',
-                title: 'Boussole',
-            },
-        ]) {
-            const control = document.querySelector(querySelector);
-
-            if (!control) {
-                continue;
-            }
-
-            control.setAttribute('title', title);
-            control.setAttribute('aria-label', title);
-        }
 
         // draw control callbacks
 
@@ -264,6 +219,66 @@ const Component: React.FC<ComponentProps> = ({
                 node.fitBounds(bbox(layer.tileSet.geometry), { padding: 20, animate: false });
             }
         }
+
+        // change controls labels
+
+        setTimeout(() => {
+            for (const { querySelector, title } of [
+                {
+                    querySelector: '.mapbox-gl-draw_polygon',
+                    title: 'Dessiner un objet',
+                },
+                {
+                    querySelector: '.mapboxgl-ctrl-fullscreen',
+                    title: 'Plein écran',
+                },
+                {
+                    querySelector: '.mapboxgl-ctrl-fullscreen > .mapboxgl-ctrl-icon',
+                    title: 'Plein écran',
+                },
+                {
+                    querySelector: '.mapboxgl-ctrl-zoom-in',
+                    title: 'Zoomer',
+                },
+                {
+                    querySelector: '.mapboxgl-ctrl-zoom-in > .mapboxgl-ctrl-icon',
+                    title: 'Zoomer',
+                },
+                {
+                    querySelector: '.mapboxgl-ctrl-zoom-out',
+                    title: 'Dézoomer',
+                },
+                {
+                    querySelector: '.mapboxgl-ctrl-zoom-out > .mapboxgl-ctrl-icon',
+                    title: 'Dézoomer',
+                },
+                {
+                    querySelector: '.mapboxgl-ctrl-compass',
+                    title: 'Boussole',
+                },
+                {
+                    querySelector: '.mapboxgl-ctrl-compass > .mapboxgl-ctrl-icon',
+                    title: 'Boussole',
+                },
+                {
+                    querySelector: '.mapboxgl-ctrl-geolocate',
+                    title: 'Ma position',
+                },
+                {
+                    querySelector: '.mapboxgl-ctrl-geolocate > .mapboxgl-ctrl-icon',
+                    title: 'Ma position',
+                },
+            ]) {
+                const control = document.querySelector(querySelector);
+
+                if (!control) {
+                    continue;
+                }
+
+                control.setAttribute('title', title);
+                control.setAttribute('aria-label', title);
+            }
+        }, 100);
     }, []);
 
     const layersDisplayed = layers.filter((layer) => layer.displayed);
@@ -341,6 +356,21 @@ const Component: React.FC<ComponentProps> = ({
 
         return () => {
             eventEmitter.off('JUMP_TO', jumpTo);
+        };
+    }, [mapRef]);
+    useEffect(() => {
+        if (!mapRef) {
+            return;
+        }
+
+        const displayParcel = (polygon: Polygon) => {
+            setParcelPolygonDisplayed(polygon);
+        };
+
+        eventEmitter.on('DISPLAY_PARCEL', displayParcel);
+
+        return () => {
+            eventEmitter.off('DISPLAY_PARCEL', displayParcel);
         };
     }, [mapRef]);
     useEffect(() => {
@@ -433,15 +463,16 @@ const Component: React.FC<ComponentProps> = ({
         return undefined;
     };
 
-    console.log({ customZoneLayers });
-
     return (
         <div className={classes.container}>
             <Map
                 reuseMaps={true}
                 ref={handleMapRef}
                 mapboxAccessToken={MAPBOX_TOKEN}
-                initialViewState={MAP_INITIAL_VIEW_STATE}
+                initialViewState={{
+                    ...MAP_INITIAL_VIEW_STATE_DEFAULT,
+                    ...(initialPosition ? { longitude: initialPosition[0], latitude: initialPosition[1] } : {}),
+                }}
                 onLoad={loadDataFromBounds}
                 onMoveEnd={loadDataFromBounds}
                 interactiveLayerIds={[GEOJSON_DETECTIONS_LAYER_ID]}
@@ -451,6 +482,16 @@ const Component: React.FC<ComponentProps> = ({
                 cursor={cursor}
                 {...(settings?.globalGeometry ? { maxBounds: bbox(settings.globalGeometry) } : {})}
             >
+                <GeolocateControl
+                    position="top-left"
+                    style={{
+                        position: 'fixed',
+                        left: '300px', // searchbar width
+                        zIndex: 10,
+                        transform: 'translateX(calc(-10px - 100%))',
+                        background: 'none',
+                    }}
+                />
                 {displayDetections ? (
                     <>
                         <MapControlSearchParcel
@@ -578,6 +619,22 @@ const Component: React.FC<ComponentProps> = ({
                     />
                 </Source>
                 <Source
+                    id="parcel-geojson-data"
+                    type="geojson"
+                    data={parcelPolygonDisplayed || EMPTY_GEOJSON_FEATURE_COLLECTION}
+                >
+                    <Layer
+                        id={GEOJSON_PARCEL_LAYER_ID}
+                        beforeId={GEOJSON_DETECTIONS_LAYER_OUTLINE_ID}
+                        type="line"
+                        paint={{
+                            'line-width': 2,
+                            'line-color': PARCEL_COLOR,
+                            'line-dasharray': [2, 2],
+                        }}
+                    />
+                </Source>
+                <Source
                     id="custom-zones-geojson-data"
                     type="geojson"
                     data={featureCollection(
@@ -591,7 +648,7 @@ const Component: React.FC<ComponentProps> = ({
                 >
                     <Layer
                         id={GEOJSON_CUSTOM_ZONES_LAYER_ID}
-                        beforeId={GEOJSON_DETECTIONS_LAYER_OUTLINE_ID}
+                        beforeId={GEOJSON_PARCEL_LAYER_ID}
                         type="fill"
                         paint={{
                             'fill-color': ['get', 'color'],
