@@ -31,32 +31,31 @@
         list-style-type: none;
         padding: 0;
         margin: 0;
-    
+
         margin-top: var(--mantine-spacing-sm);
-    
+
         .legend-item {
             display: flex;
             flex-direction: row;
             align-items: center;
             gap: 8px;
-    
+
             &:not(:last-of-type) {
                 margin-bottom: var(--mantine-spacing-xs);
             }
-    
+
             .legend-item-square {
                 border: 2px solid;
-    
+
                 width: 16px;
                 height: 16px;
             }
-    
+
             .legend-item-square-dashed {
                 border-style: dashed;
             }
         }
     }
-
 }
 
 .container {
