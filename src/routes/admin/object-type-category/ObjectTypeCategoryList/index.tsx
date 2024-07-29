@@ -55,6 +55,7 @@ const Component: React.FC = () => {
 
     return (
         <LayoutAdminBase
+            title="Liste des thématiques"
             actions={
                 <>
                     <Button leftSection={<IconCategoryPlus />} component={Link} to="/admin/object-type-categories/form">

@@ -148,7 +148,7 @@ const Component: React.FC<ComponentProps> = ({
 
             {displayName ? (
                 <>
-                    <p className={classes['detection-tile-preview-title']}>{tileSet.name}</p>
+                    <p className={clsx('detection-tile-preview-title', classes['detection-tile-preview-title'])}>{tileSet.name}</p>
                     <p className={classes['detection-tile-preview-date']}>
                         {format(tileSet.date, DEFAULT_DATE_FORMAT)}
                     </p>

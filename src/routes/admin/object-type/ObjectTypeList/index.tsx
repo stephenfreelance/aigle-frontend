@@ -42,6 +42,7 @@ const Component: React.FC = () => {
 
     return (
         <LayoutAdminBase
+            title="Liste des types d'objets"
             actions={
                 <>
                     <Button leftSection={<IconCubePlus />} component={Link} to="/admin/object-types/form">

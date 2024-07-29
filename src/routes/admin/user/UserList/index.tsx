@@ -35,6 +35,7 @@ const Component: React.FC = () => {
 
     return (
         <LayoutAdminBase
+            title="Liste des utilisateurs"
             actions={
                 <>
                     <Button leftSection={<IconUserPlus />} component={Link} to={'/admin/users/form'}>

@@ -32,6 +32,7 @@ const Component: React.FC = () => {
 
     return (
         <LayoutAdminBase
+            title="Liste des fonds de carte"
             actions={
                 <>
                     <Button leftSection={<IconMapPlus />} component={Link} to="/admin/tile-sets/form">

@@ -1,6 +1,6 @@
 import React, { PropsWithChildren } from 'react';
 
-import Layout from '@/components/Layout';
+import LayoutAdmin from '@/components/admin/LayoutAdmin';
 import { Button } from '@mantine/core';
 import { IconChevronLeft } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
@@ -10,20 +10,17 @@ interface AdminSubheaderProps {
     backUrl: string;
 }
 
-const AdminSubheader: React.FC<AdminSubheaderProps> = ({ backText, backUrl }) => {
-    return (
-        <header className="admin-subheader">
-            <Button component={Link} to={backUrl} variant="transparent" leftSection={<IconChevronLeft />}>
-                {backText}
-            </Button>
-        </header>
-    );
-};
-
 interface ComponentProps extends AdminSubheaderProps {}
 
 const Component: React.FC<PropsWithChildren<ComponentProps>> = ({ backText, backUrl, children }) => {
-    return <Layout subHeader={<AdminSubheader backText={backText} backUrl={backUrl} />}>{children}</Layout>;
+    return (
+        <LayoutAdmin>
+            <Button p={0} component={Link} to={backUrl} variant="transparent" leftSection={<IconChevronLeft />}>
+                {backText}
+            </Button>
+            {children}
+        </LayoutAdmin>
+    );
 };
 
 export default Component;

@@ -26,6 +26,7 @@ const Component: React.FC = () => {
 
     return (
         <LayoutAdminBase
+            title="Liste des zones à enjeux"
             actions={
                 <>
                     <Button leftSection={<IconHexagonPlus2 />} component={Link} to="/admin/custom-zones/form">

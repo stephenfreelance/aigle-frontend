@@ -28,6 +28,7 @@ const Component: React.FC = () => {
 
     return (
         <LayoutAdminBase
+            title="Liste des groupes d'utilisateurs"
             actions={
                 <>
                     <Button leftSection={<IconUserPlus />} component={Link} to={'/admin/user-groups/form'}>

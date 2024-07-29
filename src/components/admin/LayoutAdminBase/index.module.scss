@@ -1,1 +1,10 @@
 @import '@/constants.scss';
+
+
+.top-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: var(--mantine-spacing-md);
+}

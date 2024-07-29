@@ -70,13 +70,11 @@ const Component: React.FC = () => {
     });
 
     return (
-        <LayoutAdminBase>
+        <LayoutAdminBase title="Informations pour lancer un import">
             {isLoading || !data ? (
                 <Loader />
             ) : (
                 <div className={classes.container}>
-                    <h1>Informations pour lancer un import</h1>
-
                     <p>
                         Pour lancer un import, vous devez fournir une table dans un schema autre que <Code>public</Code>{' '}
                         OU un fichier CSV avec les données à importer.

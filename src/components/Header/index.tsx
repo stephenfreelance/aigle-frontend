@@ -3,26 +3,29 @@ import React from 'react';
 import logoSmallImg from '@/assets/logo_small.png';
 import { useAuth } from '@/utils/auth-context';
 import { DEFAULT_ROUTE, ROLES_NAMES_MAP } from '@/utils/constants';
-import { Avatar, Button, Divider, Image, Menu, NavLink } from '@mantine/core';
+import { Avatar, Burger, Button, Divider, Image, Menu, NavLink } from '@mantine/core';
 import { IconAdjustments, IconLogout, IconMap } from '@tabler/icons-react';
-import clsx from 'clsx';
 import { Link, useLocation } from 'react-router-dom';
 import classes from './index.module.scss';
 
-interface ComponentProps {
-    hasSubHeader?: boolean;
+interface BurgerState {
+    opened: boolean;
+    toggle: () => void;
 }
 
-const Component: React.FC<ComponentProps> = ({ hasSubHeader }) => {
+interface ComponentProps {
+    burgerState?: BurgerState;
+}
+
+const Component: React.FC<ComponentProps> = ({ burgerState }) => {
     const { userMe, logout } = useAuth();
     const { pathname } = useLocation();
 
     return (
-        <header
-            className={clsx(classes.container, {
-                [classes['has-subheader']]: hasSubHeader,
-            })}
-        >
+        <header className={classes.container}>
+            {burgerState ? (
+                <Burger opened={burgerState.opened} onClick={burgerState.toggle} hiddenFrom="sm" size="sm" />
+            ) : null}
             <div className="navigation-items">
                 <Link to={DEFAULT_ROUTE} className={classes['logo-container']}>
                     <Image src={logoSmallImg} alt="Logo Aigle" h="100%" fit="contain" />
@@ -47,7 +50,7 @@ const Component: React.FC<ComponentProps> = ({ hasSubHeader }) => {
             </div>
 
             {userMe ? (
-                <Menu>
+                <Menu position="bottom-end">
                     <Menu.Target>
                         <div className={classes['user-infos']}>
                             <div className={classes['user-infos-details']}>
@@ -59,6 +62,12 @@ const Component: React.FC<ComponentProps> = ({ hasSubHeader }) => {
                     </Menu.Target>
 
                     <Menu.Dropdown className={classes.menu}>
+                        <div className={classes['user-infos']}>
+                            <div className={classes['user-infos-details']}>
+                                <p className={classes['user-infos-details-email']}>{userMe.email}</p>
+                                <p className={classes['user-infos-details-role']}>{ROLES_NAMES_MAP[userMe.userRole]}</p>
+                            </div>
+                        </div>
                         <Button variant="outline" leftSection={<IconLogout />} onClick={() => logout()}>
                             Déconnexion
                         </Button>

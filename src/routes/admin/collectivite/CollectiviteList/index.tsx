@@ -53,7 +53,7 @@ const Component: React.FC = () => {
     }, [collectivityTypeSelected]);
 
     return (
-        <LayoutAdminBase>
+        <LayoutAdminBase title={`Liste des collectivités`}>
             <Button.Group className={classes['collectivity-type-selection']}>
                 {collectivityTypes.map((type) => (
                     <Button

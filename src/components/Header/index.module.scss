@@ -1,12 +1,8 @@
-@import '@/constants.scss';
+@import "@/constants.scss";
 
 .container {
     top: 0;
     padding-right: 0;
-
-    &.has-subheader {
-        border: none;
-    }
 
     .avatar-button {
         border: 0;
@@ -31,8 +27,15 @@
 
 .menu {
     padding: 16px !important;
-}
 
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+
+    .user-infos {
+        display: none;
+    }
+}
 .user-infos {
     display: flex;
     height: 100%;
@@ -60,6 +63,24 @@
         }
         .user-infos-details-role {
             font-size: 0.75rem;
+        }
+    }
+}
+
+
+@media screen and (max-width: 768px) {
+    .user-infos {
+        .user-infos-details {
+            display: none;
+        }
+    }
+
+    .menu {
+        .user-infos {
+            display: flex;
+            .user-infos-details {
+                display: block;
+            }
         }
     }
 }

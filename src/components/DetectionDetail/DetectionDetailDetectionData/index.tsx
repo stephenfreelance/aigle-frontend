@@ -156,7 +156,7 @@ const Form: React.FC<FormProps> = ({
         <form onSubmit={form.onSubmit(handleSubmit)} className={classes.form}>
             {!uuid ? (
                 <InfoCard title="Ajout d'un objet" withCloseButton={false}>
-                    <p>Cet objet n&apos;exsite pas acutellement. Vous êtes sur le point de le créer.</p>
+                    <p>Cet objet n&apos;exsite pas actuellement. Vous êtes sur le point de le créer.</p>
                     <Button mt="xs" type="submit" fullWidth disabled={disabled}>
                         Créer l&apos;objet
                     </Button>
@@ -273,6 +273,8 @@ const Component: React.FC<ComponentProps> = ({
         setDetectionSelected(detection);
     };
 
+    console.log({ tileSetSelected });
+
     return (
         <div className={classes.container}>
             <h2 className={classes.title}>Editer ou rajouter une détection</h2>
@@ -292,6 +294,7 @@ const Component: React.FC<ComponentProps> = ({
 
                 <div className={classes['detection-tile-preview-container']}>
                     <DetectionTilePreview
+                        key={`${tileSetSelected.uuid}-${detectionSelected?.uuid}`}
                         controlsDisplayed={['DEZOOM']}
                         bounds={previewBounds}
                         geometries={[

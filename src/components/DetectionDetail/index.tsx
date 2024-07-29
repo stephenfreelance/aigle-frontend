@@ -130,7 +130,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                         <Accordion.Panel className={classes['general-informations-content']}>
                             <p className={classes['general-informations-content-item']}>
                                 <IconRoute size={16} />
-                                <div>
+                                <span>
                                     <span className={classes['general-informations-content-item-text']}>
                                         {address ? (
                                             address
@@ -157,7 +157,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                                             <>{formatCommune(detectionObject.parcel.commune)}</>
                                         ) : null}
                                     </span>
-                                </div>
+                                </span>
                             </p>
                             <p className={classes['general-informations-content-item']}>
                                 <IconCalendarClock size={16} />{' '}

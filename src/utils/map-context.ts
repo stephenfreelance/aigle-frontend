@@ -1,4 +1,4 @@
-import { detectionControlStatuses, detectionValidationStatuses } from '@/models/detection';
+import { detectionControlStatuses } from '@/models/detection';
 import { DetectionFilter } from '@/models/detection-filter';
 import { GeoCustomZoneGeojsonData } from '@/models/geo/geo-custom-zone';
 import { MapGeoCustomZoneLayer, MapTileSetLayer } from '@/models/map-layer';
@@ -113,7 +113,7 @@ const useMap = create<MapState>()((set, get) => ({
             objectTypes: allObjectTypes,
             detectionFilter: {
                 objectTypesUuids: Array.from(objectTypesUuids),
-                detectionValidationStatuses: [...detectionValidationStatuses],
+                detectionValidationStatuses: ['DETECTED_NOT_VERIFIED', 'SUSPECT'],
                 detectionControlStatuses: [...detectionControlStatuses],
                 score: 0.6,
                 prescripted: null,

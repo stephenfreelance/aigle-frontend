@@ -173,10 +173,6 @@ header {
     }
 }
 
-.admin-subheader {
-    top: $header-height;
-}
-
 .input-label {
     font-weight: 500 !important;
     font-size: var(--input-label-size, var(--mantine-font-size-sm)) !important;
@@ -190,12 +186,6 @@ header {
 
 .mantine-MultiSelect-dropdown {
     z-index: 500 !important;
-}
-
-.mantine-NavLink-body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .multiselect-pills-hidden {
@@ -324,4 +314,8 @@ $tile-margin: calc(-1 * ($tile-size * (1 - $tile-scale)) / 2);
     border-radius: $border-radius-medium;
 
     overflow: hidden;
+}
+
+.detection-tile-preview-title {
+    width: $tile-preview-detail-size;
 }
