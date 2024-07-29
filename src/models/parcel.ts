@@ -24,4 +24,5 @@ export interface ParcelDetectionObject extends DetectionObjectMinimal {
 export interface ParcelDetail extends Parcel {
     detectionObjects: ParcelDetectionObject[];
     customGeoZones: GeoCustomZone[];
+    communeEnvelope: Polygon;
 }

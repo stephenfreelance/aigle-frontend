@@ -182,7 +182,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onGener
             {!previewImages[PLAN_URL_TILESET.uuid] ? (
                 <DetectionTilePreview
                     tileSet={PLAN_URL_TILESET}
-                    bounds={previewBounds}
+                    bounds={parcel ? (bbox(parcel.communeEnvelope) as [number, number, number, number]) : previewBounds}
                     classNames={{
                         main: classes['detection-tile-preview-detail'],
                         inner: classes['detection-tile-preview-inner'],
@@ -190,7 +190,6 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onGener
                     id={getPreviewId(PLAN_URL_TILESET.uuid)}
                     displayName={false}
                     onIdle={() => getPreviewImage(PLAN_URL_TILESET.uuid, 'Plan', tileSetsToRender.length)}
-                    extendedLevel={5}
                 />
             ) : null}
             {Object.keys(previewImages).length === tileSetsToRender.length + 1 ? (

@@ -7,6 +7,7 @@ import { IconPencil, IconZoomOut } from '@tabler/icons-react';
 import clsx from 'clsx';
 import { format } from 'date-fns';
 import { Polygon } from 'geojson';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import React, { useEffect, useRef, useState } from 'react';
 import Map, { Layer, MapRef, Source } from 'react-map-gl';
 import classes from './index.module.scss';
@@ -148,7 +149,9 @@ const Component: React.FC<ComponentProps> = ({
 
             {displayName ? (
                 <>
-                    <p className={clsx('detection-tile-preview-title', classes['detection-tile-preview-title'])}>{tileSet.name}</p>
+                    <p className={clsx('detection-tile-preview-title', classes['detection-tile-preview-title'])}>
+                        {tileSet.name}
+                    </p>
                     <p className={classes['detection-tile-preview-date']}>
                         {format(tileSet.date, DEFAULT_DATE_FORMAT)}
                     </p>
