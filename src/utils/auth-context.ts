@@ -39,6 +39,7 @@ const useAuth = create<AuthState>()(
                     accessToken: undefined,
                     userMe: undefined,
                 }));
+                window.location.reload();
             },
             isAuthenticated: () => !!get().accessToken,
         }),

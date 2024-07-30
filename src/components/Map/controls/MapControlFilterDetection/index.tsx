@@ -263,7 +263,8 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
 
                         {form.getValues().detectionValidationStatuses.length === 0 ? (
                             <p className={classes['empty-filter-text']}>
-                                Aucun filtre sur les statuts de validation n&apos;est appliqué
+                                <p>Aucun filtre sur les statuts</p>
+                                <p>de validation n&apos;est appliqué</p>
                             </p>
                         ) : null}
                     </div>
@@ -288,7 +289,8 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
 
                         {form.getValues().detectionControlStatuses.length === 0 ? (
                             <p className={classes['empty-filter-text']}>
-                                Aucun filtre sur les statuts de contrôle n&apos;est appliqué
+                                <p>Aucun filtre sur les statuts</p> 
+                                <p>de contrôle n&apos;est appliqué</p>
                             </p>
                         ) : null}
                     </div>
@@ -314,7 +316,8 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
 
                         {form.getValues().customZonesUuids.length === 0 ? (
                             <p className={classes['empty-filter-text']}>
-                                Aucune zone à enjeux n&apos;est sélectionnée, tous les objets sont affichés
+                                <p>Aucune zone à enjeux n&apos;est sélectionnée</p>
+                                <p>tous les objets sont affichés</p>
                             </p>
                         ) : null}
                     </div>

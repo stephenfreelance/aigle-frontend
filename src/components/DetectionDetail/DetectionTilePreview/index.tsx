@@ -23,7 +23,15 @@ interface ClassNames {
     inner?: string;
 }
 
+const GEOJSON_LAYER_ID = 'geojson-layer';
+const IMAGE_LAYER_ID = 'image-layer';
+
 type PreviewControl = 'DEZOOM' | 'EDIT';
+
+interface ImageLayer {
+    coordinates: [[number, number], [number, number], [number, number], [number, number]];
+    url: string;
+}
 
 interface ComponentProps {
     geometries?: PreviewGeometry[];
@@ -36,6 +44,7 @@ interface ComponentProps {
     editDetection?: () => void;
     extendedLevel?: number;
     id?: string;
+    imageLayer?: ImageLayer;
     onIdle?: () => void;
 }
 
@@ -50,6 +59,7 @@ const Component: React.FC<ComponentProps> = ({
     editDetection,
     extendedLevel = 0,
     id,
+    imageLayer,
     onIdle,
 }) => {
     const mapRef = useRef<MapRef>();
@@ -102,6 +112,11 @@ const Component: React.FC<ComponentProps> = ({
                         {...(id ? { id } : {})}
                         {...(onIdle ? { onIdle } : {})}
                     >
+                        {imageLayer ? (
+                            <Source type="image" coordinates={imageLayer.coordinates} url={imageLayer.url}>
+                                <Layer id={IMAGE_LAYER_ID} type="raster" />
+                            </Source>
+                        ) : null}
                         {geometries ? (
                             <Source
                                 type="geojson"
@@ -118,7 +133,8 @@ const Component: React.FC<ComponentProps> = ({
                                 }}
                             >
                                 <Layer
-                                    id="geojson-layer"
+                                    id={GEOJSON_LAYER_ID}
+                                    beforeId={imageLayer ? IMAGE_LAYER_ID : undefined}
                                     type="line"
                                     paint={{
                                         'line-color': ['get', 'color'],
@@ -137,7 +153,7 @@ const Component: React.FC<ComponentProps> = ({
                             tileSize={256}
                         >
                             <Layer
-                                beforeId={geometries ? 'geojson-layer' : undefined}
+                                beforeId={geometries ? GEOJSON_LAYER_ID : imageLayer ? IMAGE_LAYER_ID : undefined}
                                 id="raster-layer"
                                 type="raster"
                                 source="raster-source"

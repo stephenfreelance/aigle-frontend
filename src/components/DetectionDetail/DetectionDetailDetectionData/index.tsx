@@ -273,8 +273,6 @@ const Component: React.FC<ComponentProps> = ({
         setDetectionSelected(detection);
     };
 
-    console.log({ tileSetSelected });
-
     return (
         <div className={classes.container}>
             <h2 className={classes.title}>Editer ou rajouter une détection</h2>

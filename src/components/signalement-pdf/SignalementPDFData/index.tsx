@@ -13,10 +13,12 @@ import { TileSet } from '@/models/tile-set';
 import api from '@/utils/api';
 import { DEFAULT_DATE_FORMAT, PARCEL_COLOR } from '@/utils/constants';
 import { formatParcel } from '@/utils/format';
+import { extendBbox } from '@/utils/geojson';
 import { usePDF } from '@react-pdf/renderer';
 import { useQuery } from '@tanstack/react-query';
-import { bbox } from '@turf/turf';
+import { bbox, bboxPolygon, square } from '@turf/turf';
 import { format } from 'date-fns';
+import { Polygon } from 'geojson';
 import classes from './index.module.scss';
 
 const fetchParcelDetail = async (uuid: string, tileSetUuid: string) => {
@@ -85,6 +87,20 @@ const PLAN_URL_TILESET: TileSet = {
 };
 
 const getPreviewId = (tileSetUuid: string) => `preview-${tileSetUuid}`;
+
+const getParcelCrossCoordinates = (parcelGeometry: Polygon) => {
+    const parcelBbox = square(bbox(parcelGeometry));
+    const parcelBboxExtended = extendBbox(parcelBbox as [number, number, number, number], 5);
+
+    const parcelPolygonExtended = bboxPolygon(parcelBboxExtended);
+
+    return [
+        parcelPolygonExtended.geometry.coordinates[0][0],
+        parcelPolygonExtended.geometry.coordinates[0][1],
+        parcelPolygonExtended.geometry.coordinates[0][2],
+        parcelPolygonExtended.geometry.coordinates[0][3],
+    ];
+};
 
 interface ComponentProps {
     detectionObject: DetectionObjectDetail;
@@ -190,6 +206,14 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onGener
                     id={getPreviewId(PLAN_URL_TILESET.uuid)}
                     displayName={false}
                     onIdle={() => getPreviewImage(PLAN_URL_TILESET.uuid, 'Plan', tileSetsToRender.length)}
+                    imageLayer={
+                        parcel
+                            ? {
+                                  coordinates: getParcelCrossCoordinates(parcel?.geometry),
+                                  url: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAZQTFRFAAAAXuGb4/0yFAAAAAJ0Uk5TAP9bkSK1AAAARklEQVR4nO3UIQ4AMAgDQPj/o9ksZgK1ZdcEUXK6GS21L9snAQAAAAAAAAAAAGAAKs4BAOBf0OulIwYAAAAAAAAAAAC8BhbUngDw86zg6AAAAABJRU5ErkJggg==',
+                              }
+                            : undefined
+                    }
                 />
             ) : null}
             {Object.keys(previewImages).length === tileSetsToRender.length + 1 ? (
