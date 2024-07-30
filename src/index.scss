@@ -160,6 +160,8 @@ header {
     z-index: 10;
 
     .navigation-items {
+        height: 100%;
+
         white-space: nowrap;
 
         display: flex;

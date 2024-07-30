@@ -158,7 +158,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, initialGeoSelectedValu
             tileSetScheme: isNotEmpty('Le scheme du fond de carte est requis'),
             tileSetType: isNotEmpty('Le type du fond de carte est requis'),
             maxZoom: (value) => {
-                if (value === null) {
+                if (value === null || value === undefined) {
                     return null;
                 }
 
@@ -175,7 +175,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, initialGeoSelectedValu
                 return null;
             },
             minZoom: (value) => {
-                if (value === null) {
+                if (value === null || value === undefined) {
                     return null;
                 }
 
