@@ -15,6 +15,9 @@
         align-items: center;
         height: 100%;
 
+        padding-left: $content-padding;
+        padding-right: $content-padding;
+
         &:hover {
             background-color: var(--mantine-color-gray-0);
         }
@@ -25,7 +28,9 @@
     }
 }
 
-.tabs, .tabs-list, .tab {
+.tabs,
+.tabs-list,
+.tab {
     height: 100%;
 }
 
@@ -40,6 +45,7 @@
         display: none;
     }
 }
+
 .user-infos {
     display: flex;
     height: 100%;
@@ -65,6 +71,7 @@
             font-weight: 700;
             font-size: 0.9rem;
         }
+
         .user-infos-details-role {
             font-size: 0.75rem;
         }
@@ -81,6 +88,7 @@
     .menu {
         .user-infos {
             display: flex;
+
             .user-infos-details {
                 display: block;
             }

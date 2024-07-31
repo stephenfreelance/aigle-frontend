@@ -13,7 +13,15 @@ import { getAddressFromPolygon } from '@/utils/geojson';
 import { useMap } from '@/utils/map-context';
 import { Accordion, ActionIcon, Loader as MantineLoader, ScrollArea, Tooltip } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { IconCalendarClock, IconDownload, IconMap, IconMapPin, IconRoute, IconX } from '@tabler/icons-react';
+import {
+    IconCalendarClock,
+    IconDownload,
+    IconHexagon,
+    IconMap,
+    IconMapPin,
+    IconRoute,
+    IconX,
+} from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { centroid } from '@turf/turf';
 import clsx from 'clsx';
@@ -200,6 +208,22 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                                     )}
                                 </span>
                             </p>
+
+                            {
+                                <p className={classes['general-informations-content-item']}>
+                                    <IconHexagon size={16} />
+                                    <span className={classes['general-informations-content-item-text']}>
+                                        {detectionObject.customGeoZones.length ? (
+                                            <>
+                                                Zones à enjeux :&nbsp;
+                                                {detectionObject.customGeoZones.map((zone) => zone.name).join(', ')}
+                                            </>
+                                        ) : (
+                                            <i>Aucune zone à enjeux associée</i>
+                                        )}
+                                    </span>
+                                </p>
+                            }
                         </Accordion.Panel>
                     </Accordion.Item>
                 </Accordion>

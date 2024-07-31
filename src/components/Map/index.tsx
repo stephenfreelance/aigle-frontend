@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import Map, { GeolocateControl, Layer, Marker, Source, ViewStateChangeEvent } from 'react-map-gl';
+import Map, { GeolocateControl, Layer, Source, ViewStateChangeEvent } from 'react-map-gl';
 
 import { getDetectionListEndpoint } from '@/api-endpoints';
 import DetectionDetail from '@/components/DetectionDetail';
@@ -27,7 +27,7 @@ import mapboxgl from 'mapbox-gl';
 import DrawRectangle, { DrawStyles } from 'mapbox-gl-draw-rectangle-restrict-area';
 import classes from './index.module.scss';
 
-const ZOOM_LIMIT_TO_DISPLAY_DETECTIONS = 15;
+const ZOOM_LIMIT_TO_DISPLAY_DETECTIONS = 13;
 const MAP_INITIAL_VIEW_STATE_DEFAULT = {
     longitude: 3.95657,
     latitude: 43.61951,
