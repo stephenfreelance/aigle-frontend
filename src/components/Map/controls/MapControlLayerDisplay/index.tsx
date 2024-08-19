@@ -98,7 +98,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ layers, customZoneLayer
                         </div>
                     ) : null,
                 )}
-            <div className={classes['layers-section']}>
+            {/* <div className={classes['layers-section']}>
                 <h3 className={classes['layers-section-title']}>Contours des zones à enjeux</h3>
                 <Stack className={classes['layers-section-group']} gap="xs">
                     {customZoneLayers.map((customZoneLayer) => (
@@ -129,7 +129,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ layers, customZoneLayer
                         />
                     ))}
                 </Stack>
-            </div>
+            </div> */}
         </>
     );
 };
