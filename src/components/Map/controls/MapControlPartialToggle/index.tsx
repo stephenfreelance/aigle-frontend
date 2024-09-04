@@ -46,9 +46,7 @@ const Component: React.FC = () => {
                 size="sm"
                 className={classes.button}
             >
-                {partialLayersDisplayed
-                    ? `Cacher les ${TILE_SET_TYPES_NAMES_MAP.PARTIAL}`
-                    : `Afficher les  ${TILE_SET_TYPES_NAMES_MAP.PARTIAL}`}
+                Images {TILE_SET_TYPES_NAMES_MAP.PARTIAL}
             </Button>
         </MapControlCustom>
     );

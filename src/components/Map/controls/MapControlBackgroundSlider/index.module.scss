@@ -1,7 +1,8 @@
 @import '@/constants.scss';
 
 .content {
-    bottom: 92px; // 36px (partial layers button height) + 10px (partial layers button margin) + 20px (switch height) + 10px (switch margin) + 16px (switch padding)
+    bottom: 46px; // 20px (switch height) + 10px (switch margin) + 16px (switch padding)
+
     left: 0;
 
     margin-left: 10px;
