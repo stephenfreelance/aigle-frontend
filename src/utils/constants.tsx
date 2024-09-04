@@ -41,8 +41,8 @@ export const TILE_SET_STATUSES_NAMES_MAP: {
 export const TILE_SET_TYPES_NAMES_MAP: {
     [role in TileSetType]: string;
 } = {
-    BACKGROUND: 'Arrière-plan',
-    PARTIAL: 'Partiel',
+    BACKGROUND: 'Orthos',
+    PARTIAL: 'Pléiades',
     INDICATIVE: 'Indicative',
 } as const;
 

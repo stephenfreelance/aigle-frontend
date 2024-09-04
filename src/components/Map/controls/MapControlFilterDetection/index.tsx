@@ -289,7 +289,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
 
                         {form.getValues().detectionControlStatuses.length === 0 ? (
                             <p className={classes['empty-filter-text']}>
-                                <p>Aucun filtre sur les statuts</p> 
+                                <p>Aucun filtre sur les statuts</p>
                                 <p>de contrôle n&apos;est appliqué</p>
                             </p>
                         ) : null}

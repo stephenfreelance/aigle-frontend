@@ -228,7 +228,6 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                     </Accordion.Item>
                 </Accordion>
                 <DetectionDetailDetectionObject detectionObject={detectionObject} />
-                <DetectionTileHistory detectionObject={detectionObject} setTileSetSelected={setTileSetSelected} />
                 <DetectionDetailDetectionData
                     detectionObject={detectionObject}
                     detectionRefreshing={detectionObjectRefreshing}
@@ -236,6 +235,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                     tileSetSelected={tileSetSelected}
                     setTileSetSelected={setTileSetSelected}
                 />
+                <DetectionTileHistory detectionObject={detectionObject} setTileSetSelected={setTileSetSelected} />
             </div>
         </ScrollArea>
     );

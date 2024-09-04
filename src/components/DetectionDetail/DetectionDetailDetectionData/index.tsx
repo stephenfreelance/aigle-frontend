@@ -168,6 +168,27 @@ const Form: React.FC<FormProps> = ({
                 </ErrorCard>
             ) : null}
 
+            <Text mt="md" className="input-label">
+                Statut de validation
+            </Text>
+            <div
+                className={clsx(classes['detection-validation-status-select-container'], {
+                    [classes.disabled]: disabled,
+                })}
+            >
+                {detectionValidationStatuses.map((status) => (
+                    <Button
+                        variant={form.getValues().detectionValidationStatus === status ? 'filled' : 'outline'}
+                        color={DETECTION_VALIDATION_STATUSES_COLORS_MAP[status]}
+                        key={status}
+                        disabled={mutation.status === 'pending'}
+                        onClick={() => form.setFieldValue('detectionValidationStatus', status)}
+                    >
+                        {DETECTION_VALIDATION_STATUSES_NAMES_MAP[status]}
+                    </Button>
+                ))}
+            </div>
+
             <Select
                 allowDeselect={false}
                 mt="md"
@@ -197,27 +218,6 @@ const Form: React.FC<FormProps> = ({
                     }
                 />
             ) : null}
-
-            <Text mt="md" className="input-label">
-                Statut de validation
-            </Text>
-            <div
-                className={clsx(classes['detection-validation-status-select-container'], {
-                    [classes.disabled]: disabled,
-                })}
-            >
-                {detectionValidationStatuses.map((status) => (
-                    <Button
-                        variant={form.getValues().detectionValidationStatus === status ? 'filled' : 'outline'}
-                        color={DETECTION_VALIDATION_STATUSES_COLORS_MAP[status]}
-                        key={status}
-                        disabled={mutation.status === 'pending'}
-                        onClick={() => form.setFieldValue('detectionValidationStatus', status)}
-                    >
-                        {DETECTION_VALIDATION_STATUSES_NAMES_MAP[status]}
-                    </Button>
-                ))}
-            </div>
         </form>
     );
 };
@@ -293,7 +293,7 @@ const Component: React.FC<ComponentProps> = ({
                 <div className={classes['detection-tile-preview-container']}>
                     <DetectionTilePreview
                         key={`${tileSetSelected.uuid}-${detectionSelected?.uuid}`}
-                        controlsDisplayed={['DEZOOM']}
+                        controlsDisplayed={['ZOOM']}
                         bounds={previewBounds}
                         geometries={[
                             {

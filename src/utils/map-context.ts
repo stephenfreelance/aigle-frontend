@@ -31,7 +31,7 @@ const getInitialLayers = (settings: MapSettings) => {
     return layers;
 };
 
-type MapEventType = 'UPDATE_DETECTIONS' | 'JUMP_TO' | 'DISPLAY_PARCEL';
+type MapEventType = 'UPDATE_DETECTIONS' | 'JUMP_TO' | 'DISPLAY_PARCEL' | 'LAYERS_UPDATED';
 
 interface MapState {
     layers?: MapTileSetLayer[];
@@ -50,6 +50,7 @@ interface MapState {
     updateDetectionFilter: (detectionFilter: DetectionFilter) => void;
     getDisplayedTileSetUrls: () => string[];
     setTileSetVisibility: (uuid: string, visible: boolean) => void;
+    setTileSetsVisibility: (uuids: string[], visible: boolean) => void;
     setCustomZoneVisibility: (uuid: string, visible: boolean) => void;
     getTileSets: (tileSetTypes: TileSetType[], tileSetStatuses: TileSetStatus[]) => TileSet[];
     eventEmitter: EventEmitter<MapEventType>;
@@ -131,9 +132,12 @@ const useMap = create<MapState>()((set, get) => ({
 
         const layers = getInitialLayers(settings);
 
-        set(() => ({
-            layers,
-        }));
+        set((state) => {
+            state.eventEmitter.emit('LAYERS_UPDATED');
+            return {
+                layers,
+            };
+        });
     },
     updateDetectionFilter: (detectionFilter: DetectionFilter) => {
         set((state) => ({
@@ -145,6 +149,35 @@ const useMap = create<MapState>()((set, get) => ({
     },
     getDisplayedTileSetUrls: () => {
         return (get().layers || []).filter((layer) => layer.displayed).map((layer) => layer.tileSet.url);
+    },
+    setTileSetsVisibility: (uuids: string[], visible: boolean) => {
+        set((state) => {
+            if (!state.layers) {
+                return {};
+            }
+
+            const layerIndexes: number[] = [];
+
+            state.layers.forEach((layer, index) => {
+                if (uuids.includes(layer.tileSet.uuid)) {
+                    if (layer.tileSet.tileSetType === 'BACKGROUND') {
+                        throw new Error('Cannot set background layer visibility with this method');
+                    }
+
+                    layerIndexes.push(index);
+                }
+            });
+
+            layerIndexes.forEach((index) => {
+                state.layers[index].displayed = visible;
+            });
+
+            state.eventEmitter.emit('LAYERS_UPDATED');
+
+            return {
+                layers: state.layers,
+            };
+        });
     },
     setTileSetVisibility: (uuid: string, visible: boolean) => {
         set((state) => {
@@ -172,6 +205,8 @@ const useMap = create<MapState>()((set, get) => ({
                     }
                 });
             }
+
+            state.eventEmitter.emit('LAYERS_UPDATED');
 
             return {
                 layers: state.layers,

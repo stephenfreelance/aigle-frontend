@@ -1,7 +1,7 @@
 @import '@/constants.scss';
 
 .content {
-    bottom: 75px; // 19px (mapbox logo) + 10px (mapbox margin) + 20px (switch height) + 10px (switch margin) + 16px (switch padding)
+    bottom: 46px; // 20px (switch height) + 10px (switch margin) + 16px (switch padding)
     left: 0;
 
     margin-left: 10px;
@@ -59,6 +59,8 @@
 }
 
 .container {
+    margin: 0 0 10px 10px;
+
     padding: 8px 12px;
 
     box-shadow: $shadow;

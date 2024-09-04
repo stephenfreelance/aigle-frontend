@@ -8,6 +8,7 @@ import MapControlBackgroundSlider from '@/components/Map/controls/MapControlBack
 import MapControlFilterDetection from '@/components/Map/controls/MapControlFilterDetection';
 import MapControlLayerDisplay from '@/components/Map/controls/MapControlLayerDisplay';
 import MapControlLegend from '@/components/Map/controls/MapControlLegend';
+import MapControlPartialToggle from '@/components/Map/controls/MapControlPartialToggle';
 import MapControlSearchParcel from '@/components/Map/controls/MapControlSearchParcel';
 import { DetectionGeojsonData, DetectionProperties } from '@/models/detection';
 import { MapTileSetLayer } from '@/models/map-layer';
@@ -507,6 +508,7 @@ const Component: React.FC<ComponentProps> = ({
                             }}
                         />
                         <MapControlBackgroundSlider />
+                        <MapControlPartialToggle />
                         <MapControlLegend
                             isShowed={leftSectionShowed === 'LEGEND'}
                             setIsShowed={(state: boolean) => {
