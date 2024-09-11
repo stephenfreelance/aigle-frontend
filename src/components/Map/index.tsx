@@ -1,15 +1,18 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Map, { GeolocateControl, Layer, Source, ViewStateChangeEvent } from 'react-map-gl';
 
-import { getDetectionListEndpoint } from '@/api-endpoints';
+import { GET_CUSTOM_GEOMETRY_ENDPOINT, getDetectionListEndpoint } from '@/api-endpoints';
 import DetectionDetail from '@/components/DetectionDetail';
 import MapAddAnnotationModal from '@/components/Map/MapAddAnnotationModal';
 import MapControlBackgroundSlider from '@/components/Map/controls/MapControlBackgroundSlider';
 import MapControlFilterDetection from '@/components/Map/controls/MapControlFilterDetection';
 import MapControlLayerDisplay from '@/components/Map/controls/MapControlLayerDisplay';
 import MapControlLegend from '@/components/Map/controls/MapControlLegend';
+import MapControlPartialToggle from '@/components/Map/controls/MapControlPartialToggle';
 import MapControlSearchParcel from '@/components/Map/controls/MapControlSearchParcel';
+import { processDetections } from '@/components/Map/utils/process-detections';
 import { DetectionGeojsonData, DetectionProperties } from '@/models/detection';
+import { GeoCustomZoneGeojsonData } from '@/models/geo/geo-custom-zone';
 import { MapTileSetLayer } from '@/models/map-layer';
 import api from '@/utils/api';
 import { MAPBOX_TOKEN, PARCEL_COLOR } from '@/utils/constants';
@@ -21,7 +24,7 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { bbox, bboxPolygon, centroid, feature, featureCollection, getCoord } from '@turf/turf';
+import { bbox, bboxPolygon, centroid, feature, getCoord } from '@turf/turf';
 import { FeatureCollection, Geometry, Polygon } from 'geojson';
 import mapboxgl from 'mapbox-gl';
 import DrawRectangle, { DrawStyles } from 'mapbox-gl-draw-rectangle-restrict-area';
@@ -143,17 +146,14 @@ const Component: React.FC<ComponentProps> = ({
 
     const [addAnnotationPolygon, setAddAnnotationPolygon] = useState<Polygon>();
 
-    const {
-        eventEmitter,
-        detectionFilter,
-        resetLayers,
-        settings,
-        customZoneLayers,
-        geoCustomZoneUuidGeoCustomZoneGeojsonDataMap,
-    } = useMap();
+    const { eventEmitter, detectionFilter, resetLayers, settings, customZoneLayers } = useMap();
 
     const [cursor, setCursor] = useState<string>();
     const [mapRef, setMapRef] = useState<mapboxgl.Map>();
+
+    const customZoneLayersDisplayedUuids = (customZoneLayers || [])
+        .filter(({ displayed }) => displayed)
+        .map(({ geoCustomZone }) => geoCustomZone.uuid);
 
     const handleMapRef = useCallback((node?: mapboxgl.Map) => {
         if (!node) {
@@ -315,7 +315,8 @@ const Component: React.FC<ComponentProps> = ({
             },
             signal,
         });
-        return res.data;
+
+        return processDetections(res.data);
     };
     const {
         data,
@@ -331,6 +332,34 @@ const Component: React.FC<ComponentProps> = ({
         queryFn: ({ signal }) => fetchDetections(signal, mapBounds),
         placeholderData: keepPreviousData,
         enabled: displayDetections && !!mapBounds,
+    });
+
+    // custom zones fetching
+
+    const fetchCustomZoneGeometries = async (signal: AbortSignal, mapBounds?: MapBounds) => {
+        if (!mapBounds || customZoneLayersDisplayedUuids.length === 0) {
+            return null;
+        }
+
+        const res = await api.get<GeoCustomZoneGeojsonData>(GET_CUSTOM_GEOMETRY_ENDPOINT, {
+            params: {
+                ...mapBounds,
+                uuids: customZoneLayersDisplayedUuids,
+            },
+            signal,
+        });
+
+        return res.data;
+    };
+    const { data: customZonesGeometries } = useQuery({
+        queryKey: [
+            GET_CUSTOM_GEOMETRY_ENDPOINT,
+            ...Object.values(mapBounds || {}),
+            customZoneLayersDisplayedUuids.join(','),
+        ],
+        queryFn: ({ signal }) => fetchCustomZoneGeometries(signal, mapBounds),
+        placeholderData: keepPreviousData,
+        enabled: !!mapBounds,
     });
 
     // event that makes detections to be reloaded
@@ -507,6 +536,7 @@ const Component: React.FC<ComponentProps> = ({
                             }}
                         />
                         <MapControlBackgroundSlider />
+                        <MapControlPartialToggle />
                         <MapControlLegend
                             isShowed={leftSectionShowed === 'LEGEND'}
                             setIsShowed={(state: boolean) => {
@@ -637,14 +667,7 @@ const Component: React.FC<ComponentProps> = ({
                 <Source
                     id="custom-zones-geojson-data"
                     type="geojson"
-                    data={featureCollection(
-                        (customZoneLayers || [])
-                            ?.filter(
-                                ({ displayed, geoCustomZone }) =>
-                                    displayed && geoCustomZoneUuidGeoCustomZoneGeojsonDataMap[geoCustomZone.uuid],
-                            )
-                            .map((layer) => geoCustomZoneUuidGeoCustomZoneGeojsonDataMap[layer.geoCustomZone.uuid]),
-                    )}
+                    data={customZonesGeometries || EMPTY_GEOJSON_FEATURE_COLLECTION}
                 >
                     <Layer
                         id={GEOJSON_CUSTOM_ZONES_LAYER_ID}

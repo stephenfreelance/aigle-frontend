@@ -3,7 +3,7 @@ import { DEFAULT_DATE_FORMAT, MAPBOX_TOKEN } from '@/utils/constants';
 import { extendBbox } from '@/utils/geojson';
 import { ActionIcon, Overlay, Tooltip } from '@mantine/core';
 import { useHover } from '@mantine/hooks';
-import { IconPencil, IconZoomOut } from '@tabler/icons-react';
+import { IconPencil, IconZoomIn, IconZoomOut } from '@tabler/icons-react';
 import clsx from 'clsx';
 import { format } from 'date-fns';
 import { Polygon } from 'geojson';
@@ -26,7 +26,7 @@ interface ClassNames {
 const GEOJSON_LAYER_ID = 'geojson-layer';
 const IMAGE_LAYER_ID = 'image-layer';
 
-type PreviewControl = 'DEZOOM' | 'EDIT';
+type PreviewControl = 'ZOOM' | 'EDIT';
 
 interface ImageLayer {
     coordinates: [[number, number], [number, number], [number, number], [number, number]];
@@ -81,15 +81,26 @@ const Component: React.FC<ComponentProps> = ({
             <div className={clsx(classes['detection-tile-preview-container'], classNames?.main)} ref={previewRef}>
                 {controlsDisplayed?.length && previewHovered ? (
                     <Overlay blur={4} backgroundOpacity={0} className={classes['detection-tile-preview-controls']}>
-                        {controlsDisplayed.includes('DEZOOM') ? (
-                            <Tooltip label="Dézoomer l'aperçu" position="bottom">
-                                <ActionIcon
-                                    variant="filled"
-                                    onClick={() => setCurrentExtendedLevel((prev) => prev + 1)}
-                                >
-                                    <IconZoomOut size={16} />
-                                </ActionIcon>
-                            </Tooltip>
+                        {controlsDisplayed.includes('ZOOM') ? (
+                            <>
+                                <Tooltip label="Dézoomer l'aperçu" position="bottom">
+                                    <ActionIcon
+                                        variant="filled"
+                                        onClick={() => setCurrentExtendedLevel((prev) => prev + 1)}
+                                    >
+                                        <IconZoomOut size={16} />
+                                    </ActionIcon>
+                                </Tooltip>
+                                <Tooltip label="Zoomer l'aperçu" position="bottom">
+                                    <ActionIcon
+                                        variant="filled"
+                                        onClick={() => setCurrentExtendedLevel((prev) => prev - 1)}
+                                        disabled={currentExtendedLevel === 0}
+                                    >
+                                        <IconZoomIn size={16} />
+                                    </ActionIcon>
+                                </Tooltip>
+                            </>
                         ) : null}
                         {controlsDisplayed.includes('EDIT') ? (
                             <Tooltip label="Editer la détection" position="bottom">

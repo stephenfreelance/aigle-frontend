@@ -38,7 +38,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, setTileSetSelect
             <div className={classes['detection-tile-previews-container']}>
                 {tileSetsShowed.map(({ tileSet, preview }) => (
                     <DetectionTilePreview
-                        controlsDisplayed={['DEZOOM', 'EDIT']}
+                        controlsDisplayed={['ZOOM', 'EDIT']}
                         editDetection={() => setTileSetSelected(tileSet)}
                         bounds={previewBounds}
                         key={tileSet.uuid}

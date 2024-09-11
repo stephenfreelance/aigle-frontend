@@ -22,7 +22,7 @@ export interface DetectionObjectDetail extends DetectionObjectMinimal {
     tileSets: DetectionObjectDetailTilesetPreview[];
     parcel: Parcel | null;
     userGroupRights: UserGroupRight[];
-    customGeoZones: GeoCustomZone[];
+    geoCustomZones: GeoCustomZone[];
 }
 
 export interface DetectionObjectHistoryItem {

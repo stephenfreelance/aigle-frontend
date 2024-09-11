@@ -41,9 +41,9 @@ export const TILE_SET_STATUSES_NAMES_MAP: {
 export const TILE_SET_TYPES_NAMES_MAP: {
     [role in TileSetType]: string;
 } = {
-    BACKGROUND: 'Arrière-plan',
-    PARTIAL: 'Partiel',
-    INDICATIVE: 'Indicative',
+    BACKGROUND: 'orthos',
+    PARTIAL: 'satellites',
+    INDICATIVE: 'indicatives',
 } as const;
 
 export const GEO_CUSTOM_ZONE_STATUSES_NAMES_MAP: {

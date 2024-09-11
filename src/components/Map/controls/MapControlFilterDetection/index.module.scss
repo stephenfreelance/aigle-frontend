@@ -3,6 +3,8 @@
 $margin-sides: 10px;
 
 .content {
+    z-index: 1000;
+
     max-width: calc(100% - 2 * $margin-sides);
     width: 1000px;
 

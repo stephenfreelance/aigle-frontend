@@ -1,14 +1,11 @@
 import React, { useMemo } from 'react';
 
-import { getGeoCustomZoneDetailEndpoint } from '@/api-endpoints';
 import MapControlCustom from '@/components/Map/controls/MapControlCustom';
-import { GeoCustomZoneGeojsonData } from '@/models/geo/geo-custom-zone';
 import { MapGeoCustomZoneLayer, MapTileSetLayer } from '@/models/map-layer';
 import { TileSetType, tileSetTypes } from '@/models/tile-set';
-import api from '@/utils/api';
 import { TILE_SET_TYPES_NAMES_MAP } from '@/utils/constants';
 import { useMap } from '@/utils/map-context';
-import { Checkbox, Loader as MantineLoader, Radio, Stack } from '@mantine/core';
+import { Checkbox, Radio, Stack } from '@mantine/core';
 import { IconBoxMultiple } from '@tabler/icons-react';
 import classes from './index.module.scss';
 
@@ -16,30 +13,13 @@ const CONTROL_LABEL = 'Affichage des couches';
 
 type LayersMap = Record<TileSetType, MapTileSetLayer[]>;
 
-const fetchGeoCustomZone = async (geoCustomZoneUuid: string): Promise<GeoCustomZoneGeojsonData> => {
-    const endpoint = getGeoCustomZoneDetailEndpoint(geoCustomZoneUuid);
-    const res = await api.get<GeoCustomZoneGeojsonData>(endpoint, {
-        params: {
-            geometry: true,
-        },
-    });
-    return res.data;
-};
-
 interface ComponentInnerProps {
     layers: MapTileSetLayer[];
     customZoneLayers: MapGeoCustomZoneLayer[];
 }
 
 const ComponentInner: React.FC<ComponentInnerProps> = ({ layers, customZoneLayers }) => {
-    const {
-        setTileSetVisibility,
-        setCustomZoneVisibility,
-        setGeoCustomZoneGeojson,
-        geoCustomZonesGeojsonLoading,
-        setGeoCustomZoneGeojsonLoading,
-        geoCustomZoneUuidGeoCustomZoneGeojsonDataMap,
-    } = useMap();
+    const { setTileSetVisibility, setCustomZoneVisibility } = useMap();
 
     const layersMap: LayersMap = useMemo(
         () =>
@@ -64,7 +44,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ layers, customZoneLayer
             <h2>{CONTROL_LABEL}</h2>
             {layersMap.BACKGROUND.length ? (
                 <div className={classes['layers-section']}>
-                    <h3 className={classes['layers-section-title']}>Arrière-plan</h3>
+                    <h3 className={classes['layers-section-title']}>{TILE_SET_TYPES_NAMES_MAP.BACKGROUND}</h3>
                     <Radio.Group
                         value={backgroundTileSetUuidDisplayed}
                         onChange={(uuid) => setTileSetVisibility(uuid, true)}
@@ -98,7 +78,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ layers, customZoneLayer
                         </div>
                     ) : null,
                 )}
-            {/* <div className={classes['layers-section']}>
+            <div className={classes['layers-section']}>
                 <h3 className={classes['layers-section-title']}>Contours des zones à enjeux</h3>
                 <Stack className={classes['layers-section-group']} gap="xs">
                     {customZoneLayers.map((customZoneLayer) => (
@@ -106,12 +86,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ layers, customZoneLayer
                             key={customZoneLayer.geoCustomZone.uuid}
                             checked={customZoneLayer.displayed}
                             label={
-                                <div className={classes['checkbox-label']}>
-                                    {customZoneLayer.geoCustomZone.name}
-                                    {geoCustomZonesGeojsonLoading.includes(customZoneLayer.geoCustomZone.uuid) ? (
-                                        <MantineLoader size="xs" ml="sm" />
-                                    ) : null}
-                                </div>
+                                <div className={classes['checkbox-label']}>{customZoneLayer.geoCustomZone.name}</div>
                             }
                             color={customZoneLayer.geoCustomZone.color}
                             onChange={async (event) => {
@@ -119,17 +94,11 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ layers, customZoneLayer
                                     customZoneLayer.geoCustomZone.uuid,
                                     event.currentTarget.checked,
                                 );
-                                if (geoCustomZoneUuidGeoCustomZoneGeojsonDataMap[customZoneLayer.geoCustomZone.uuid]) {
-                                    return;
-                                }
-                                setGeoCustomZoneGeojsonLoading(customZoneLayer.geoCustomZone.uuid, true);
-                                const geoCustomZone = await fetchGeoCustomZone(customZoneLayer.geoCustomZone.uuid);
-                                setGeoCustomZoneGeojson(geoCustomZone);
                             }}
                         />
                     ))}
                 </Stack>
-            </div> */}
+            </div>
         </>
     );
 };

@@ -288,6 +288,10 @@ header {
     opacity: 0.575;
 }
 
+.mapboxgl-ctrl-bottom-left .mapboxgl-ctrl {
+    margin: 0;
+}
+
 // custom
 
 $tile-size: 256px;

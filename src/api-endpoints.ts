@@ -137,4 +137,6 @@ export const getDetectionParcelDetailEndpoint = (uuid: string) => `${BASE_PARCEL
 export const PARCEL_SUGGEST_SECTION_ENDPOINT = `${BASE_PARCEL}suggest_section/`;
 export const PARCEL_SUGGEST_NUM_PARCEL_ENDPOINT = `${BASE_PARCEL}suggest_num_parcel/`;
 
-export const IMPORTS_INFOS_ENDPOINT = `${BASE_API}utils/imports-infos/`;
+const BASE_UTILS = `${BASE_API}utils/`
+export const IMPORTS_INFOS_ENDPOINT = `${BASE_UTILS}imports-infos/`;
+export const GET_CUSTOM_GEOMETRY_ENDPOINT = `${BASE_UTILS}get-custom-geometry/`;

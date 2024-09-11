@@ -1,6 +1,5 @@
 import { detectionControlStatuses } from '@/models/detection';
 import { DetectionFilter } from '@/models/detection-filter';
-import { GeoCustomZoneGeojsonData } from '@/models/geo/geo-custom-zone';
 import { MapGeoCustomZoneLayer, MapTileSetLayer } from '@/models/map-layer';
 import { MapSettings } from '@/models/map-settings';
 import { ObjectType } from '@/models/object-type';
@@ -31,7 +30,7 @@ const getInitialLayers = (settings: MapSettings) => {
     return layers;
 };
 
-type MapEventType = 'UPDATE_DETECTIONS' | 'JUMP_TO' | 'DISPLAY_PARCEL';
+type MapEventType = 'UPDATE_DETECTIONS' | 'JUMP_TO' | 'DISPLAY_PARCEL' | 'LAYERS_UPDATED';
 
 interface MapState {
     layers?: MapTileSetLayer[];
@@ -39,52 +38,20 @@ interface MapState {
     objectTypes?: ObjectType[];
     detectionFilter?: DetectionFilter;
     settings?: MapSettings;
-    geoCustomZoneUuidGeoCustomZoneGeojsonDataMap: Record<string, GeoCustomZoneGeojsonData>;
-    geoCustomZonesGeojsonLoading: string[];
     userLastPosition?: GeoJSON.Position | null;
 
-    setGeoCustomZoneGeojsonLoading: (geoCustomZoneUuid: string, loading: boolean) => void;
-    setGeoCustomZoneGeojson: (geoCustomZoneGeojson: GeoCustomZoneGeojsonData) => void;
     setMapSettings: (settings: MapSettings) => void;
     resetLayers: () => void;
     updateDetectionFilter: (detectionFilter: DetectionFilter) => void;
     getDisplayedTileSetUrls: () => string[];
     setTileSetVisibility: (uuid: string, visible: boolean) => void;
+    setTileSetsVisibility: (uuids: string[], visible: boolean) => void;
     setCustomZoneVisibility: (uuid: string, visible: boolean) => void;
     getTileSets: (tileSetTypes: TileSetType[], tileSetStatuses: TileSetStatus[]) => TileSet[];
     eventEmitter: EventEmitter<MapEventType>;
 }
 
 const useMap = create<MapState>()((set, get) => ({
-    setGeoCustomZoneGeojson: (geoCustomZoneGeojson: GeoCustomZoneGeojsonData) => {
-        set(() => ({
-            geoCustomZoneUuidGeoCustomZoneGeojsonDataMap: {
-                ...get().geoCustomZoneUuidGeoCustomZoneGeojsonDataMap,
-                [geoCustomZoneGeojson.properties.uuid]: geoCustomZoneGeojson,
-            },
-        }));
-        get().setGeoCustomZoneGeojsonLoading(geoCustomZoneGeojson.properties.uuid, false);
-    },
-    geoCustomZonesGeojsonLoading: [],
-    setGeoCustomZoneGeojsonLoading: (geoCustomZoneUuid: string, loading: boolean) => {
-        set((state) => {
-            let geoCustomZonesGeojsonLoading: string[];
-
-            if (loading) {
-                geoCustomZonesGeojsonLoading = Array.from(
-                    new Set([...state.geoCustomZonesGeojsonLoading, geoCustomZoneUuid]),
-                );
-            } else {
-                geoCustomZonesGeojsonLoading = state.geoCustomZonesGeojsonLoading.filter(
-                    (uuid) => uuid !== geoCustomZoneUuid,
-                );
-            }
-
-            return {
-                geoCustomZonesGeojsonLoading,
-            };
-        });
-    },
     setMapSettings: (settings: MapSettings) => {
         const allObjectTypes: ObjectType[] = [];
         const objectTypesUuids = new Set<string>();
@@ -131,9 +98,12 @@ const useMap = create<MapState>()((set, get) => ({
 
         const layers = getInitialLayers(settings);
 
-        set(() => ({
-            layers,
-        }));
+        set((state) => {
+            state.eventEmitter.emit('LAYERS_UPDATED');
+            return {
+                layers,
+            };
+        });
     },
     updateDetectionFilter: (detectionFilter: DetectionFilter) => {
         set((state) => ({
@@ -145,6 +115,35 @@ const useMap = create<MapState>()((set, get) => ({
     },
     getDisplayedTileSetUrls: () => {
         return (get().layers || []).filter((layer) => layer.displayed).map((layer) => layer.tileSet.url);
+    },
+    setTileSetsVisibility: (uuids: string[], visible: boolean) => {
+        set((state) => {
+            if (!state.layers) {
+                return {};
+            }
+
+            const layerIndexes: number[] = [];
+
+            state.layers.forEach((layer, index) => {
+                if (uuids.includes(layer.tileSet.uuid)) {
+                    if (layer.tileSet.tileSetType === 'BACKGROUND') {
+                        throw new Error('Cannot set background layer visibility with this method');
+                    }
+
+                    layerIndexes.push(index);
+                }
+            });
+
+            layerIndexes.forEach((index) => {
+                state.layers[index].displayed = visible;
+            });
+
+            state.eventEmitter.emit('LAYERS_UPDATED');
+
+            return {
+                layers: state.layers,
+            };
+        });
     },
     setTileSetVisibility: (uuid: string, visible: boolean) => {
         set((state) => {
@@ -172,6 +171,8 @@ const useMap = create<MapState>()((set, get) => ({
                     }
                 });
             }
+
+            state.eventEmitter.emit('LAYERS_UPDATED');
 
             return {
                 layers: state.layers,
@@ -206,7 +207,6 @@ const useMap = create<MapState>()((set, get) => ({
             )
             .map((layer) => layer.tileSet);
     },
-    geoCustomZoneUuidGeoCustomZoneGeojsonDataMap: {},
     eventEmitter: new EventEmitter<MapEventType>(),
 }));
 

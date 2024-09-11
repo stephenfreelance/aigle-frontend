@@ -213,10 +213,10 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                                 <p className={classes['general-informations-content-item']}>
                                     <IconHexagon size={16} />
                                     <span className={classes['general-informations-content-item-text']}>
-                                        {detectionObject.customGeoZones.length ? (
+                                        {detectionObject.geoCustomZones.length ? (
                                             <>
                                                 Zones à enjeux :&nbsp;
-                                                {detectionObject.customGeoZones.map((zone) => zone.name).join(', ')}
+                                                {detectionObject.geoCustomZones.map((zone) => zone.name).join(', ')}
                                             </>
                                         ) : (
                                             <i>Aucune zone à enjeux associée</i>
@@ -228,7 +228,6 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                     </Accordion.Item>
                 </Accordion>
                 <DetectionDetailDetectionObject detectionObject={detectionObject} />
-                <DetectionTileHistory detectionObject={detectionObject} setTileSetSelected={setTileSetSelected} />
                 <DetectionDetailDetectionData
                     detectionObject={detectionObject}
                     detectionRefreshing={detectionObjectRefreshing}
@@ -236,6 +235,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                     tileSetSelected={tileSetSelected}
                     setTileSetSelected={setTileSetSelected}
                 />
+                <DetectionTileHistory detectionObject={detectionObject} setTileSetSelected={setTileSetSelected} />
             </div>
         </ScrollArea>
     );

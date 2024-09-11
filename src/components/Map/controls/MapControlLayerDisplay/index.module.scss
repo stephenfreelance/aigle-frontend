@@ -26,6 +26,10 @@
 .layers-section {
     .layers-section-title {
         margin-top: var(--mantine-spacing-sm);
+
+        &:first-letter {
+            text-transform: uppercase;
+        }
     }
 
     .layers-section-group {
