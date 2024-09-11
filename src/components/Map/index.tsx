@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Map, { GeolocateControl, Layer, Source, ViewStateChangeEvent } from 'react-map-gl';
 
-import { GEO_CUSTOM_ZONE_GEOMETRY_ENDPOINT, getDetectionListEndpoint } from '@/api-endpoints';
+import { GET_CUSTOM_GEOMETRY_ENDPOINT, getDetectionListEndpoint } from '@/api-endpoints';
 import DetectionDetail from '@/components/DetectionDetail';
 import MapAddAnnotationModal from '@/components/Map/MapAddAnnotationModal';
 import MapControlBackgroundSlider from '@/components/Map/controls/MapControlBackgroundSlider';
@@ -341,7 +341,7 @@ const Component: React.FC<ComponentProps> = ({
             return null;
         }
 
-        const res = await api.get<GeoCustomZoneGeojsonData>(GEO_CUSTOM_ZONE_GEOMETRY_ENDPOINT, {
+        const res = await api.get<GeoCustomZoneGeojsonData>(GET_CUSTOM_GEOMETRY_ENDPOINT, {
             params: {
                 ...mapBounds,
                 uuids: customZoneLayersDisplayedUuids,
@@ -351,9 +351,9 @@ const Component: React.FC<ComponentProps> = ({
 
         return res.data;
     };
-    const { data: customZonesGeometries, refetch: refetchCustomZonesGeometries } = useQuery({
+    const { data: customZonesGeometries } = useQuery({
         queryKey: [
-            GEO_CUSTOM_ZONE_GEOMETRY_ENDPOINT,
+            GET_CUSTOM_GEOMETRY_ENDPOINT,
             ...Object.values(mapBounds || {}),
             customZoneLayersDisplayedUuids.join(','),
         ],

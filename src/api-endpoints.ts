@@ -58,7 +58,6 @@ export const getGeoListEndpoint = (collectivityType: CollectivityType) => {
 const BASE_GEO_CUSTOM_ZONE = `${BASE_GEO}custom-zone/`;
 export const GEO_CUSTOM_ZONE_LIST_ENDPOINT = `${BASE_GEO_CUSTOM_ZONE}`;
 export const GEO_CUSTOM_ZONE_POST_ENDPOINT = `${BASE_GEO_CUSTOM_ZONE}`;
-export const GEO_CUSTOM_ZONE_GEOMETRY_ENDPOINT = `${BASE_GEO_CUSTOM_ZONE}get_geometry/`;
 export const getGeoCustomZoneDetailEndpoint = (uuid: string) => `${GEO_CUSTOM_ZONE_POST_ENDPOINT}${uuid}/`;
 
 export const getGeoPostEndpoint = (collectivityType: CollectivityType) => {
@@ -138,4 +137,6 @@ export const getDetectionParcelDetailEndpoint = (uuid: string) => `${BASE_PARCEL
 export const PARCEL_SUGGEST_SECTION_ENDPOINT = `${BASE_PARCEL}suggest_section/`;
 export const PARCEL_SUGGEST_NUM_PARCEL_ENDPOINT = `${BASE_PARCEL}suggest_num_parcel/`;
 
-export const IMPORTS_INFOS_ENDPOINT = `${BASE_API}utils/imports-infos/`;
+const BASE_UTILS = `${BASE_API}utils/`
+export const IMPORTS_INFOS_ENDPOINT = `${BASE_UTILS}imports-infos/`;
+export const GET_CUSTOM_GEOMETRY_ENDPOINT = `${BASE_UTILS}get-custom-geometry/`;
