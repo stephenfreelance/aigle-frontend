@@ -213,10 +213,10 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                                 <p className={classes['general-informations-content-item']}>
                                     <IconHexagon size={16} />
                                     <span className={classes['general-informations-content-item-text']}>
-                                        {detectionObject.customGeoZones.length ? (
+                                        {detectionObject.geoCustomZones.length ? (
                                             <>
                                                 Zones à enjeux :&nbsp;
-                                                {detectionObject.customGeoZones.map((zone) => zone.name).join(', ')}
+                                                {detectionObject.geoCustomZones.map((zone) => zone.name).join(', ')}
                                             </>
                                         ) : (
                                             <i>Aucune zone à enjeux associée</i>

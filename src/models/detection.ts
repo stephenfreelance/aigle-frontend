@@ -1,7 +1,7 @@
 import { Timestamped, Uuided } from '@/models/data';
 import { DetectionObjectDetail } from '@/models/detection-object';
 import { Tile } from '@/models/tile';
-import { TileSet } from '@/models/tile-set';
+import { TileSet, TileSetType } from '@/models/tile-set';
 import { FeatureCollection, Polygon } from 'geojson';
 
 export const detectionControlStatuses = [
@@ -36,6 +36,7 @@ export interface DetectionProperties {
     detectionControlStatus: DetectionControlStatus;
     detectionValidationStatus: DetectionValidationStatus;
     detectionPrescriptionStatus: DetectionPrescriptionStatus | null;
+    tileSetType: TileSetType;
 }
 
 export interface DetectionGeojsonData extends FeatureCollection<Polygon, DetectionProperties> {}

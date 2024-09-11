@@ -44,11 +44,15 @@
                 margin-bottom: var(--mantine-spacing-xs);
             }
 
-            .legend-item-square {
+            .legend-item-square, .legend-item-round {
                 border: 2px solid;
 
                 width: 16px;
                 height: 16px;
+            }
+
+            .legend-item-round {
+                border-radius: 50%;
             }
 
             .legend-item-square-dashed {

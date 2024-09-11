@@ -262,10 +262,10 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                         </Checkbox.Group>
 
                         {form.getValues().detectionValidationStatuses.length === 0 ? (
-                            <p className={classes['empty-filter-text']}>
+                            <div className={classes['empty-filter-text']}>
                                 <p>Aucun filtre sur les statuts</p>
                                 <p>de validation n&apos;est appliqué</p>
-                            </p>
+                            </div>
                         ) : null}
                     </div>
 
@@ -288,10 +288,10 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                         </Checkbox.Group>
 
                         {form.getValues().detectionControlStatuses.length === 0 ? (
-                            <p className={classes['empty-filter-text']}>
+                            <div className={classes['empty-filter-text']}>
                                 <p>Aucun filtre sur les statuts</p>
                                 <p>de contrôle n&apos;est appliqué</p>
-                            </p>
+                            </div>
                         ) : null}
                     </div>
 
@@ -315,10 +315,10 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                         </Checkbox.Group>
 
                         {form.getValues().customZonesUuids.length === 0 ? (
-                            <p className={classes['empty-filter-text']}>
+                            <div className={classes['empty-filter-text']}>
                                 <p>Aucune zone à enjeux n&apos;est sélectionnée</p>
                                 <p>tous les objets sont affichés</p>
-                            </p>
+                            </div>
                         ) : null}
                     </div>
                 </div>
