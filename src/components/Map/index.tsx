@@ -30,7 +30,7 @@ import mapboxgl from 'mapbox-gl';
 import DrawRectangle, { DrawStyles } from 'mapbox-gl-draw-rectangle-restrict-area';
 import classes from './index.module.scss';
 
-const ZOOM_LIMIT_TO_DISPLAY_DETECTIONS = 13;
+const ZOOM_LIMIT_TO_DISPLAY_DETECTIONS = 9;
 const MAP_INITIAL_VIEW_STATE_DEFAULT = {
     longitude: 3.95657,
     latitude: 43.61951,
@@ -720,6 +720,7 @@ const Component: React.FC<ComponentProps> = ({
                             id={getLayerId(layer)}
                             type="raster"
                             source={getSourceId(layer)}
+                            paint={layer.tileSet.monochrome ? { 'raster-saturation': -1 } : {}}
                             {...(layer.tileSet.maxZoom
                                 ? {
                                       maxzoom: layer.tileSet.maxZoom,
