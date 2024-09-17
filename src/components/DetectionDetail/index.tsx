@@ -137,7 +137,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                         <Accordion.Control>Informations générales</Accordion.Control>
                         <Accordion.Panel className={classes['general-informations-content']}>
                             <p className={classes['general-informations-content-item']}>
-                                <IconRoute size={16} />
+                                <IconRoute size={16} className={classes['general-informations-content-item-icon']} />
                                 <span>
                                     <span className={classes['general-informations-content-item-text']}>
                                         {address ? (

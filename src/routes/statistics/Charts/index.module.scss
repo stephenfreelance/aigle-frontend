@@ -1,0 +1,8 @@
+@import '@/constants.scss';
+
+.content {
+    margin-top: $header-height;
+    padding: $content-padding;
+
+    height: 300px;
+}

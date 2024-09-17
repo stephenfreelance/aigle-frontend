@@ -5,15 +5,19 @@ import { useAuth } from '@/utils/auth-context';
 import { DEFAULT_ROUTE, ROLES_NAMES_MAP } from '@/utils/constants';
 import { getColorFromString, getEmailInitials } from '@/utils/string';
 import { Avatar, Burger, Button, Image, Menu, Tabs } from '@mantine/core';
-import { IconAdjustments, IconLogout, IconMap } from '@tabler/icons-react';
+import { IconAdjustments, IconLogout, IconMap, IconReportAnalytics } from '@tabler/icons-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import classes from './index.module.scss';
 
-type TabValue = 'map' | 'admin';
+type TabValue = 'map' | 'admin' | 'statistics';
 
 const getTabeValue = (pathname: string): TabValue => {
     if (pathname.includes('/map')) {
         return 'map';
+    }
+
+    if (pathname.includes('/statistics')) {
+        return 'statistics';
     }
 
     return 'admin';
@@ -52,6 +56,8 @@ const Component: React.FC<ComponentProps> = ({ burgerState }) => {
     const onTabChange = (tab: TabValue) => {
         if (tab === 'map') {
             navigate('/map');
+        } else if (tab === 'statistics') {
+            navigate('/statistics');
         } else {
             navigate('/admin');
         }
@@ -90,6 +96,15 @@ const Component: React.FC<ComponentProps> = ({ burgerState }) => {
                             value="map"
                         >
                             Carte
+                        </Tabs.Tab>
+                        <Tabs.Tab
+                            pl="xl"
+                            pr="xl"
+                            className={classes.tab}
+                            leftSection={<IconReportAnalytics size={16} />}
+                            value="statistics"
+                        >
+                            Stats
                         </Tabs.Tab>
                         {userMe?.userRole && ['ADMIN', 'SUPER_ADMIN'].includes(userMe.userRole) ? (
                             <Tabs.Tab

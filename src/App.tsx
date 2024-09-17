@@ -26,6 +26,7 @@ import { useAuth } from '@/utils/auth-context';
 import { DEFAULT_ROUTE } from '@/utils/constants';
 import React, { useCallback, useEffect } from 'react';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import Charts from './routes/statistics/Charts';
 
 const App: React.FC = () => {
     const { isAuthenticated, setUser } = useAuth();
@@ -65,6 +66,15 @@ const App: React.FC = () => {
                     element={
                         <ProtectedRoute>
                             <Map />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/statistics"
+                    element={
+                        <ProtectedRoute>
+                            <Charts />
                         </ProtectedRoute>
                     }
                 />
