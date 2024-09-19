@@ -25,7 +25,7 @@ import {
     DETECTION_VALIDATION_STATUSES_COLORS_MAP,
     DETECTION_VALIDATION_STATUSES_NAMES_MAP,
 } from '@/utils/constants';
-import { useMap } from '@/utils/map-context';
+import { useMap } from '@/utils/context/map-context';
 import { Button, Checkbox, LoadingOverlay, Loader as MantineLoader, Select, Text } from '@mantine/core';
 import { UseFormReturnType, useForm } from '@mantine/form';
 import { UseMutationResult, useMutation, useQueryClient } from '@tanstack/react-query';

@@ -10,7 +10,7 @@ import { TileSet } from '@/models/tile-set';
 import api from '@/utils/api';
 import { formatCommune, formatParcel } from '@/utils/format';
 import { getAddressFromPolygon } from '@/utils/geojson';
-import { useMap } from '@/utils/map-context';
+import { useMap } from '@/utils/context/map-context';
 import { Accordion, ActionIcon, Loader as MantineLoader, ScrollArea, Tooltip } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import {

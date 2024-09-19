@@ -1,6 +1,6 @@
 import { DetectionControlStatus, DetectionValidationStatus } from '@/models/detection';
 
-export interface DetectionFilter {
+export interface ObjectsFilter {
     objectTypesUuids: string[];
     detectionValidationStatuses: DetectionValidationStatus[];
     detectionControlStatuses: DetectionControlStatus[];

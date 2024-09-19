@@ -1,5 +1,6 @@
 // App.tsx
-import { AUTH_ME_ENDPOINT } from '@/api-endpoints';
+import { AUTH_ME_ENDPOINT, MAP_SETTINGS_ENDPOINT } from '@/api-endpoints';
+import { MapSettings } from '@/models/map-settings';
 import { User } from '@/models/user';
 import Map from '@/routes/Map/index.tsx';
 import CollectiviteForm from '@/routes/admin/collectivite/CollectiviteForm';
@@ -24,12 +25,16 @@ import ProtectedRoute from '@/utils/ProtectedRoute';
 import api from '@/utils/api';
 import { useAuth } from '@/utils/auth-context';
 import { DEFAULT_ROUTE } from '@/utils/constants';
+import { useMap } from '@/utils/context/map-context';
+import { useStatistics } from '@/utils/context/statistics-context';
 import React, { useCallback, useEffect } from 'react';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Charts from './routes/statistics/Charts';
 
 const App: React.FC = () => {
     const { isAuthenticated, setUser } = useAuth();
+    const { setMapSettings } = useMap();
+    const { setMapSettings: setStatisticsMapSettings } = useStatistics();
 
     const isAuthenticated_ = isAuthenticated();
 
@@ -42,9 +47,21 @@ const App: React.FC = () => {
         }
     }, [setUser]);
 
+    const getMapSettings = useCallback(async () => {
+        try {
+            const res = await api.get<MapSettings>(MAP_SETTINGS_ENDPOINT);
+            setMapSettings(res.data);
+            setStatisticsMapSettings(res.data);
+            return res.data;
+        } catch (err) {
+            console.error(err);
+        }
+    }, [setMapSettings]);
+
     useEffect(() => {
         if (isAuthenticated_) {
             getUser();
+            getMapSettings();
         }
     }, [isAuthenticated_, getUser]);
 

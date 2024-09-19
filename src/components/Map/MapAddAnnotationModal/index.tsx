@@ -6,7 +6,7 @@ import { ObjectType } from '@/models/object-type';
 import api from '@/utils/api';
 import { DEFAULT_DATE_FORMAT } from '@/utils/constants';
 import { getAddressFromPolygon } from '@/utils/geojson';
-import { useMap } from '@/utils/map-context';
+import { useMap } from '@/utils/context/map-context';
 import { Button, Modal, Select } from '@mantine/core';
 import { UseFormReturnType, useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';

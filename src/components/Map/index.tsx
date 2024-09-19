@@ -16,7 +16,7 @@ import { GeoCustomZoneGeojsonData } from '@/models/geo/geo-custom-zone';
 import { MapTileSetLayer } from '@/models/map-layer';
 import api from '@/utils/api';
 import { MAPBOX_TOKEN, PARCEL_COLOR } from '@/utils/constants';
-import { useMap } from '@/utils/map-context';
+import { useMap } from '@/utils/context/map-context';
 import { Loader as MantineLoader } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
@@ -146,7 +146,7 @@ const Component: React.FC<ComponentProps> = ({
 
     const [addAnnotationPolygon, setAddAnnotationPolygon] = useState<Polygon>();
 
-    const { eventEmitter, detectionFilter, resetLayers, settings, customZoneLayers } = useMap();
+    const { eventEmitter, objectsFilter, resetLayers, settings, customZoneLayers } = useMap();
 
     const [cursor, setCursor] = useState<string>();
     const [mapRef, setMapRef] = useState<mapboxgl.Map>();
@@ -299,7 +299,7 @@ const Component: React.FC<ComponentProps> = ({
     // detections fetching
 
     const fetchDetections = async (signal: AbortSignal, mapBounds?: MapBounds) => {
-        if (!displayDetections || !mapBounds || !detectionFilter) {
+        if (!displayDetections || !mapBounds || !objectsFilter) {
             return null;
         }
 
@@ -310,7 +310,7 @@ const Component: React.FC<ComponentProps> = ({
         const res = await api.get<DetectionGeojsonData>(DETECTION_ENDPOINT, {
             params: {
                 ...mapBounds,
-                ...detectionFilter,
+                ...objectsFilter,
                 tileSetsUuids: tileSetsUuidsDetection,
             },
             signal,
@@ -326,7 +326,7 @@ const Component: React.FC<ComponentProps> = ({
         queryKey: [
             DETECTION_ENDPOINT,
             ...Object.values(mapBounds || {}),
-            ...Object.values(detectionFilter || {}),
+            ...Object.values(objectsFilter || {}),
             ...tileSetsUuidsDetection,
         ],
         queryFn: ({ signal }) => fetchDetections(signal, mapBounds),
@@ -404,7 +404,7 @@ const Component: React.FC<ComponentProps> = ({
     }, [mapRef]);
     useEffect(() => {
         refetch();
-    }, [detectionFilter]);
+    }, [objectsFilter]);
 
     // bounds
 

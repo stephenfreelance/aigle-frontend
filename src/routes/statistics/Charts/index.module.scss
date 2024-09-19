@@ -1,8 +1,6 @@
 @import '@/constants.scss';
 
-.content {
-    margin-top: $header-height;
+.container {
     padding: $content-padding;
-
-    height: 300px;
+    padding-top: calc($header-height + $content-padding); 
 }

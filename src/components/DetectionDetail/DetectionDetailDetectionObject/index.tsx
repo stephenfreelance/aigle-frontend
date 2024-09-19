@@ -3,7 +3,7 @@ import SelectItem from '@/components/ui/SelectItem';
 import { DetectionObjectDetail } from '@/models/detection-object';
 import { ObjectType } from '@/models/object-type';
 import api from '@/utils/api';
-import { useMap } from '@/utils/map-context';
+import { useMap } from '@/utils/context/map-context';
 import { Loader as MantineLoader, Select } from '@mantine/core';
 import { UseFormReturnType, useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';

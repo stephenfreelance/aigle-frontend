@@ -4,7 +4,7 @@ import MapControlCustom from '@/components/Map/controls/MapControlCustom';
 import { MapGeoCustomZoneLayer, MapTileSetLayer } from '@/models/map-layer';
 import { TileSetType, tileSetTypes } from '@/models/tile-set';
 import { TILE_SET_TYPES_NAMES_MAP } from '@/utils/constants';
-import { useMap } from '@/utils/map-context';
+import { useMap } from '@/utils/context/map-context';
 import { Checkbox, Radio, Stack } from '@mantine/core';
 import { IconBoxMultiple } from '@tabler/icons-react';
 import classes from './index.module.scss';

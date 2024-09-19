@@ -1,7 +1,7 @@
 import React from 'react';
 
 import MapControlCustom from '@/components/Map/controls/MapControlCustom';
-import { useMap } from '@/utils/map-context';
+import { useMap } from '@/utils/context/map-context';
 import { SegmentedControl } from '@mantine/core';
 import { format } from 'date-fns';
 import classes from './index.module.scss';

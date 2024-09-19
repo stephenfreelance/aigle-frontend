@@ -5,7 +5,7 @@ import { GeoCustomZone } from '@/models/geo/geo-custom-zone';
 import { MapGeoCustomZoneLayer } from '@/models/map-layer';
 import { ObjectType } from '@/models/object-type';
 import { PARCEL_COLOR, TILE_SET_TYPES_NAMES_MAP } from '@/utils/constants';
-import { useMap } from '@/utils/map-context';
+import { useMap } from '@/utils/context/map-context';
 import clsx from 'clsx';
 import classes from './index.module.scss';
 
