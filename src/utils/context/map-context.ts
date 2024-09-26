@@ -1,4 +1,4 @@
-import { detectionControlStatuses } from '@/models/detection';
+import { detectionControlStatuses, DetectionValidationStatus } from '@/models/detection';
 import { ObjectsFilter } from '@/models/detection-filter';
 import { MapGeoCustomZoneLayer, MapTileSetLayer } from '@/models/map-layer';
 import { MapSettings } from '@/models/map-settings';
@@ -69,10 +69,10 @@ const useMap = create<MapState>()((set, get) => ({
             objectTypes: allObjectTypes,
             objectsFilter: {
                 objectTypesUuids: Array.from(objectTypesUuids),
-                detectionValidationStatuses: ['DETECTED_NOT_VERIFIED', 'SUSPECT'],
+                detectionValidationStatuses: ['DETECTED_NOT_VERIFIED', 'SUSPECT'] as DetectionValidationStatus[],
                 detectionControlStatuses: [...detectionControlStatuses],
                 score: 0.6,
-                prescripted: null,
+                prescripted: false,
                 customZonesUuids: settings.geoCustomZones.map(({ uuid }) => uuid),
             },
             userLastPosition: settings.userLastPosition,

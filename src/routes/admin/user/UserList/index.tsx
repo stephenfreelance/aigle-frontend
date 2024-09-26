@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { USERS_LIST_ENDPOINT } from '@/api-endpoints';
 import DataTable from '@/components/admin/DataTable';
-import FiltersSection from '@/components/admin/FiltersSection';
+import SoloAccordion from '@/components/admin/SoloAccordion';
 import LayoutAdminBase from '@/components/admin/LayoutAdminBase';
 import PillsDataCell from '@/components/admin/data-cells/PillsDataCell';
 import UserGroupRightIcon from '@/components/icons/UserGroupRightIcon';
@@ -47,8 +47,8 @@ const Component: React.FC = () => {
             <DataTable<User, DataFilter>
                 endpoint={USERS_LIST_ENDPOINT}
                 filter={filter}
-                filtersSection={
-                    <FiltersSection filtersSet={!isEqual(filter, DATA_FILTER_INITIAL_VALUE)}>
+                SoloAccordion={
+                    <SoloAccordion indicatorShown={!isEqual(filter, DATA_FILTER_INITIAL_VALUE)}>
                         <Input
                             placeholder="Rechercher un utilisateur"
                             leftSection={<IconSearch size={16} />}
@@ -78,7 +78,7 @@ const Component: React.FC = () => {
                                 ))}
                             </Stack>
                         </Checkbox.Group>
-                    </FiltersSection>
+                    </SoloAccordion>
                 }
                 tableHeader={[
                     <Table.Th key="createdAt">Date création</Table.Th>,

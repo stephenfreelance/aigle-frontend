@@ -2,6 +2,7 @@
 import { AUTH_ME_ENDPOINT, MAP_SETTINGS_ENDPOINT } from '@/api-endpoints';
 import { MapSettings } from '@/models/map-settings';
 import { User } from '@/models/user';
+import About from '@/routes/About';
 import Map from '@/routes/Map/index.tsx';
 import CollectiviteForm from '@/routes/admin/collectivite/CollectiviteForm';
 import CollectiviteList from '@/routes/admin/collectivite/CollectiviteList';
@@ -92,6 +93,15 @@ const App: React.FC = () => {
                     element={
                         <ProtectedRoute>
                             <Charts />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/about"
+                    element={
+                        <ProtectedRoute>
+                            <About />
                         </ProtectedRoute>
                     }
                 />

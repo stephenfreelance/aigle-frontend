@@ -189,20 +189,6 @@ const Form: React.FC<FormProps> = ({
                 ))}
             </div>
 
-            <Select
-                allowDeselect={false}
-                mt="md"
-                label="Statut du contrôle"
-                data={detectionControlStatuses.map((status) => ({
-                    value: status,
-                    label: DETECTION_CONTROL_STATUSES_NAMES_MAP[status],
-                }))}
-                key={form.key('detectionControlStatus')}
-                disabled={disabled || mutation.status === 'pending'}
-                rightSection={mutation.status === 'pending' ? <MantineLoader size="xs" /> : null}
-                {...form.getInputProps('detectionControlStatus')}
-            />
-
             {prescriptionDurationYears ? (
                 <Checkbox
                     mt="md"
@@ -218,6 +204,20 @@ const Form: React.FC<FormProps> = ({
                     }
                 />
             ) : null}
+
+            <Select
+                allowDeselect={false}
+                mt="md"
+                label="Statut du contrôle"
+                data={detectionControlStatuses.map((status) => ({
+                    value: status,
+                    label: DETECTION_CONTROL_STATUSES_NAMES_MAP[status],
+                }))}
+                key={form.key('detectionControlStatus')}
+                disabled={disabled || mutation.status === 'pending'}
+                rightSection={mutation.status === 'pending' ? <MantineLoader size="xs" /> : null}
+                {...form.getInputProps('detectionControlStatus')}
+            />
         </form>
     );
 };

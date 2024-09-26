@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import Map, { GeolocateControl, Layer, Source, ViewStateChangeEvent } from 'react-map-gl';
+import Map, { GeolocateControl, Layer, Marker, Source, ViewStateChangeEvent } from 'react-map-gl';
 
 import { GET_CUSTOM_GEOMETRY_ENDPOINT, getDetectionListEndpoint } from '@/api-endpoints';
 import DetectionDetail from '@/components/DetectionDetail';

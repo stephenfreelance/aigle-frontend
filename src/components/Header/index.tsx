@@ -5,11 +5,11 @@ import { useAuth } from '@/utils/auth-context';
 import { DEFAULT_ROUTE, ROLES_NAMES_MAP } from '@/utils/constants';
 import { getColorFromString, getEmailInitials } from '@/utils/string';
 import { Avatar, Burger, Button, Image, Menu, Tabs } from '@mantine/core';
-import { IconAdjustments, IconLogout, IconMap, IconReportAnalytics } from '@tabler/icons-react';
+import { IconAdjustments, IconInfoCircle, IconLogout, IconMap, IconReportAnalytics } from '@tabler/icons-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import classes from './index.module.scss';
 
-type TabValue = 'map' | 'admin' | 'statistics';
+type TabValue = 'map' | 'admin' | 'statistics' | 'about';
 
 const getTabeValue = (pathname: string): TabValue => {
     if (pathname.includes('/map')) {
@@ -18,6 +18,10 @@ const getTabeValue = (pathname: string): TabValue => {
 
     if (pathname.includes('/statistics')) {
         return 'statistics';
+    }
+
+    if (pathname.includes('/about')) {
+        return 'about';
     }
 
     return 'admin';
@@ -58,6 +62,8 @@ const Component: React.FC<ComponentProps> = ({ burgerState }) => {
             navigate('/map');
         } else if (tab === 'statistics') {
             navigate('/statistics');
+        } else if (tab === 'about') {
+            navigate('/about');
         } else {
             navigate('/admin');
         }
@@ -105,6 +111,15 @@ const Component: React.FC<ComponentProps> = ({ burgerState }) => {
                             value="statistics"
                         >
                             Stats
+                        </Tabs.Tab>
+                        <Tabs.Tab
+                            pl="xl"
+                            pr="xl"
+                            className={classes.tab}
+                            leftSection={<IconInfoCircle size={16} />}
+                            value="about"
+                        >
+                            A propos
                         </Tabs.Tab>
                         {userMe?.userRole && ['ADMIN', 'SUPER_ADMIN'].includes(userMe.userRole) ? (
                             <Tabs.Tab

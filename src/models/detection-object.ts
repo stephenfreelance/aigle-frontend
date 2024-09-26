@@ -14,6 +14,7 @@ interface DetectionObjectDetailTilesetPreview {
 export interface DetectionObjectMinimal extends Uuided, Timestamped {
     id: number;
     address: string;
+    comment: string;
     objectType: ObjectType;
 }
 
@@ -34,6 +35,7 @@ export interface DetectionObjectHistory extends Uuided, Timestamped {
     detections: DetectionObjectHistoryItem[];
     id: number;
     address: string;
+    comment: string;
     objectType: ObjectType;
     tileSets: TileSet[];
 }

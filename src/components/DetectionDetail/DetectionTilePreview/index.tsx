@@ -7,7 +7,6 @@ import { IconPencil, IconZoomIn, IconZoomOut } from '@tabler/icons-react';
 import clsx from 'clsx';
 import { format } from 'date-fns';
 import { Polygon } from 'geojson';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import React, { useEffect, useRef, useState } from 'react';
 import Map, { Layer, MapRef, Source } from 'react-map-gl';
 import classes from './index.module.scss';
@@ -46,6 +45,7 @@ interface ComponentProps {
     id?: string;
     imageLayer?: ImageLayer;
     onIdle?: () => void;
+    marker?: React.ReactNode;
 }
 
 const Component: React.FC<ComponentProps> = ({
@@ -168,6 +168,7 @@ const Component: React.FC<ComponentProps> = ({
                                 id="raster-layer"
                                 type="raster"
                                 source="raster-source"
+                                paint={tileSet.monochrome ? { 'raster-saturation': -1 } : {}}
                             />
                         </Source>
                     </Map>

@@ -13,10 +13,10 @@ import { TileSet } from '@/models/tile-set';
 import api from '@/utils/api';
 import { DEFAULT_DATE_FORMAT, PARCEL_COLOR } from '@/utils/constants';
 import { formatParcel } from '@/utils/format';
-import { extendBbox } from '@/utils/geojson';
+import { convertBBoxToSquare, extendBbox } from '@/utils/geojson';
 import { usePDF } from '@react-pdf/renderer';
 import { useQuery } from '@tanstack/react-query';
-import { bbox, bboxPolygon, square } from '@turf/turf';
+import { bbox, bboxPolygon } from '@turf/turf';
 import { format } from 'date-fns';
 import { Polygon } from 'geojson';
 import classes from './index.module.scss';
@@ -84,12 +84,14 @@ const PLAN_URL_TILESET: TileSet = {
     uuid: 'e55bfa81-a6dd-407c-a1f1-70bc2211a11c',
     createdAt: '2024-07-08T16:00:31Z',
     updatedAt: '2024-07-08T16:00:31Z',
+    monochrome: true,
 };
 
 const getPreviewId = (tileSetUuid: string) => `preview-${tileSetUuid}`;
 
 const getParcelCrossCoordinates = (parcelGeometry: Polygon) => {
-    const parcelBbox = square(bbox(parcelGeometry));
+    const parcelBbox = convertBBoxToSquare(bbox(parcelGeometry) as [number, number, number, number]);
+
     const parcelBboxExtended = extendBbox(parcelBbox as [number, number, number, number], 5);
 
     const parcelPolygonExtended = bboxPolygon(parcelBboxExtended);
@@ -210,7 +212,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onGener
                         parcel
                             ? {
                                   coordinates: getParcelCrossCoordinates(parcel?.geometry),
-                                  url: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAZQTFRFAAAAXuGb4/0yFAAAAAJ0Uk5TAP9bkSK1AAAARklEQVR4nO3UIQ4AMAgDQPj/o9ksZgK1ZdcEUXK6GS21L9snAQAAAAAAAAAAAGAAKs4BAOBf0OulIwYAAAAAAAAAAAC8BhbUngDw86zg6AAAAABJRU5ErkJggg==',
+                                  url: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAtAAAALQAQMAAACDmdXfAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAZQTFRFAAAA/wAAG/+NIgAAAAJ0Uk5TAP9bkSK1AAABE0lEQVR4nO3asQkAIAwEQIOLubp7CdpaBivF+y7wuQk+Sip1bEdvqZ9Ao9FoNBqNRqPRaDQajUaj0Wg0Go1Go9FoNBqNRqPRaDQajUaj0Wg0Go1Go9FoNBqNRqPRaDQajUaj0Wg0Go1Go9FoNBqNRqPRaDQajUaj0Wg0Go1Go9FoNBqNRqPR6M/pmbMPgkaj0Wg0Go1Go9FoNBqNRqPRaDQajUaj0Wg0Go1G/0XnarctiNBoNBqNRqPRaDQajUaj0Wg0Go1Go9FoNBqNRqPRaDQajUaj0Wg0Go1Go9FoNBqNRqPRaDQajUaj0Wg0Go1Go9FoNBqNRqPRaDQajUaj0Wg0Go1Go9FoNBqNRqPRaDT6AXoBFUc+uG9VIhoAAAAASUVORK5CYII=',
                               }
                             : undefined
                     }

@@ -1,6 +1,7 @@
-@import '@/constants.scss';
+.charts-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mantine-spacing-md);
 
-.container {
-    padding: $content-padding;
-    padding-top: calc($header-height + $content-padding); 
+    margin-top: var(--mantine-spacing-md);
 }

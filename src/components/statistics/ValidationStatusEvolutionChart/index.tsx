@@ -1,5 +1,6 @@
 import { STATISTICS_VALIDATION_STATUS_ENDPOINT } from '@/api-endpoints';
-import Header from '@/components/Header';
+import SoloAccordion from '@/components/admin/SoloAccordion';
+import GeoCollectivitiesMultiSelects from '@/components/admin/form-fields/GeoCollectivitiesMultiSelects';
 import Loader from '@/components/ui/Loader';
 import { ObjectsFilter } from '@/models/detection-filter';
 import { ValidationStatusEvolution } from '@/models/statistics/valisation-status-evolution';
@@ -9,28 +10,35 @@ import { DETECTION_VALIDATION_STATUSES_COLORS_MAP, DETECTION_VALIDATION_STATUSES
 import { useStatistics } from '@/utils/context/statistics-context';
 import { LineChart } from '@mantine/charts';
 import { LoadingOverlay, MultiSelect } from '@mantine/core';
+import { UseFormReturnType, useForm } from '@mantine/form';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import classes from './index.module.scss';
+
+interface FormValues {
+    tileSetsUuids: string[];
+
+    communesUuids: string[];
+    departmentsUuids: string[];
+    regionsUuids: string[];
+}
 
 const fetchData = async (
     signal: AbortSignal,
     objectsFilter: ObjectsFilter,
     tileSets: TileSet[],
-    tileSetsUuids: string[],
+    formValues: FormValues,
 ): any => {
-    console.log({
-        objectsFilter,
-        tileSets,
-        tileSetsUuids,
-    });
     const params: any = {
         detectionValidationStatuses: objectsFilter.detectionValidationStatuses.join(','),
-        tileSetsUuids: tileSetsUuids.join(','),
+        tileSetsUuids: formValues.tileSetsUuids.join(','),
         detectionControlStatuses: objectsFilter.detectionControlStatuses.join(','),
         score: objectsFilter.score,
         objectTypesUuids: objectsFilter.objectTypesUuids.join(','),
         customZonesUuids: objectsFilter.customZonesUuids.join(','),
+        communesUuids: formValues.communesUuids.join(','),
+        departmentsUuids: formValues.departmentsUuids.join(','),
+        regionsUuids: formValues.regionsUuids.join(','),
     };
 
     if (objectsFilter.prescripted !== null) {
@@ -43,7 +51,7 @@ const fetchData = async (
     });
 
     const chartData: any = tileSets.reduce((prev, current) => {
-        if (!tileSetsUuids.includes(current.uuid)) {
+        if (!formValues.tileSetsUuids.includes(current.uuid)) {
             return prev;
         }
 
@@ -76,16 +84,12 @@ const fetchData = async (
 
     return Object.values(chartData).sort((a, b) => a.date.getTime() - b.date.getTime());
 };
-
 interface ComponentInnerProps {
     tileSets: TileSet[];
     objectsFilter: ObjectsFilter;
 }
 
 const ComponentInner: React.FC<ComponentInnerProps> = ({ tileSets, objectsFilter }: ComponentInnerProps) => {
-    const [tileSetsUuids, setTileSetsUuids] = useState<string[]>(
-        tileSets.filter(({ tileSetType }) => tileSetType === 'BACKGROUND').map(({ uuid }) => uuid),
-    );
     const tileSetsValues = useMemo(() => tileSets.map(({ name, uuid }) => ({ value: uuid, label: name })), [tileSets]);
     const series = useMemo(() => {
         return objectsFilter.detectionValidationStatuses.map((status) => ({
@@ -94,10 +98,26 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ tileSets, objectsFilter
         }));
     }, [objectsFilter.detectionValidationStatuses]);
 
+    const form: UseFormReturnType<FormValues> = useForm({
+        initialValues: {
+            tileSetsUuids: tileSets.filter(({ tileSetType }) => tileSetType === 'BACKGROUND').map(({ uuid }) => uuid),
+            communesUuids: [] as string[],
+            departmentsUuids: [] as string[],
+            regionsUuids: [] as string[],
+        },
+    });
+
     const { data: statistics, isFetching } = useQuery({
-        queryKey: [STATISTICS_VALIDATION_STATUS_ENDPOINT, Object.values(objectsFilter), tileSetsUuids.join(',')],
+        queryKey: [
+            STATISTICS_VALIDATION_STATUS_ENDPOINT,
+            Object.values(objectsFilter),
+            form.values.tileSetsUuids.join(','),
+            form.values.communesUuids.join(','),
+            form.values.departmentsUuids.join(','),
+            form.values.regionsUuids.join(','),
+        ],
         placeholderData: keepPreviousData,
-        queryFn: ({ signal }) => fetchData(signal, objectsFilter, tileSets, tileSetsUuids),
+        queryFn: ({ signal }) => fetchData(signal, objectsFilter, tileSets, form.values),
     });
 
     if (!statistics) {
@@ -107,15 +127,18 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ tileSets, objectsFilter
     return (
         <div>
             <h2 className={classes.title}>Evolution du nombre de détections par status de validation</h2>
-            <MultiSelect
-                label="Fonds de carte"
-                data={tileSetsValues}
-                value={tileSetsUuids}
-                onChange={(uuids) => {
-                    setTileSetsUuids(uuids);
-                    console.log('ONCHANGE');
-                }}
-            />
+
+            <SoloAccordion title="Plus de filtres">
+                <MultiSelect
+                    label="Fonds de carte"
+                    data={tileSetsValues}
+                    key={form.key('tileSetsUuids')}
+                    {...form.getInputProps('tileSetsUuids')}
+                />
+
+                <GeoCollectivitiesMultiSelects form={form} />
+            </SoloAccordion>
+
             <div className={classes['chart-container']}>
                 <LoadingOverlay visible={isFetching}>
                     <Loader />
@@ -142,14 +165,11 @@ const Component: React.FC = () => {
 
     return (
         <>
-            <Header />
-            <div className={classes.content}>
-                {objectsFilter && tileSets && tileSets.length ? (
-                    <ComponentInner objectsFilter={objectsFilter} tileSets={tileSets} />
-                ) : (
-                    <Loader />
-                )}
-            </div>
+            {objectsFilter && tileSets && tileSets.length ? (
+                <ComponentInner objectsFilter={objectsFilter} tileSets={tileSets} />
+            ) : (
+                <Loader />
+            )}
         </>
     );
 };

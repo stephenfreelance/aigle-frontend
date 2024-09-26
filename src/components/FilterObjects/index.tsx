@@ -130,8 +130,6 @@ const Component: React.FC<ComponentProps> = ({ objectTypes, objectsFilter, geoCu
         );
     }, [objectTypes]);
 
-    console.log({ objectTypes, uuids: form.getValues().objectTypesUuids });
-
     return (
         <form className={classes.form}>
             <h2>{CONTROL_LABEL}</h2>

@@ -1,5 +1,6 @@
 import FilterObjects from '@/components/FilterObjects';
-import FiltersSection from '@/components/admin/FiltersSection';
+import LayoutBase from '@/components/LayoutBase';
+import SoloAccordion from '@/components/admin/SoloAccordion';
 import ValidationStatusEvolutionChart from '@/components/statistics/ValidationStatusEvolutionChart';
 import { useStatistics } from '@/utils/context/statistics-context';
 import React from 'react';
@@ -13,17 +14,19 @@ const Component: React.FC = () => {
     }
 
     return (
-        <div className={classes.container}>
-            <FiltersSection opened>
+        <LayoutBase>
+            <SoloAccordion opened>
                 <FilterObjects
                     objectTypes={allObjectTypes}
                     objectsFilter={objectsFilter}
                     geoCustomZones={geoCustomZones}
                     updateObjectsFilter={updateObjectsFilter}
                 />
-            </FiltersSection>
-            <ValidationStatusEvolutionChart />
-        </div>
+            </SoloAccordion>
+            <div className={classes['charts-container']}>
+                <ValidationStatusEvolutionChart />
+            </div>
+        </LayoutBase>
     );
 };
 
