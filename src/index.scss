@@ -285,12 +285,14 @@ header {
 .mapbox-gl-draw_ctrl-draw-btn {
     height: 36px !important;
     width: 36px !important;
-
-    opacity: 0.575;
 }
 
 .mapboxgl-ctrl-bottom-left .mapboxgl-ctrl {
     margin: 0;
+}
+
+.mapbox-gl-draw_polygon {
+    background-image: url('@/assets/pencil.svg');
 }
 
 // custom

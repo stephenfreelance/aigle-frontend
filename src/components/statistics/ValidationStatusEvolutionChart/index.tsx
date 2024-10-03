@@ -126,7 +126,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ tileSets, objectsFilter
 
     return (
         <div>
-            <h2 className={classes.title}>Evolution du nombre de détections par status de validation</h2>
+            <h2 className={classes.title}>Evolution du nombre de détections par statut de validation</h2>
 
             <SoloAccordion title="Plus de filtres">
                 <MultiSelect

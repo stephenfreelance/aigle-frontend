@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 
 import { USER_GROUP_LIST_ENDPOINT } from '@/api-endpoints';
 import DataTable from '@/components/admin/DataTable';
-import SoloAccordion from '@/components/admin/SoloAccordion';
 import LayoutAdminBase from '@/components/admin/LayoutAdminBase';
+import SoloAccordion from '@/components/admin/SoloAccordion';
 import PillsDataCell from '@/components/admin/data-cells/PillsDataCell';
 import DateInfo from '@/components/ui/DateInfo';
-import { GeoCollectivity } from '@/models/geo/_common';
+import { GeoCustomZone } from '@/models/geo/geo-custom-zone';
+import { GeoZone } from '@/models/geo/geo-zone';
 import { ObjectTypeCategory } from '@/models/object-type-category';
 import { UserGroupDetail } from '@/models/user-group';
 import { Button, Input, Table } from '@mantine/core';
@@ -61,6 +62,7 @@ const Component: React.FC = () => {
                     <Table.Th key="name">Nom</Table.Th>,
                     <Table.Th key="categories">Thématiques</Table.Th>,
                     <Table.Th key="collectivities">Collectivités</Table.Th>,
+                    <Table.Th key="geoCustomZones">Zones</Table.Th>,
                 ]}
                 tableBodyRenderFns={[
                     (item: UserGroupDetail) => <DateInfo date={item.createdAt} />,
@@ -73,10 +75,13 @@ const Component: React.FC = () => {
                         />
                     ),
                     (item: UserGroupDetail) => (
-                        <PillsDataCell<GeoCollectivity>
+                        <PillsDataCell<GeoZone>
                             items={[...item.regions, ...item.departments, ...item.communes]}
                             getLabel={(geo) => geo.name}
                         />
+                    ),
+                    (item: UserGroupDetail) => (
+                        <PillsDataCell<GeoCustomZone> items={item.geoCustomZones} getLabel={(geo) => geo.name} />
                     ),
                 ]}
                 onItemClick={({ uuid }) => navigate(`/admin/user-groups/form/${uuid}`)}

@@ -40,10 +40,10 @@ const Component: React.FC = () => {
                 </Button>
 
                 <Group>
-                    <Image src={logoDdtm} mt="lg" className={classes.logo} alt="Logo DDTM" h={200} fit="contain" />
+                    <Image src={logoDdtm} mt="lg" className={classes.logo} alt="Logo DDTM" h={100} fit="contain" />
                 </Group>
 
-                <Divider mt="xl" mb="xl" />
+                <Divider className={classes.divider} mt="xl" mb="xl" />
 
                 <Group gap="lg">
                     <Image src={logoMte} className={classes.logo} alt="Logo MTE" h={200} fit="contain" />

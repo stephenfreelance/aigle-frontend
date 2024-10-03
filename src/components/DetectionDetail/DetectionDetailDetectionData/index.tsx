@@ -4,6 +4,7 @@ import {
     getDetectionObjectDetailEndpoint,
 } from '@/api-endpoints';
 import DetectionTilePreview from '@/components/DetectionDetail/DetectionTilePreview';
+import InfoBubble from '@/components/InfoBubble';
 import InfoCard from '@/components/InfoCard';
 import ErrorCard from '@/components/ui/ErrorCard';
 import {
@@ -169,7 +170,26 @@ const Form: React.FC<FormProps> = ({
             ) : null}
 
             <Text mt="md" className="input-label">
-                Statut de validation
+                Statut de validation{' '}
+                <InfoBubble>
+                    <>
+                        <p>Non-vérifié: l&apos;objet n&apos;a pas été vérifié par un utilisateur</p>
+                        <p>
+                            Suspect: l&apos;objet est <b>bien présent</b> sur les images et est{' '}
+                            <b>suspecté d&apos;être illégal</b>
+                        </p>
+                        <p>
+                            Légitime: l&apos;objet est <b>bien présent</b> sur les images et <b>légal</b>
+                        </p>
+                        <p>
+                            Invalidé: l&apos;objet est <b>absent</b> sur les images
+                        </p>
+                        <p>
+                            Disparu: l&apos;objet est <b>bien présent</b> sur les images mais{' '}
+                            <b>absent sur le terrain</b>
+                        </p>
+                    </>
+                </InfoBubble>
             </Text>
             <div
                 className={clsx(classes['detection-validation-status-select-container'], {

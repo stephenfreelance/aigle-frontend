@@ -77,6 +77,10 @@ const useMap = create<MapState>()((set, get) => ({
             },
             userLastPosition: settings.userLastPosition,
         }));
+        document.documentElement.style.setProperty(
+            '--nbr-background-layers',
+            get().getTileSets(['BACKGROUND'], ['VISIBLE', 'HIDDEN']).length.toString(),
+        );
     },
     resetLayers: () => {
         const settings = get().settings;

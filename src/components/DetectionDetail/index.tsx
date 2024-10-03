@@ -8,10 +8,10 @@ import Loader from '@/components/ui/Loader';
 import { DetectionObjectDetail } from '@/models/detection-object';
 import { TileSet } from '@/models/tile-set';
 import api from '@/utils/api';
+import { useMap } from '@/utils/context/map-context';
 import { formatCommune, formatParcel } from '@/utils/format';
 import { getAddressFromPolygon } from '@/utils/geojson';
-import { useMap } from '@/utils/context/map-context';
-import { Accordion, ActionIcon, Loader as MantineLoader, ScrollArea, Tooltip } from '@mantine/core';
+import { Accordion, ActionIcon, Button, Group, Loader as MantineLoader, ScrollArea, Tooltip } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import {
     IconCalendarClock,
@@ -19,6 +19,7 @@ import {
     IconHexagon,
     IconMap,
     IconMapPin,
+    IconMapPinFilled,
     IconRoute,
     IconX,
 } from '@tabler/icons-react';
@@ -30,7 +31,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import classes from './index.module.scss';
 
-const getGoogleMapLink = (point: Position) => `https://www.google.com/maps/place/${point[1]},${point[0]}`;
+const getGoogleMapLink = (point: Position) => `https://www.google.com/maps/?t=k&q=${point[1]},${point[0]}`;
 
 const updateAdress = (objectTypeUuid: string, address: string) => {
     return api.patch(getDetectionObjectDetailEndpoint(objectTypeUuid), {
@@ -97,22 +98,40 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                 </div>
 
                 <div>
-                    <Tooltip label="Télécharger la fiche de signalement" position="bottom-start">
-                        <ActionIcon
-                            variant="transparent"
-                            disabled={signalementPdfLoading}
-                            onClick={() => {
-                                notifications.show({
-                                    title: 'Génération de la fiche de signalement en cours',
-                                    message: 'Le téléchargement se lancera dans quelques instants',
-                                });
-                                setSignalementPdfLoading(true);
-                            }}
-                        >
-                            {signalementPdfLoading ? <MantineLoader size="xs" /> : <IconDownload />}
-                        </ActionIcon>
-                    </Tooltip>
+                    <Group>
+                        <Tooltip label="Télécharger la fiche de signalement" position="bottom-start">
+                            <Button
+                                variant="transparent"
+                                disabled={signalementPdfLoading}
+                                size="xs"
+                                onClick={() => {
+                                    notifications.show({
+                                        title: 'Génération de la fiche de signalement en cours',
+                                        message: 'Le téléchargement se lancera dans quelques instants',
+                                    });
+                                    setSignalementPdfLoading(true);
+                                }}
+                                leftSection={
+                                    signalementPdfLoading ? <MantineLoader size="xs" /> : <IconDownload size={24} />
+                                }
+                            >
+                                Fiche de signalement
+                            </Button>
+                        </Tooltip>
 
+                        <Tooltip label="Ouvrir dans Google Maps" position="bottom-start">
+                            <Button
+                                variant="transparent"
+                                component={Link}
+                                size="xs"
+                                leftSection={<IconMapPinFilled size={24} />}
+                                to={getGoogleMapLink(centerPoint)}
+                                target="_blank"
+                            >
+                                GMaps
+                            </Button>
+                        </Tooltip>
+                    </Group>
                     {signalementPdfLoading ? (
                         <SignalementPDFData
                             detectionObject={detectionObject}
