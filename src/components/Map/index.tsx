@@ -124,6 +124,7 @@ interface ComponentProps {
     fitBoundsFirstLayer?: boolean;
     displayTileSetControls?: boolean;
     displayDrawControl?: boolean;
+    skipProcessDetections?: boolean;
     boundLayers?: boolean;
     initialPosition?: GeoJSON.Position | null;
 }
@@ -135,6 +136,7 @@ const Component: React.FC<ComponentProps> = ({
     displayTileSetControls = true,
     displayDetections = true,
     boundLayers = true,
+    skipProcessDetections = false,
     initialPosition,
 }) => {
     const [mapBounds, setMapBounds] = useState<MapBounds>();
@@ -318,6 +320,10 @@ const Component: React.FC<ComponentProps> = ({
             },
             signal,
         });
+
+        if (skipProcessDetections) {
+            return res.data;
+        }
 
         return processDetections(res.data);
     };

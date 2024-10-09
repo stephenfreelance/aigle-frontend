@@ -92,6 +92,7 @@ const MapPreview: React.FC<MapPreviewProps> = ({ url, scheme, name, type, monoch
                             displayLayersGeometry={true}
                             boundLayers={false}
                             fitBoundsFirstLayer={true}
+                            skipProcessDetections={true}
                         />
                     </div>
                 ) : (
