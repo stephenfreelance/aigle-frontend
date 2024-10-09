@@ -125,6 +125,7 @@ interface ComponentProps {
     displayTileSetControls?: boolean;
     displayDrawControl?: boolean;
     skipProcessDetections?: boolean;
+    displayLayersSelection?: boolean;
     boundLayers?: boolean;
     initialPosition?: GeoJSON.Position | null;
 }
@@ -137,6 +138,7 @@ const Component: React.FC<ComponentProps> = ({
     displayDetections = true,
     boundLayers = true,
     skipProcessDetections = false,
+    displayLayersSelection = true,
     initialPosition,
 }) => {
     const [mapBounds, setMapBounds] = useState<MapBounds>();
@@ -561,6 +563,7 @@ const Component: React.FC<ComponentProps> = ({
                             setIsShowed={(state: boolean) => {
                                 setLeftSectionShowed(state ? 'LAYER_DISPLAY' : undefined);
                             }}
+                            displayLayersSelection={displayLayersSelection}
                             disabled={drawMode}
                         />
                         <MapAddAnnotationModal
