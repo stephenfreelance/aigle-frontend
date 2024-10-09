@@ -41,9 +41,10 @@ interface MapPreviewProps {
     name: string;
     monochrome: boolean;
     geometry?: Geometry;
+    uuid?: string;
 }
 
-const MapPreview: React.FC<MapPreviewProps> = ({ url, scheme, name, type, monochrome, geometry }) => {
+const MapPreview: React.FC<MapPreviewProps> = ({ url, scheme, name, type, monochrome, geometry, uuid }) => {
     const fakeDate = formatISO(new Date());
     const layers: MapTileSetLayer[] = [
         {
@@ -51,7 +52,7 @@ const MapPreview: React.FC<MapPreviewProps> = ({ url, scheme, name, type, monoch
             tileSet: {
                 createdAt: fakeDate,
                 updatedAt: fakeDate,
-                uuid: 'fake-uuid',
+                uuid: uuid || 'fake-uuid',
                 minZoom: null,
                 maxZoom: null,
                 date: fakeDate,
@@ -74,12 +75,19 @@ const MapPreview: React.FC<MapPreviewProps> = ({ url, scheme, name, type, monoch
                     Le carré autour de la zone de limite définie la zone dans laquelle les tuiles seront chargées pour
                     l&apos;affichage de la carte
                 </p>
+                {uuid ? (
+                    <p>Les détections associées à ce fond de carte seront affichées</p>
+                ) : (
+                    <p>Enregistrez ce fond de carte et retournez sur cette page pour voir les détections associées</p>
+                )}
             </InfoCard>
             <div>
                 {url ? (
                     <div className={classes['map-preview-content']}>
                         <Map
-                            displayDetections={false}
+                            displayTileSetControls={false}
+                            displayDrawControl={false}
+                            displayDetections={true}
                             layers={layers}
                             displayLayersGeometry={true}
                             boundLayers={false}
@@ -131,6 +139,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, initialGeoSelectedValu
     const [error, setError] = useState<AxiosError>();
     const navigate = useNavigate();
     const [mapPreviewProps, setMapPreviewProps] = useState<MapPreviewProps>({
+        uuid,
         url: initialValues.url,
         scheme: initialValues.tileSetScheme,
         name: initialValues.name,

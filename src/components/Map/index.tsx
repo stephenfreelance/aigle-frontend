@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import Map, { GeolocateControl, Layer, Marker, Source, ViewStateChangeEvent } from 'react-map-gl';
+import Map, { GeolocateControl, Layer, Source, ViewStateChangeEvent } from 'react-map-gl';
 
 import { GET_CUSTOM_GEOMETRY_ENDPOINT, getDetectionListEndpoint } from '@/api-endpoints';
 import DetectionDetail from '@/components/DetectionDetail';
@@ -122,6 +122,8 @@ interface ComponentProps {
     displayDetections?: boolean;
     displayLayersGeometry?: boolean;
     fitBoundsFirstLayer?: boolean;
+    displayTileSetControls?: boolean;
+    displayDrawControl?: boolean;
     boundLayers?: boolean;
     initialPosition?: GeoJSON.Position | null;
 }
@@ -130,6 +132,7 @@ const Component: React.FC<ComponentProps> = ({
     layers,
     displayLayersGeometry,
     fitBoundsFirstLayer = false,
+    displayTileSetControls = true,
     displayDetections = true,
     boundLayers = true,
     initialPosition,
@@ -535,8 +538,12 @@ const Component: React.FC<ComponentProps> = ({
                                 setLeftSectionShowed(state ? 'FILTER_DETECTION' : undefined);
                             }}
                         />
-                        <MapControlBackgroundSlider />
-                        <MapControlPartialToggle />
+                        {displayTileSetControls ? (
+                            <>
+                                <MapControlBackgroundSlider />
+                                <MapControlPartialToggle />
+                            </>
+                        ) : null}
                         <MapControlLegend
                             isShowed={leftSectionShowed === 'LEGEND'}
                             setIsShowed={(state: boolean) => {

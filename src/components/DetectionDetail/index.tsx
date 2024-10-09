@@ -190,7 +190,16 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                                 <IconCalendarClock size={16} />{' '}
                                 <span className={classes['general-informations-content-item-text']}>
                                     Dernière mise à jour :&nbsp;
-                                    <DateInfo date={detectionObject.updatedAt} />
+                                    <div>
+                                        {detectionObject.userGroupLastUpdate ? (
+                                            <div>
+                                                <b>{detectionObject.userGroupLastUpdate.name}</b>
+                                            </div>
+                                        ) : (
+                                            <div>Aucun groupe</div>
+                                        )}
+                                        <DateInfo date={detectionObject.updatedAt} />
+                                    </div>
                                 </span>
                             </p>
                             <p className={classes['general-informations-content-item']}>

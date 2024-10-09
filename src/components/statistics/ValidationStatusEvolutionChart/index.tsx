@@ -1,5 +1,4 @@
 import { STATISTICS_VALIDATION_STATUS_ENDPOINT } from '@/api-endpoints';
-import SoloAccordion from '@/components/admin/SoloAccordion';
 import GeoCollectivitiesMultiSelects from '@/components/admin/form-fields/GeoCollectivitiesMultiSelects';
 import Loader from '@/components/ui/Loader';
 import { ObjectsFilter } from '@/models/detection-filter';
@@ -128,16 +127,14 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ tileSets, objectsFilter
         <div>
             <h2 className={classes.title}>Evolution du nombre de détections par statut de validation</h2>
 
-            <SoloAccordion title="Plus de filtres">
-                <MultiSelect
-                    label="Fonds de carte"
-                    data={tileSetsValues}
-                    key={form.key('tileSetsUuids')}
-                    {...form.getInputProps('tileSetsUuids')}
-                />
+            <MultiSelect
+                label="Fonds de carte"
+                data={tileSetsValues}
+                key={form.key('tileSetsUuids')}
+                {...form.getInputProps('tileSetsUuids')}
+            />
 
-                <GeoCollectivitiesMultiSelects form={form} />
-            </SoloAccordion>
+            <GeoCollectivitiesMultiSelects form={form} className={classes['geocolectivities-container']} />
 
             <div className={classes['chart-container']}>
                 <LoadingOverlay visible={isFetching}>

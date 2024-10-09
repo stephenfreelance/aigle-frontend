@@ -3,6 +3,7 @@ import { AUTH_ME_ENDPOINT, MAP_SETTINGS_ENDPOINT } from '@/api-endpoints';
 import { MapSettings } from '@/models/map-settings';
 import { User } from '@/models/user';
 import About from '@/routes/About';
+import Help from '@/routes/Help';
 import Map from '@/routes/Map/index.tsx';
 import CollectiviteForm from '@/routes/admin/collectivite/CollectiviteForm';
 import CollectiviteList from '@/routes/admin/collectivite/CollectiviteList';
@@ -28,6 +29,7 @@ import { useAuth } from '@/utils/auth-context';
 import { DEFAULT_ROUTE } from '@/utils/constants';
 import { useMap } from '@/utils/context/map-context';
 import { useStatistics } from '@/utils/context/statistics-context';
+import { Crisp } from 'crisp-sdk-web';
 import React, { useCallback, useEffect } from 'react';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Charts from './routes/statistics/Charts';
@@ -47,6 +49,10 @@ const App: React.FC = () => {
             console.error(err);
         }
     }, [setUser]);
+
+    useEffect(() => {
+        Crisp.configure('b7048ccf-68b6-424e-a7c0-0c6e8b5d2724');
+    }, []);
 
     const getMapSettings = useCallback(async () => {
         try {
@@ -102,6 +108,15 @@ const App: React.FC = () => {
                     element={
                         <ProtectedRoute>
                             <About />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/help"
+                    element={
+                        <ProtectedRoute>
+                            <Help />
                         </ProtectedRoute>
                     }
                 />

@@ -35,10 +35,6 @@ const Component: React.FC = () => {
                     </Anchor>
                 </p>
 
-                <Button mt="lg" leftSection={<IconDownload />} component={Anchor} href={pdfDoc} target="_blank">
-                    Télécharger la fiche métier
-                </Button>
-
                 <Group>
                     <Image src={logoDdtm} mt="lg" className={classes.logo} alt="Logo DDTM" h={100} fit="contain" />
                 </Group>

@@ -4,6 +4,7 @@ import { ObjectType } from '@/models/object-type';
 import { Parcel } from '@/models/parcel';
 import { TileSet } from '@/models/tile-set';
 import { UserGroupRight } from '@/models/user';
+import { UserGroup } from '@/models/user-group';
 import { GeoCustomZone } from './geo/geo-custom-zone';
 
 interface DetectionObjectDetailTilesetPreview {
@@ -24,6 +25,7 @@ export interface DetectionObjectDetail extends DetectionObjectMinimal {
     parcel: Parcel | null;
     userGroupRights: UserGroupRight[];
     geoCustomZones: GeoCustomZone[];
+    userGroupLastUpdate: UserGroup | null;
 }
 
 export interface DetectionObjectHistoryItem {
