@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { TILE_SET_POST_ENDPOINT, getTileSetDetailEndpoint } from '@/api-endpoints';
 import InfoCard from '@/components/InfoCard';
@@ -20,6 +20,7 @@ import {
 } from '@/models/tile-set';
 import api from '@/utils/api';
 import { TILE_SET_STATUSES_NAMES_MAP, TILE_SET_TYPES_NAMES_MAP } from '@/utils/constants';
+import { useMap } from '@/utils/context/map-context';
 import { GeoValues, geoZoneToGeoOption } from '@/utils/geojson';
 import { Button, Card, Checkbox, NumberInput, Select, TextInput } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
@@ -398,6 +399,18 @@ const EMPTY_FORM_VALUES: FormValues = {
 
 const ComponentInner: React.FC = () => {
     const { uuid } = useParams();
+    const { updateObjectsFilter } = useMap();
+
+    useEffect(() => {
+        updateObjectsFilter({
+            objectTypesUuids: [],
+            detectionValidationStatuses: [],
+            detectionControlStatuses: [],
+            score: 0,
+            prescripted: null,
+            customZonesUuids: [],
+        });
+    }, []);
 
     const fetchData = async () => {
         if (!uuid) {
