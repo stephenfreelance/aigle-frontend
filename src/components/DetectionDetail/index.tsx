@@ -276,15 +276,27 @@ interface ComponentProps {
 }
 
 const Component: React.FC<ComponentProps> = ({ detectionObjectUuid, detectionUuid, onClose }: ComponentProps) => {
+    const { eventEmitter } = useMap();
     const fetchData = async () => {
         const res = await api.get<DetectionObjectDetail>(getDetectionObjectDetailEndpoint(detectionObjectUuid));
 
         return res.data;
     };
-    const { data: detectionObject, isRefetching: detectionObjectRefreshing } = useQuery({
+    const {
+        data: detectionObject,
+        isRefetching: detectionObjectRefreshing,
+        refetch,
+    } = useQuery({
         queryKey: [getDetectionObjectDetailEndpoint(String(detectionObjectUuid))],
         queryFn: () => fetchData(),
     });
+    useEffect(() => {
+        eventEmitter.on('UPDATE_DETECTION_DETAIL', refetch);
+
+        return () => {
+            eventEmitter.off('UPDATE_DETECTION_DETAIL', refetch);
+        };
+    }, []);
 
     if (!detectionObject) {
         return <Loader className={classes.loader} />;

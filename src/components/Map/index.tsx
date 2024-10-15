@@ -153,7 +153,8 @@ const Component: React.FC<ComponentProps> = ({
 
     const [addAnnotationPolygon, setAddAnnotationPolygon] = useState<Polygon>();
 
-    const { eventEmitter, objectsFilter, resetLayers, settings, customZoneLayers } = useMap();
+    const { eventEmitter, objectsFilter, getTileSetsUuids, setTileSetsVisibility, settings, customZoneLayers } =
+        useMap();
 
     const [cursor, setCursor] = useState<string>();
     const [mapRef, setMapRef] = useState<mapboxgl.Map>();
@@ -183,7 +184,22 @@ const Component: React.FC<ComponentProps> = ({
 
         node.on('draw.modechange', ({ mode }: { mode: keyof MapboxDraw.Modes }) => {
             if (mode === 'draw_polygon') {
-                resetLayers();
+                const partialLayersDisplayedUuids = getTileSetsUuids(['PARTIAL'], ['VISIBLE', 'HIDDEN'], true);
+                let partialLayersToDisplayUuids: string[] = [];
+
+                if (partialLayersDisplayedUuids.length) {
+                    partialLayersToDisplayUuids = getTileSetsUuids(['PARTIAL'], ['VISIBLE', 'HIDDEN'], false);
+                }
+
+                const mostRecentBackgroundLayer = layers
+                    .sort(
+                        (layer1, layer2) =>
+                            new Date(layer2.tileSet.date).getTime() - new Date(layer1.tileSet.date).getTime(),
+                    )
+                    .filter((layer) => layer.tileSet.tileSetType === 'BACKGROUND')[0];
+
+                setTileSetsVisibility([...partialLayersToDisplayUuids, mostRecentBackgroundLayer.tileSet.uuid], true);
+
                 setDrawMode(true);
                 setLeftSectionShowed(undefined);
 

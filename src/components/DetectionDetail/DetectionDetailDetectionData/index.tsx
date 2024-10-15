@@ -128,6 +128,7 @@ const Form: React.FC<FormProps> = ({
             }
 
             eventEmitter.emit('UPDATE_DETECTIONS');
+            eventEmitter.emit('UPDATE_DETECTION_DETAIL');
         },
         onError: (error) => {
             setError(error);

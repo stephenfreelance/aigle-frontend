@@ -31,7 +31,7 @@ const getInitialLayers = (settings: MapSettings) => {
     return layers;
 };
 
-type MapEventType = 'UPDATE_DETECTIONS' | 'JUMP_TO' | 'DISPLAY_PARCEL' | 'LAYERS_UPDATED';
+type MapEventType = 'UPDATE_DETECTIONS' | 'UPDATE_DETECTION_DETAIL' | 'JUMP_TO' | 'DISPLAY_PARCEL' | 'LAYERS_UPDATED';
 
 interface MapState {
     layers?: MapTileSetLayer[];
@@ -48,8 +48,8 @@ interface MapState {
     setTileSetVisibility: (uuid: string, visible: boolean) => void;
     setTileSetsVisibility: (uuids: string[], visible: boolean) => void;
     setCustomZoneVisibility: (uuid: string, visible: boolean) => void;
-    getTileSets: (tileSetTypes: TileSetType[], tileSetStatuses: TileSetStatus[]) => TileSet[];
-    getTileSetsUuids: (tileSetTypes: TileSetType[], tileSetStatuses: TileSetStatus[]) => string[];
+    getTileSets: (tileSetTypes: TileSetType[], tileSetStatuses: TileSetStatus[], displayed?: boolean) => TileSet[];
+    getTileSetsUuids: (tileSetTypes: TileSetType[], tileSetStatuses: TileSetStatus[], displayed?: boolean) => string[];
     eventEmitter: EventEmitter<MapEventType>;
 }
 
@@ -116,11 +116,21 @@ const useMap = create<MapState>()((set, get) => ({
             }
 
             const layerIndexes: number[] = [];
+            let backgroundSet = false;
 
             state.layers.forEach((layer, index) => {
                 if (uuids.includes(layer.tileSet.uuid)) {
                     if (layer.tileSet.tileSetType === 'BACKGROUND') {
-                        throw new Error('Cannot set background layer visibility with this method');
+                        if (backgroundSet) {
+                            throw new Error('Cannot set more than one background layer visible');
+                        }
+
+                        (state.layers || []).forEach((lay) => {
+                            if (lay.tileSet.tileSetType === 'BACKGROUND' && lay.tileSet.uuid !== layer.tileSet.uuid) {
+                                lay.displayed = false;
+                            }
+                        });
+                        backgroundSet = true;
                     }
 
                     layerIndexes.push(index);
@@ -191,18 +201,24 @@ const useMap = create<MapState>()((set, get) => ({
             };
         });
     },
-    getTileSets: (tileSetTypes: TileSetType[], tileSetStatuses: TileSetStatus[]) => {
+    getTileSets: (tileSetTypes: TileSetType[], tileSetStatuses: TileSetStatus[], displayed?: boolean) => {
         return (get().layers || [])
-            .filter(
-                (layer) =>
+            .filter((layer) => {
+                let condition =
                     tileSetTypes.includes(layer.tileSet.tileSetType) &&
-                    tileSetStatuses.includes(layer.tileSet.tileSetStatus),
-            )
+                    tileSetStatuses.includes(layer.tileSet.tileSetStatus);
+
+                if (displayed !== undefined) {
+                    condition = condition && layer.displayed === displayed;
+                }
+
+                return condition;
+            })
             .map((layer) => layer.tileSet);
     },
-    getTileSetsUuids: (tileSetTypes: TileSetType[], tileSetStatuses: TileSetStatus[]) => {
+    getTileSetsUuids: (tileSetTypes: TileSetType[], tileSetStatuses: TileSetStatus[], displayed?: boolean) => {
         return get()
-            .getTileSets(tileSetTypes, tileSetStatuses)
+            .getTileSets(tileSetTypes, tileSetStatuses, displayed)
             .map((tileSet) => tileSet.uuid);
     },
     eventEmitter: new EventEmitter<MapEventType>(),

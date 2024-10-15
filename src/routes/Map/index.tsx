@@ -10,6 +10,8 @@ import classes from './index.module.scss';
 const Component: React.FC = () => {
     const { layers, userLastPosition } = useMap();
 
+    console.log({layers});
+
     return (
         <>
             <Header />
