@@ -16,10 +16,11 @@ import WarningCard from '@/components/ui/WarningCard';
 import { GeoCustomZone } from '@/models/geo/geo-custom-zone';
 import { ObjectType } from '@/models/object-type';
 import { ObjectTypeCategory } from '@/models/object-type-category';
-import { UserGroupDetail } from '@/models/user-group';
+import { UserGroupDetail, UserGroupType, userGroupTypes } from '@/models/user-group';
 import api from '@/utils/api';
+import { USER_GROUP_TYPES_NAMES_MAP } from '@/utils/constants';
 import { GeoValues, geoZoneToGeoOption } from '@/utils/geojson';
-import { Button, MultiSelect, TextInput } from '@mantine/core';
+import { Button, MultiSelect, Select, TextInput } from '@mantine/core';
 import { UseFormReturnType, isNotEmpty, useForm } from '@mantine/form';
 import { IconUserPlus } from '@tabler/icons-react';
 import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query';
@@ -31,6 +32,7 @@ const BACK_URL = '/admin/user-groups';
 
 interface FormValues {
     name: string;
+    userGroupType: UserGroupType;
     communesUuids: string[];
     departmentsUuids: string[];
     regionsUuids: string[];
@@ -118,6 +120,19 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, initialGeoSelectedValu
                 key={form.key('name')}
                 {...form.getInputProps('name')}
             />
+            <Select
+                allowDeselect={false}
+                label="Type"
+                withAsterisk
+                mt="md"
+                data={userGroupTypes.map((type) => ({
+                    value: type,
+                    label: USER_GROUP_TYPES_NAMES_MAP[type],
+                }))}
+                key={form.key('userGroupType')}
+                {...form.getInputProps('userGroupType')}
+            />
+
             <MultiSelect
                 mt="md"
                 label="Thématiques"
@@ -169,6 +184,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, initialGeoSelectedValu
 
 const EMPTY_FORM_VALUES: FormValues = {
     name: '',
+    userGroupType: 'COLLECTIVITY',
     communesUuids: [],
     departmentsUuids: [],
     regionsUuids: [],

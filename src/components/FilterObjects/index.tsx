@@ -5,6 +5,7 @@ import { detectionControlStatuses, detectionValidationStatuses } from '@/models/
 import { ObjectsFilter } from '@/models/detection-filter';
 import { GeoCustomZone } from '@/models/geo/geo-custom-zone';
 import { ObjectType } from '@/models/object-type';
+import { useAuth } from '@/utils/auth-context';
 import {
     DETECTION_CONTROL_STATUSES_NAMES_MAP,
     DETECTION_VALIDATION_STATUSES_COLORS_MAP,
@@ -37,6 +38,9 @@ interface ComponentProps {
 }
 
 const Component: React.FC<ComponentProps> = ({ objectTypes, objectsFilter, geoCustomZones, updateObjectsFilter }) => {
+    const { getUserGroupType, userMe } = useAuth();
+    const userGroupType = useMemo(() => getUserGroupType(), [userMe]);
+
     const {
         objectTypesUuids,
         detectionValidationStatuses: detectionValidationStatusesFilter,
@@ -274,7 +278,7 @@ const Component: React.FC<ComponentProps> = ({ objectTypes, objectsFilter, geoCu
                                     <Checkbox
                                         key={status}
                                         value={status}
-                                        label={DETECTION_CONTROL_STATUSES_NAMES_MAP[status]}
+                                        label={DETECTION_CONTROL_STATUSES_NAMES_MAP[userGroupType][status]}
                                     />
                                 ))}
                             </Stack>

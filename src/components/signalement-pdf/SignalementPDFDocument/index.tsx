@@ -2,11 +2,12 @@ import logoImg from '@/assets/logo.png';
 import prefetHeraultImg from '@/assets/signalement-pdf/prefet_herault.jpg';
 import { DetectionObjectDetail } from '@/models/detection-object';
 import { ParcelDetail } from '@/models/parcel';
+import { useAuth } from '@/utils/auth-context';
 import { DEFAULT_DATE_FORMAT, DETECTION_CONTROL_STATUSES_NAMES_MAP } from '@/utils/constants';
 import { formatCommune, formatParcel } from '@/utils/format';
 import { Document, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import { format } from 'date-fns';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 const countSuspectObjectsParcel = (parcel: ParcelDetail, excludeObjectUuid: string): Record<string, number> | null => {
     const suspectObjectsMap: Record<string, number> = {};
@@ -110,6 +111,9 @@ export interface ComponentProps {
 
 // Create Document Component
 const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, previewImages, parcel }) => {
+    const { getUserGroupType, userMe } = useAuth();
+    const userGroupType = useMemo(() => getUserGroupType(), [userMe]);
+
     const suspectObjectsCount = parcel ? countSuspectObjectsParcel(parcel, detectionObject.uuid) : null;
 
     return (
@@ -151,7 +155,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, preview
                     <Text>
                         Statut:{' '}
                         {
-                            DETECTION_CONTROL_STATUSES_NAMES_MAP[
+                            DETECTION_CONTROL_STATUSES_NAMES_MAP[userGroupType][
                                 detectionObject.detections[0].detectionData.detectionControlStatus
                             ]
                         }

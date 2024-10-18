@@ -20,6 +20,7 @@ import {
 import { DetectionObjectDetail } from '@/models/detection-object';
 import { TileSet } from '@/models/tile-set';
 import api from '@/utils/api';
+import { useAuth } from '@/utils/auth-context';
 import {
     DEFAULT_DATE_FORMAT,
     DETECTION_CONTROL_STATUSES_NAMES_MAP,
@@ -92,9 +93,17 @@ const Form: React.FC<FormProps> = ({
     const [error, setError] = useState<AxiosError>();
     const { eventEmitter } = useMap();
 
+    const { getUserGroupType, userMe } = useAuth();
+    const userGroupType = useMemo(() => getUserGroupType(), [userMe]);
+
     const form: UseFormReturnType<FormValues> = useForm({
         initialValues,
     });
+
+    useEffect(() => {
+        form.setValues(initialValues);
+    }, [initialValues]);
+
     const queryClient = useQueryClient();
 
     const mutation: UseMutationResult<FormValues, AxiosError, FormValues> = useMutation({
@@ -174,7 +183,7 @@ const Form: React.FC<FormProps> = ({
                 Statut de validation{' '}
                 <InfoBubble>
                     <>
-                        <p>Non-vérifié: l&apos;objet n&apos;a pas été vérifié par un utilisateur</p>
+                        <p>Aucune sélection: l&apos;objet n&apos;a pas été vérifié par un utilisateur</p>
                         <p>
                             Suspect: l&apos;objet est <b>bien présent</b> sur les images et est{' '}
                             <b>suspecté d&apos;être illégal</b>
@@ -185,10 +194,6 @@ const Form: React.FC<FormProps> = ({
                         <p>
                             Invalidé: l&apos;objet est <b>absent</b> sur les images
                         </p>
-                        <p>
-                            Disparu: l&apos;objet est <b>bien présent</b> sur les images mais{' '}
-                            <b>absent sur le terrain</b>
-                        </p>
                     </>
                 </InfoBubble>
             </Text>
@@ -197,17 +202,19 @@ const Form: React.FC<FormProps> = ({
                     [classes.disabled]: disabled,
                 })}
             >
-                {detectionValidationStatuses.map((status) => (
-                    <Button
-                        variant={form.getValues().detectionValidationStatus === status ? 'filled' : 'outline'}
-                        color={DETECTION_VALIDATION_STATUSES_COLORS_MAP[status]}
-                        key={status}
-                        disabled={mutation.status === 'pending'}
-                        onClick={() => form.setFieldValue('detectionValidationStatus', status)}
-                    >
-                        {DETECTION_VALIDATION_STATUSES_NAMES_MAP[status]}
-                    </Button>
-                ))}
+                {detectionValidationStatuses
+                    .filter((status) => status !== 'DETECTED_NOT_VERIFIED')
+                    .map((status) => (
+                        <Button
+                            variant={form.getValues().detectionValidationStatus === status ? 'filled' : 'outline'}
+                            color={DETECTION_VALIDATION_STATUSES_COLORS_MAP[status]}
+                            key={status}
+                            disabled={mutation.status === 'pending'}
+                            onClick={() => form.setFieldValue('detectionValidationStatus', status)}
+                        >
+                            {DETECTION_VALIDATION_STATUSES_NAMES_MAP[status]}
+                        </Button>
+                    ))}
             </div>
 
             {prescriptionDurationYears ? (
@@ -232,7 +239,7 @@ const Form: React.FC<FormProps> = ({
                 label="Statut du contrôle"
                 data={detectionControlStatuses.map((status) => ({
                     value: status,
-                    label: DETECTION_CONTROL_STATUSES_NAMES_MAP[status],
+                    label: DETECTION_CONTROL_STATUSES_NAMES_MAP[userGroupType][status],
                 }))}
                 key={form.key('detectionControlStatus')}
                 disabled={disabled || mutation.status === 'pending'}

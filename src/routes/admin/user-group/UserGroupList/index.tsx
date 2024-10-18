@@ -10,6 +10,7 @@ import { GeoCustomZone } from '@/models/geo/geo-custom-zone';
 import { GeoZone } from '@/models/geo/geo-zone';
 import { ObjectTypeCategory } from '@/models/object-type-category';
 import { UserGroupDetail } from '@/models/user-group';
+import { USER_GROUP_TYPES_NAMES_MAP } from '@/utils/constants';
 import { Button, Input, Table } from '@mantine/core';
 import { IconSearch, IconUserPlus } from '@tabler/icons-react';
 import isEqual from 'lodash/isEqual';
@@ -60,6 +61,7 @@ const Component: React.FC = () => {
                 tableHeader={[
                     <Table.Th key="createdAt">Date création</Table.Th>,
                     <Table.Th key="name">Nom</Table.Th>,
+                    <Table.Th key="userGroupType">Type</Table.Th>,
                     <Table.Th key="categories">Thématiques</Table.Th>,
                     <Table.Th key="collectivities">Collectivités</Table.Th>,
                     <Table.Th key="geoCustomZones">Zones</Table.Th>,
@@ -67,6 +69,7 @@ const Component: React.FC = () => {
                 tableBodyRenderFns={[
                     (item: UserGroupDetail) => <DateInfo date={item.createdAt} />,
                     (item: UserGroupDetail) => item.name,
+                    (item: UserGroupDetail) => USER_GROUP_TYPES_NAMES_MAP[item.userGroupType],
                     (item: UserGroupDetail) => (
                         <PillsDataCell<ObjectTypeCategory>
                             items={item.objectTypeCategories}

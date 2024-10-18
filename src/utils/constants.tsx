@@ -5,6 +5,7 @@ import { GeoCustomZoneStatus } from '@/models/geo/geo-custom-zone';
 import { ObjectTypeCategoryObjectTypeStatus } from '@/models/object-type-category';
 import { TileSetStatus, TileSetType } from '@/models/tile-set';
 import { UserGroupRight, UserRole } from '@/models/user';
+import { UserGroupType } from '@/models/user-group';
 
 export const DEFAULT_ROUTE = '/';
 
@@ -53,15 +54,31 @@ export const GEO_CUSTOM_ZONE_STATUSES_NAMES_MAP: {
     INACTIVE: 'Inactif',
 } as const;
 
-export const DETECTION_CONTROL_STATUSES_NAMES_MAP: {
+const DETECTION_CONTROL_STATUSES_NAMES_MAP_BASE: {
     [status in DetectionControlStatus]: string;
 } = {
     NOT_CONTROLLED: 'Non contrôlé',
-    SIGNALED_INTERNALLY: 'Signalé en interne',
     SIGNALED_COLLECTIVITY: 'Signalé à la collectivité',
+    SIGNALED_COMMUNE: 'Signalé à la commune',
+    CONTROLLED_FIELD: 'Contrôlé terrain',
+    PRIOR_LETTER_SENT: 'Courrier préalable envoyé',
+    OFFICIAL_REPORT_DRAWN_UP: 'Procès-verbal dressé',
+    OBSERVARTION_REPORT_REDACTED: 'Rapport de constatations rédigé',
     VERBALIZED: 'Verbalisé',
     REHABILITATED: 'Remis en état',
 } as const;
+
+export const DETECTION_CONTROL_STATUSES_NAMES_MAP: {
+    [userGroupType in UserGroupType]: {
+        [status in DetectionControlStatus]: string;
+    };
+} = {
+    DDTM: DETECTION_CONTROL_STATUSES_NAMES_MAP_BASE,
+    COLLECTIVITY: {
+        ...DETECTION_CONTROL_STATUSES_NAMES_MAP_BASE,
+        SIGNALED_COLLECTIVITY: 'Signalement effectué par la DDTM',
+    },
+};
 
 export const DETECTION_PRESCRIPTION_STATUSES_NAMES_MAP: {
     [status in DetectionPrescriptionStatus]: string;
@@ -75,9 +92,8 @@ export const DETECTION_VALIDATION_STATUSES_NAMES_MAP: {
 } = {
     DETECTED_NOT_VERIFIED: 'Non vérifié',
     SUSPECT: 'Suspect',
-    LEGITIMATE: 'Légitime',
+    LEGITIMATE: 'Légal',
     INVALIDATED: 'Invalidé',
-    DISAPPEARED: 'Disparu',
 } as const;
 
 export const DETECTION_VALIDATION_STATUSES_COLORS_MAP: {
@@ -87,7 +103,13 @@ export const DETECTION_VALIDATION_STATUSES_COLORS_MAP: {
     SUSPECT: '#FFC107',
     LEGITIMATE: '#4CAF50',
     INVALIDATED: '#E53935',
-    DISAPPEARED: '#009688',
+} as const;
+
+export const USER_GROUP_TYPES_NAMES_MAP: {
+    [type in UserGroupType]: string;
+} = {
+    DDTM: 'DDTM',
+    COLLECTIVITY: 'Collectivité',
 } as const;
 
 export const USER_GROUP_RIGHTS_ORDERED: UserGroupRight[] = ['WRITE', 'ANNOTATE', 'READ'] as const;
