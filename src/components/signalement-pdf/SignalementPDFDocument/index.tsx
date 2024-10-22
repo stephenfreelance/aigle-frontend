@@ -111,7 +111,7 @@ export interface ComponentProps {
 
 // Create Document Component
 const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, previewImages, parcel }) => {
-    const { getUserGroupType, userMe } = useAuth();
+    const { getUserGroupType, userMe } = useAuth.getState();
     const userGroupType = useMemo(() => getUserGroupType(), [userMe]);
 
     const suspectObjectsCount = parcel ? countSuspectObjectsParcel(parcel, detectionObject.uuid) : null;
