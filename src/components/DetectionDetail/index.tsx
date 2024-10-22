@@ -9,7 +9,7 @@ import { DetectionObjectDetail } from '@/models/detection-object';
 import { TileSet } from '@/models/tile-set';
 import api from '@/utils/api';
 import { useMap } from '@/utils/context/map-context';
-import { formatCommune, formatParcel } from '@/utils/format';
+import { formatParcel } from '@/utils/format';
 import { getAddressFromPolygon } from '@/utils/geojson';
 import { Accordion, ActionIcon, Button, Group, Loader as MantineLoader, ScrollArea, Tooltip } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
@@ -20,12 +20,10 @@ import {
     IconMap,
     IconMapPin,
     IconMapPinFilled,
-    IconRoute,
     IconX,
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { centroid } from '@turf/turf';
-import clsx from 'clsx';
 import { Position } from 'geojson';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';

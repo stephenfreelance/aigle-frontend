@@ -13,6 +13,7 @@ import {
     IconMap,
     IconReportAnalytics,
 } from '@tabler/icons-react';
+import clsx from 'clsx';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import classes from './index.module.scss';
 
@@ -81,6 +82,85 @@ const Component: React.FC<ComponentProps> = ({ burgerState }) => {
             navigate('/admin');
         }
     };
+
+    return (
+        <header role="banner" className={clsx(classes.container, 'fr-header')}>
+            <div className="fr-header__body">
+                <div className="fr-container">
+                    <div className="fr-header__body-row">
+                        <div className="fr-header__brand fr-enlarge-link">
+                            <div className="fr-header__brand-top">
+                                <div className="fr-header__logo">
+                                    <p className="fr-logo">
+                                        Ministère de la
+                                        <br />
+                                        transition écologique
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="fr-header__service">
+                                <a
+                                    href="/"
+                                    title="Accueil - [À MODIFIER - Nom du site / service] - Nom de l’entité (ministère, secrétariat d‘état, gouvernement)"
+                                >
+                                    <p className="fr-header__service-title">
+                                        Aigle <p className="fr-badge fr-badge--green-menthe">BETA</p>
+                                    </p>
+                                </a>
+                                <p className="fr-header__service-tagline">Détection par IA des irrégularités</p>
+                                <p className="fr-header__service-tagline">d&apos;occupation du sol</p>
+                            </div>
+                        </div>
+                        <div className="fr-header__tools">
+                            <div className="fr-header__tools-links">
+                                <ul className="fr-btns-group">
+                                    <li>
+                                        <a className="fr-btn" href="/map">
+                                            <IconMap className={classes["link-icon"]} size={16} />
+                                            Carte
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a className="fr-btn" href="/statistics">
+                                            <IconReportAnalytics className={classes["link-icon"]} size={16} />
+                                            Stats
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a className="fr-btn" href="/about">
+                                            <IconInfoCircle className={classes["link-icon"]} size={16} />A propos
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a className="fr-btn" href="/help">
+                                            <IconHelp className={classes["link-icon"]} size={16} />
+                                            Besoin d&apos;aide
+                                        </a>
+                                    </li>
+                                    {userMe?.userRole && ['ADMIN', 'SUPER_ADMIN'].includes(userMe.userRole) ? (
+                                        <li>
+                                            <a className="fr-btn" href="/admin">
+                                                <IconAdjustments className={classes["link-icon"]} size={16} />
+                                                Admin
+                                            </a>
+                                        </li>
+                                    ) : null}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div className="fr-header__menu fr-modal" id="modal-499" aria-labelledby="button-500">
+                <div className="fr-container">
+                    <button className="fr-btn--close fr-btn" aria-controls="modal-499" title="Fermer">
+                        Fermer
+                    </button>
+                    <div className="fr-header__menu-links"></div>
+                </div>
+            </div>
+        </header>
+    );
 
     return (
         <header className={classes.container}>

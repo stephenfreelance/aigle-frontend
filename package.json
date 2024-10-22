@@ -16,6 +16,7 @@
         "scalingo-prebuild": "npm config set legacy-peer-deps true"
     },
     "dependencies": {
+        "@gouvfr/dsfr": "^1.12.1",
         "@mantine/charts": "^7.12.2",
         "@mantine/core": "^7.10.2",
         "@mantine/dates": "^7.10.2",

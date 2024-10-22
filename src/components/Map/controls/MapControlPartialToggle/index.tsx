@@ -29,7 +29,7 @@ const Component: React.FC = () => {
         return () => {
             eventEmitter.off('LAYERS_UPDATED', updatePartialLayersDisplayed);
         };
-    }, []);
+    }, [layers]);
 
     return (
         <MapControlCustom

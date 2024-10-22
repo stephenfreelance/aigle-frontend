@@ -23,7 +23,7 @@ const Component: React.FC<PropsWithChildren> = ({ children }) => {
     return (
         <AppShell
             header={{
-                height: 60,
+                height: 116.5,
             }}
             navbar={{
                 width: 300,
