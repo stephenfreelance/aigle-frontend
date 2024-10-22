@@ -111,40 +111,49 @@ const Component: React.FC<ComponentProps> = ({ burgerState }) => {
                                 <p className="fr-header__service-tagline">d&apos;occupation du sol</p>
                             </div>
                         </div>
-                        <div className="fr-header__tools">
-                            <div className="fr-header__tools-links">
+
+                        <div className={clsx('fr-header__tools', classes['header-tools'])}>
+                            <div className={clsx('fr-header__tools-links', classes['tools-links'])}>
                                 <ul className="fr-btns-group">
                                     <li>
                                         <a className="fr-btn" href="/map">
-                                            <IconMap className={classes["link-icon"]} size={16} />
+                                            <IconMap className={classes['link-icon']} size={16} />
                                             Carte
                                         </a>
                                     </li>
                                     <li>
                                         <a className="fr-btn" href="/statistics">
-                                            <IconReportAnalytics className={classes["link-icon"]} size={16} />
+                                            <IconReportAnalytics className={classes['link-icon']} size={16} />
                                             Stats
                                         </a>
                                     </li>
                                     <li>
                                         <a className="fr-btn" href="/about">
-                                            <IconInfoCircle className={classes["link-icon"]} size={16} />A propos
+                                            <IconInfoCircle className={classes['link-icon']} size={16} />A propos
                                         </a>
                                     </li>
                                     <li>
                                         <a className="fr-btn" href="/help">
-                                            <IconHelp className={classes["link-icon"]} size={16} />
+                                            <IconHelp className={classes['link-icon']} size={16} />
                                             Besoin d&apos;aide
                                         </a>
                                     </li>
                                     {userMe?.userRole && ['ADMIN', 'SUPER_ADMIN'].includes(userMe.userRole) ? (
                                         <li>
                                             <a className="fr-btn" href="/admin">
-                                                <IconAdjustments className={classes["link-icon"]} size={16} />
+                                                <IconAdjustments className={classes['link-icon']} size={16} />
                                                 Admin
                                             </a>
                                         </li>
                                     ) : null}
+                                </ul>
+
+                                <ul className="fr-btns-group">
+                                    <li>
+                                        <a className="fr-btn fr-icon-lock-line" href='/' onClick={() => logout()}>
+                                            Se déconnecter
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
