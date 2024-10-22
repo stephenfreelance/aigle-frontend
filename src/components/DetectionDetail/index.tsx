@@ -155,7 +155,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                     <Accordion.Item key="infos" value="infos" className={classes['general-informations-item']}>
                         <Accordion.Control>Informations générales</Accordion.Control>
                         <Accordion.Panel className={classes['general-informations-content']}>
-                            <p className={classes['general-informations-content-item']}>
+                            {/* <p className={classes['general-informations-content-item']}>
                                 <IconRoute size={16} className={classes['general-informations-content-item-icon']} />
                                 <span>
                                     <span className={classes['general-informations-content-item-text']}>
@@ -185,7 +185,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                                         ) : null}
                                     </span>
                                 </span>
-                            </p>
+                            </p> */}
                             <p className={classes['general-informations-content-item']}>
                                 <IconCalendarClock size={16} />{' '}
                                 <span className={classes['general-informations-content-item-text']}>
