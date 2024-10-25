@@ -28,6 +28,7 @@ import { UseMutationResult, useMutation, useQuery } from '@tanstack/react-query'
 import { AxiosError, AxiosResponse } from 'axios';
 import omit from 'lodash/omit';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '@/utils/auth-context';
 
 const BACK_URL = '/admin/users';
 
@@ -67,6 +68,7 @@ interface FormProps {
 const Form: React.FC<FormProps> = ({ uuid, initialValues, userGroups }) => {
     const [error, setError] = useState<AxiosError>();
     const navigate = useNavigate();
+    const { userMe } = useAuth();
 
     const [searchGroupValue, setSearchGroupValue] = useState('');
 
@@ -178,6 +180,7 @@ const Form: React.FC<FormProps> = ({ uuid, initialValues, userGroups }) => {
                 allowDeselect={false}
                 label="Rôle"
                 withAsterisk
+                disabled={userMe?.userRole === 'ADMIN'}
                 mt="md"
                 data={userRoles.map((role) => ({
                     value: role,

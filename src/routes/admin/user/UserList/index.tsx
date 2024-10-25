@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 
 import { USERS_LIST_ENDPOINT } from '@/api-endpoints';
 import DataTable from '@/components/admin/DataTable';
-import SoloAccordion from '@/components/admin/SoloAccordion';
 import LayoutAdminBase from '@/components/admin/LayoutAdminBase';
+import SoloAccordion from '@/components/admin/SoloAccordion';
 import PillsDataCell from '@/components/admin/data-cells/PillsDataCell';
 import UserGroupRightIcon from '@/components/icons/UserGroupRightIcon';
 import DateInfo from '@/components/ui/DateInfo';
 import { Uuided } from '@/models/data';
 import { User, UserRole, UserUserGroup, userRoles } from '@/models/user';
+import { useAuth } from '@/utils/auth-context';
 import { ROLES_NAMES_MAP, USER_GROUP_RIGHTS_ORDERED } from '@/utils/constants';
 import { Button, Checkbox, Input, Stack, Table } from '@mantine/core';
 import { IconSearch, IconUserPlus } from '@tabler/icons-react';
@@ -30,6 +31,7 @@ interface UuidedUserUserGroup extends Uuided {
 }
 
 const Component: React.FC = () => {
+    const { userMe } = useAuth();
     const navigate = useNavigate();
     const [filter, setFilter] = useState<DataFilter>(DATA_FILTER_INITIAL_VALUE);
 
@@ -97,7 +99,11 @@ const Component: React.FC = () => {
                                 userUserGroup,
                             }))}
                             getLabel={(item) => item.userUserGroup.userGroup.name}
-                            toLink={(item) => `/admin/user-groups/form/${item.uuid}`}
+                            toLink={
+                                userMe?.userRole !== 'SUPER_ADMIN'
+                                    ? undefined
+                                    : (item) => `/admin/user-groups/form/${item.uuid}`
+                            }
                             getLeftSection={(item) => {
                                 for (const right of USER_GROUP_RIGHTS_ORDERED) {
                                     if (item.userUserGroup.userGroupRights.includes(right)) {

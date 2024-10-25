@@ -1,7 +1,7 @@
 import { GEO_COMMUNE_LIST_ENDPOINT, GEO_DEPARTMENT_LIST_ENDPOINT, GEO_REGION_LIST_ENDPOINT } from '@/api-endpoints';
 import { DetectionControlStatus, DetectionPrescriptionStatus, DetectionValidationStatus } from '@/models/detection';
 import { CollectivityType } from '@/models/geo/_common';
-import { GeoCustomZoneStatus } from '@/models/geo/geo-custom-zone';
+import { GeoCustomZoneStatus, GeoCustomZoneType } from '@/models/geo/geo-custom-zone';
 import { ObjectTypeCategoryObjectTypeStatus } from '@/models/object-type-category';
 import { TileSetStatus, TileSetType } from '@/models/tile-set';
 import { UserGroupRight, UserRole } from '@/models/user';
@@ -52,6 +52,13 @@ export const GEO_CUSTOM_ZONE_STATUSES_NAMES_MAP: {
 } = {
     ACTIVE: 'Actif',
     INACTIVE: 'Inactif',
+} as const;
+
+export const GEO_CUSTOM_ZONE_TYPES_NAMES_MAP: {
+    [type in GeoCustomZoneType]: string;
+} = {
+    COMMON: 'Commun',
+    COLLECTIVITY_MANAGED: 'Géré niveau collectivité',
 } as const;
 
 const DETECTION_CONTROL_STATUSES_NAMES_MAP_BASE: {
