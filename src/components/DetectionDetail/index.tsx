@@ -9,7 +9,7 @@ import { DetectionObjectDetail } from '@/models/detection-object';
 import { TileSet } from '@/models/tile-set';
 import api from '@/utils/api';
 import { useMap } from '@/utils/context/map-context';
-import { formatParcel } from '@/utils/format';
+import { formatCommune, formatParcel } from '@/utils/format';
 import { getAddressFromPolygon } from '@/utils/geojson';
 import { Accordion, ActionIcon, Button, Group, Loader as MantineLoader, ScrollArea, Tooltip } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
@@ -20,10 +20,12 @@ import {
     IconMap,
     IconMapPin,
     IconMapPinFilled,
+    IconRoute,
     IconX,
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { centroid } from '@turf/turf';
+import clsx from 'clsx';
 import { Position } from 'geojson';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -153,7 +155,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                     <Accordion.Item key="infos" value="infos" className={classes['general-informations-item']}>
                         <Accordion.Control>Informations générales</Accordion.Control>
                         <Accordion.Panel className={classes['general-informations-content']}>
-                            {/* <p className={classes['general-informations-content-item']}>
+                            <p className={classes['general-informations-content-item']}>
                                 <IconRoute size={16} className={classes['general-informations-content-item-icon']} />
                                 <span>
                                     <span className={classes['general-informations-content-item-text']}>
@@ -183,7 +185,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                                         ) : null}
                                     </span>
                                 </span>
-                            </p> */}
+                            </p>
                             <p className={classes['general-informations-content-item']}>
                                 <IconCalendarClock size={16} />{' '}
                                 <span className={classes['general-informations-content-item-text']}>
