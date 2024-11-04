@@ -21,10 +21,11 @@ import { format } from 'date-fns';
 import { Polygon } from 'geojson';
 import classes from './index.module.scss';
 
-const fetchParcelDetail = async (uuid: string, tileSetUuid: string) => {
+const fetchParcelDetail = async (uuid: string, tileSetUuid: string, detectionObjectUuid: string) => {
     const res = await api.get<ParcelDetail>(getParcelDownloadInfosEndpoint(uuid), {
         params: {
             tileSetUuid,
+            detectionObjectUuid
         },
     });
 
@@ -118,7 +119,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onGener
     const { data: parcel, isLoading: parcelIsLoading } = useQuery({
         queryKey: [getParcelDownloadInfosEndpoint(String(detectionObject.parcel?.uuid))],
         enabled: !!detectionObject.parcel?.uuid,
-        queryFn: () => fetchParcelDetail(String(detectionObject.parcel?.uuid), lastTileSetUuid),
+        queryFn: () => fetchParcelDetail(String(detectionObject.parcel?.uuid), lastTileSetUuid, detectionObject.uuid),
     });
 
     const previewBounds = bbox(detectionObject.detections[0].tile.geometry) as [number, number, number, number];
@@ -202,7 +203,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onGener
                     tileSet={PLAN_URL_TILESET}
                     bounds={
                         parcel
-                            ? (extendBbox(bbox(parcel.communeEnvelope), 2) as [number, number, number, number])
+                            ? (extendBbox(bbox(parcel.communeEnvelope), 1.2) as [number, number, number, number])
                             : previewBounds
                     }
                     classNames={{
