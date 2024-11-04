@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { getDetectionParcelDetailEndpoint } from '@/api-endpoints';
+import { getParcelDownloadInfosEndpoint } from '@/api-endpoints';
 import DetectionTilePreview from '@/components/DetectionDetail/DetectionTilePreview';
 import SignalementPDFDocument, {
     PreviewImage,
@@ -22,7 +22,7 @@ import { Polygon } from 'geojson';
 import classes from './index.module.scss';
 
 const fetchParcelDetail = async (uuid: string, tileSetUuid: string) => {
-    const res = await api.get<ParcelDetail>(getDetectionParcelDetailEndpoint(uuid), {
+    const res = await api.get<ParcelDetail>(getParcelDownloadInfosEndpoint(uuid), {
         params: {
             tileSetUuid,
         },
@@ -116,9 +116,9 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onGener
     const lastTileSetUuid = tileSetsToRender[0].tileSet.uuid;
 
     const { data: parcel, isLoading: parcelIsLoading } = useQuery({
-        queryKey: [getDetectionParcelDetailEndpoint(String(detectionObject.parcel?.uuid))],
+        queryKey: [getParcelDownloadInfosEndpoint(String(detectionObject.parcel?.uuid))],
         enabled: !!detectionObject.parcel?.uuid,
-        queryFn: () => fetchParcelDetail(detectionObject.parcel?.uuid, lastTileSetUuid),
+        queryFn: () => fetchParcelDetail(String(detectionObject.parcel?.uuid), lastTileSetUuid),
     });
 
     const previewBounds = bbox(detectionObject.detections[0].tile.geometry) as [number, number, number, number];
@@ -200,7 +200,11 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onGener
             {!previewImages[PLAN_URL_TILESET.uuid] ? (
                 <DetectionTilePreview
                     tileSet={PLAN_URL_TILESET}
-                    bounds={parcel ? (bbox(parcel.communeEnvelope) as [number, number, number, number]) : previewBounds}
+                    bounds={
+                        parcel
+                            ? (extendBbox(bbox(parcel.communeEnvelope), 2) as [number, number, number, number])
+                            : previewBounds
+                    }
                     classNames={{
                         main: classes['detection-tile-preview-detail'],
                         inner: classes['detection-tile-preview-inner'],
