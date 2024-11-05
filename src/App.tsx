@@ -1,5 +1,4 @@
-// App.tsx
-import { AUTH_ME_ENDPOINT, MAP_SETTINGS_ENDPOINT } from '@/api-endpoints';
+import { MAP_SETTINGS_ENDPOINT, USERS_ME_ENDPOINT } from '@/api-endpoints';
 import { MapSettings } from '@/models/map-settings';
 import { User } from '@/models/user';
 import About from '@/routes/About';
@@ -43,7 +42,7 @@ const App: React.FC = () => {
 
     const getUser = useCallback(async () => {
         try {
-            const res = await api.get<User>(AUTH_ME_ENDPOINT);
+            const res = await api.get<User>(USERS_ME_ENDPOINT);
             setUser(res.data);
         } catch (err) {
             console.error(err);

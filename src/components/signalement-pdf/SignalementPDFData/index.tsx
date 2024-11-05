@@ -93,7 +93,7 @@ const getPreviewId = (tileSetUuid: string) => `preview-${tileSetUuid}`;
 const getParcelCrossCoordinates = (parcelGeometry: Polygon) => {
     const parcelBbox = convertBBoxToSquare(bbox(parcelGeometry) as [number, number, number, number]);
 
-    const parcelBboxExtended = extendBbox(parcelBbox as [number, number, number, number], 5);
+    const parcelBboxExtended = extendBbox(parcelBbox as [number, number, number, number], 10);
 
     const parcelPolygonExtended = bboxPolygon(parcelBboxExtended);
 

@@ -4,7 +4,6 @@ const BASE_AUTH = '/auth/';
 export const AUTH_REGISTER_ENDPOINT = `${BASE_AUTH}users/`;
 export const AUTH_LOGIN_ENDPOINT = `${BASE_AUTH}jwt/create/`;
 export const AUTH_REFRESH_TOKEN_ENDPOINT = `${BASE_AUTH}jwt/refresh/`;
-export const AUTH_ME_ENDPOINT = `${BASE_AUTH}users/me/`;
 export const AUTH_RESET_PASSWORD_ENDPOINT = `${BASE_AUTH}users/reset_password/`;
 export const AUTH_RESET_PASSWORD_CONFIRM_ENDPOINT = `${BASE_AUTH}users/reset_password_confirm/`;
 
@@ -13,6 +12,7 @@ const BASE_API = '/api/';
 const BASE_USERS = `${BASE_API}users/`;
 export const USERS_LIST_ENDPOINT = `${BASE_USERS}`;
 export const USERS_POST_ENDPOINT = `${BASE_USERS}`;
+export const USERS_ME_ENDPOINT = `${BASE_USERS}me/`;
 export const getUserDetailEndpoint = (uuid: string) => `${USERS_POST_ENDPOINT}${uuid}/`;
 
 const BASE_USER_GROUP = `${BASE_API}user-group/`;
