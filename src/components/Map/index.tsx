@@ -24,7 +24,7 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { bbox, bboxPolygon, centroid, feature, getCoord } from '@turf/turf';
+import { bbox, bboxPolygon, booleanIntersects, centroid, feature, getCoord } from '@turf/turf';
 import { FeatureCollection, Geometry, Polygon } from 'geojson';
 import mapboxgl from 'mapbox-gl';
 import DrawRectangle, { DrawStyles } from 'mapbox-gl-draw-rectangle-restrict-area';
@@ -37,7 +37,7 @@ const MAP_INITIAL_VIEW_STATE_DEFAULT = {
     zoom: 16,
 } as const;
 
-const MAPBOX_DRAW_CONTROL = new MapboxDraw({
+const MAPBOX_DRAW_RECTANGLE_CONTROL = new MapboxDraw({
     userProperties: true,
     displayControlsDefault: false,
     styles: DrawStyles,
@@ -45,6 +45,7 @@ const MAPBOX_DRAW_CONTROL = new MapboxDraw({
         draw_rectangle: DrawRectangle,
     }),
     controls: {
+        point: true,
         polygon: true,
     },
 });
@@ -80,9 +81,9 @@ const MAP_CONTROLS: {
         }),
         position: 'bottom-right',
     },
-    // draw
+    // draw rectangle
     {
-        control: MAPBOX_DRAW_CONTROL,
+        control: MAPBOX_DRAW_RECTANGLE_CONTROL,
         position: 'top-right',
         hideWhenNoDetection: true,
     },
@@ -102,6 +103,8 @@ const GEOJSON_LAYER_EXTRA_BOUNDINGS_ID = 'geojson-layer-data-extra-boundings';
 const GEOJSON_PARCEL_LAYER_ID = 'parcel-geojson-layer';
 
 const GEOJSON_LAYER_EXTRA_COLOR = '#FF0000';
+
+const MULTIPLE_SELECTION_MAX = 30;
 
 type LeftSection = 'SEARCH_ADDRESS' | 'FILTER_DETECTION' | 'LEGEND' | 'LAYER_DISPLAY' | 'SEARCH_PARCEL';
 
@@ -163,6 +166,35 @@ const Component: React.FC<ComponentProps> = ({
         .filter(({ displayed }) => displayed)
         .map(({ geoCustomZone }) => geoCustomZone.uuid);
 
+    // we get detections for all the layers available for the user, even if they are not displayed
+    const tileSetsUuidsDetection = useMemo(
+        () =>
+            layers
+                .filter(
+                    (layer) =>
+                        ['BACKGROUND', 'PARTIAL'].includes(layer.tileSet.tileSetType) &&
+                        ['VISIBLE', 'HIDDEN'].includes(layer.tileSet.tileSetStatus),
+                )
+                .map((layer) => layer.tileSet.uuid),
+        [],
+    );
+
+    const {
+        data,
+        refetch,
+        isFetching: isDetectionsFetching,
+    } = useQuery({
+        queryKey: [
+            DETECTION_ENDPOINT,
+            ...Object.values(mapBounds || {}),
+            ...Object.values(objectsFilter || {}),
+            ...tileSetsUuidsDetection,
+        ],
+        queryFn: ({ signal }) => fetchDetections(signal, mapBounds),
+        placeholderData: keepPreviousData,
+        enabled: displayDetections && !!mapBounds,
+    });
+
     const handleMapRef = useCallback((node?: mapboxgl.Map) => {
         if (!node) {
             return;
@@ -178,59 +210,6 @@ const Component: React.FC<ComponentProps> = ({
             if (!node.hasControl(control)) {
                 node.addControl(control, position);
             }
-        });
-
-        // draw control callbacks
-
-        node.on('draw.modechange', ({ mode }: { mode: keyof MapboxDraw.Modes }) => {
-            if (mode === 'draw_polygon') {
-                const partialLayersDisplayedUuids = getTileSetsUuids(['PARTIAL'], ['VISIBLE', 'HIDDEN'], true);
-                let partialLayersToDisplayUuids: string[] = [];
-
-                if (partialLayersDisplayedUuids.length) {
-                    partialLayersToDisplayUuids = getTileSetsUuids(['PARTIAL'], ['VISIBLE', 'HIDDEN'], false);
-                }
-
-                const mostRecentBackgroundLayer = layers
-                    .sort(
-                        (layer1, layer2) =>
-                            new Date(layer2.tileSet.date).getTime() - new Date(layer1.tileSet.date).getTime(),
-                    )
-                    .filter((layer) => layer.tileSet.tileSetType === 'BACKGROUND')[0];
-
-                setTileSetsVisibility([...partialLayersToDisplayUuids, mostRecentBackgroundLayer.tileSet.uuid], true);
-
-                setDrawMode(true);
-                setLeftSectionShowed(undefined);
-
-                notifications.show({
-                    title: 'Mode de dessin activé',
-                    message: "L'affichage des couches a été réinitialisé",
-                });
-                MAPBOX_DRAW_CONTROL.changeMode('draw_rectangle', {
-                    escapeKeyStopsDrawing: true, // default true
-                    allowCreateExceeded: false, // default false
-                    exceedCallsOnEachMove: false, // default false
-                });
-            } else {
-                setDrawMode(false);
-            }
-        });
-
-        node.on('draw.create', ({ features }) => {
-            if (!features.length) {
-                return;
-            }
-
-            const polygon: Polygon = features[0].geometry;
-
-            // drawing returns one extra point not needed
-            if (polygon.coordinates[0].length >= 6) {
-                polygon.coordinates[0] = polygon.coordinates[0].slice(0, 5);
-            }
-
-            setAddAnnotationPolygon(polygon);
-            MAPBOX_DRAW_CONTROL.deleteAll();
         });
 
         // fit bounds
@@ -249,6 +228,10 @@ const Component: React.FC<ComponentProps> = ({
             for (const { querySelector, title } of [
                 {
                     querySelector: '.mapbox-gl-draw_polygon',
+                    title: 'Sélection multiple',
+                },
+                {
+                    querySelector: '.mapbox-gl-draw_point',
                     title: 'Dessiner un objet',
                 },
                 {
@@ -304,20 +287,122 @@ const Component: React.FC<ComponentProps> = ({
         }, 100);
     }, []);
 
-    const layersDisplayed = layers.filter((layer) => layer.displayed);
+    useEffect(() => {
+        if (!mapRef) {
+            return;
+        }
 
-    // we get detections for all the layers available for the user, even if they are not displayed
-    const tileSetsUuidsDetection = useMemo(
-        () =>
-            layers
-                .filter(
-                    (layer) =>
-                        ['BACKGROUND', 'PARTIAL'].includes(layer.tileSet.tileSetType) &&
-                        ['VISIBLE', 'HIDDEN'].includes(layer.tileSet.tileSetStatus),
-                )
-                .map((layer) => layer.tileSet.uuid),
-        [],
-    );
+        // draw control callbacks
+
+        const handleModeChange = (event) => {
+            console.log('draw.modechange', event);
+            const { mode } = event;
+
+            if (mode === 'draw_point') {
+                const partialLayersDisplayedUuids = getTileSetsUuids(['PARTIAL'], ['VISIBLE', 'HIDDEN'], true);
+                let partialLayersToDisplayUuids: string[] = [];
+
+                if (partialLayersDisplayedUuids.length) {
+                    partialLayersToDisplayUuids = getTileSetsUuids(['PARTIAL'], ['VISIBLE', 'HIDDEN'], false);
+                }
+
+                const mostRecentBackgroundLayer = layers
+                    .sort(
+                        (layer1, layer2) =>
+                            new Date(layer2.tileSet.date).getTime() - new Date(layer1.tileSet.date).getTime(),
+                    )
+                    .filter((layer) => layer.tileSet.tileSetType === 'BACKGROUND')[0];
+
+                setTileSetsVisibility([...partialLayersToDisplayUuids, mostRecentBackgroundLayer.tileSet.uuid], true);
+
+                setDrawMode(true);
+                setLeftSectionShowed(undefined);
+
+                notifications.show({
+                    title: 'Mode de dessin activé',
+                    message: "L'affichage des couches a été réinitialisé",
+                });
+                MAPBOX_DRAW_RECTANGLE_CONTROL.changeMode('draw_rectangle', {
+                    escapeKeyStopsDrawing: true,
+                    allowCreateExceeded: false,
+                    exceedCallsOnEachMove: false,
+                });
+            } else if (mode === 'draw_polygon') {
+            } else {
+                setDrawMode(false);
+            }
+        };
+
+        const handleCreate = (event) => {
+            const { features } = event;
+
+            const currentMode = MAPBOX_DRAW_RECTANGLE_CONTROL.getMode();
+
+            if (currentMode === 'draw_polygon') {
+                if (!features.length) {
+                    return;
+                }
+
+                const polygon: Polygon = features[0].geometry;
+                const detectionUuids: string[] = [];
+
+                for (const feature of data?.features || []) {
+                    if (!booleanIntersects(feature.geometry, polygon)) {
+                        continue;
+                    }
+
+                    detectionUuids.push(feature.properties.uuid);
+
+                    if (detectionUuids.length > MULTIPLE_SELECTION_MAX) {
+                        notifications.show({
+                            title: 'Sélection multiple',
+                            message: `Vous avez sélectionné ${detectionUuids.length} objets. La sélection multiple est limitée à ${MULTIPLE_SELECTION_MAX} objets.`,
+                            color: 'red',
+                        });
+                        MAPBOX_DRAW_RECTANGLE_CONTROL.deleteAll();
+                        return;
+                    }
+                }
+
+                if (!detectionUuids.length) {
+                    notifications.show({
+                        title: 'Sélection multiple',
+                        message: "Aucun objet n'a été sélectionné",
+                        color: 'red',
+                    });
+                    MAPBOX_DRAW_RECTANGLE_CONTROL.deleteAll();
+                    return;
+                }
+            }
+
+            if (currentMode === 'draw_rectangle') {
+                if (!features.length) {
+                    return;
+                }
+
+                const polygon: Polygon = features[0].geometry;
+
+                // drawing returns one extra point not needed
+                if (polygon.coordinates[0].length >= 6) {
+                    polygon.coordinates[0] = polygon.coordinates[0].slice(0, 5);
+                }
+
+                setAddAnnotationPolygon(polygon);
+            }
+
+            MAPBOX_DRAW_RECTANGLE_CONTROL.deleteAll();
+        };
+
+        mapRef.on('draw.modechange', handleModeChange);
+        mapRef.on('draw.create', handleCreate);
+
+        return () => {
+            mapRef.off('draw.modechange', handleModeChange);
+            mapRef.off('draw.create', handleCreate);
+        };
+    }, [data, mapRef]);
+
+    const layersDisplayed = layers.filter((layer) => layer.displayed);
 
     // detections fetching
 
@@ -345,21 +430,6 @@ const Component: React.FC<ComponentProps> = ({
 
         return processDetections(res.data);
     };
-    const {
-        data,
-        refetch,
-        isFetching: isDetectionsFetching,
-    } = useQuery({
-        queryKey: [
-            DETECTION_ENDPOINT,
-            ...Object.values(mapBounds || {}),
-            ...Object.values(objectsFilter || {}),
-            ...tileSetsUuidsDetection,
-        ],
-        queryFn: ({ signal }) => fetchDetections(signal, mapBounds),
-        placeholderData: keepPreviousData,
-        enabled: displayDetections && !!mapBounds,
-    });
 
     // custom zones fetching
 

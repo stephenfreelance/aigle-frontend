@@ -154,6 +154,7 @@ const Component: React.FC<ComponentProps> = ({ objectTypes, objectsFilter, geoCu
                             {...form.getInputProps('score')}
                             onChange={undefined}
                             onChangeEnd={(value) => form.setFieldValue('score', value)}
+                            aria-label="Changer le seuil du score"
                         />
                         {formatScore(form.getValues().score)}
                     </div>
@@ -221,6 +222,7 @@ const Component: React.FC<ComponentProps> = ({ objectTypes, objectsFilter, geoCu
                                                     prev.filter((typeUuid) => typeUuid !== uuid),
                                                 );
                                             }}
+                                            aria-label={`Retirer ${objectTypesMap[uuid].name} des filtres`}
                                         >
                                             <IconX size={16} color="white" />
                                         </ActionIcon>
