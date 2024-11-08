@@ -107,9 +107,9 @@ export const DETECTION_VALIDATION_STATUSES_COLORS_MAP: {
     [status in DetectionValidationStatus]: string;
 } = {
     DETECTED_NOT_VERIFIED: '#2196F3',
-    SUSPECT: '#FFC107',
-    LEGITIMATE: '#4CAF50',
-    INVALIDATED: '#E53935',
+    SUSPECT: '#936e00',
+    LEGITIMATE: '#39833c',
+    INVALIDATED: '#bb1c18',
 } as const;
 
 export const USER_GROUP_TYPES_NAMES_MAP: {

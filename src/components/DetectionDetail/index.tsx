@@ -91,7 +91,7 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                     <h1>Objet détecté #{detectionObject.id}</h1>
 
                     {onClose ? (
-                        <ActionIcon variant="transparent" onClick={onClose}>
+                        <ActionIcon variant="transparent" onClick={onClose} aria-label="Fermer le détail de détection">
                             <IconX />
                         </ActionIcon>
                     ) : null}

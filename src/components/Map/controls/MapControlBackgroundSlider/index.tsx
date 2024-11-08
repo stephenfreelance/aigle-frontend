@@ -48,7 +48,7 @@ const Component: React.FC = () => {
             <SegmentedControl
                 className={classes['controller']}
                 fullWidth
-                color="#21e19b"
+                color="#117f58"
                 orientation="vertical"
                 data={backgroundTileSets.map((tileSet) => ({
                     label: format(tileSet.date, 'yyyy'),

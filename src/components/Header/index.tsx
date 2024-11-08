@@ -160,14 +160,6 @@ const Component: React.FC<ComponentProps> = ({ burgerState }) => {
                     </div>
                 </div>
             </div>
-            <div className="fr-header__menu fr-modal" id="modal-499" aria-labelledby="button-500">
-                <div className="fr-container">
-                    <button className="fr-btn--close fr-btn" aria-controls="modal-499" title="Fermer">
-                        Fermer
-                    </button>
-                    <div className="fr-header__menu-links"></div>
-                </div>
-            </div>
         </header>
     );
 
