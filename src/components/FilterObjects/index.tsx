@@ -25,6 +25,7 @@ interface FormValues {
     detectionControlStatuses: ObjectsFilter['detectionControlStatuses'];
     score: ObjectsFilter['score'];
     prescripted: ObjectsFilter['prescripted'];
+    interfaceDrawn: ObjectsFilter['interfaceDrawn'];
     customZonesUuids: ObjectsFilter['customZonesUuids'];
 }
 
@@ -47,6 +48,7 @@ const Component: React.FC<ComponentProps> = ({ objectTypes, objectsFilter, geoCu
         detectionControlStatuses: detectionControlStatusesFilter,
         score,
         prescripted,
+        interfaceDrawn,
         customZonesUuids,
     } = objectsFilter;
 
@@ -59,66 +61,49 @@ const Component: React.FC<ComponentProps> = ({ objectTypes, objectsFilter, geoCu
             score,
             prescripted,
             customZonesUuids: customZonesUuids,
+            interfaceDrawn,
         },
     });
     form.watch('objectTypesUuids', ({ value }) => {
         updateObjectsFilter({
-            detectionValidationStatuses: form.getValues().detectionValidationStatuses,
+            ...form.getValues(),
             objectTypesUuids: value,
-            detectionControlStatuses: form.getValues().detectionControlStatuses,
-            score: form.getValues().score,
-            prescripted: form.getValues().prescripted,
-            customZonesUuids: form.getValues().customZonesUuids,
         });
     });
     form.watch('detectionValidationStatuses', ({ value }) => {
         updateObjectsFilter({
+            ...form.getValues(),
             detectionValidationStatuses: value,
-            objectTypesUuids: form.getValues().objectTypesUuids,
-            detectionControlStatuses: form.getValues().detectionControlStatuses,
-            score: form.getValues().score,
-            prescripted: form.getValues().prescripted,
-            customZonesUuids: form.getValues().customZonesUuids,
         });
     });
     form.watch('detectionControlStatuses', ({ value }) => {
         updateObjectsFilter({
-            detectionValidationStatuses: form.getValues().detectionValidationStatuses,
-            objectTypesUuids: form.getValues().objectTypesUuids,
+            ...form.getValues(),
             detectionControlStatuses: value,
-            score: form.getValues().score,
-            prescripted: form.getValues().prescripted,
-            customZonesUuids: form.getValues().customZonesUuids,
         });
     });
     form.watch('score', ({ value }) => {
         updateObjectsFilter({
-            detectionValidationStatuses: form.getValues().detectionValidationStatuses,
-            objectTypesUuids: form.getValues().objectTypesUuids,
-            detectionControlStatuses: form.getValues().detectionControlStatuses,
+            ...form.getValues(),
             score: value,
-            prescripted: form.getValues().prescripted,
-            customZonesUuids: form.getValues().customZonesUuids,
         });
     });
     form.watch('prescripted', ({ value }) => {
         updateObjectsFilter({
-            detectionValidationStatuses: form.getValues().detectionValidationStatuses,
-            objectTypesUuids: form.getValues().objectTypesUuids,
-            detectionControlStatuses: form.getValues().detectionControlStatuses,
-            score: form.getValues().score,
+            ...form.getValues(),
             prescripted: value,
-            customZonesUuids: form.getValues().customZonesUuids,
         });
     });
     form.watch('customZonesUuids', ({ value }) => {
         updateObjectsFilter({
-            detectionValidationStatuses: form.getValues().detectionValidationStatuses,
-            objectTypesUuids: form.getValues().objectTypesUuids,
-            detectionControlStatuses: form.getValues().detectionControlStatuses,
-            score: form.getValues().score,
-            prescripted: form.getValues().prescripted,
+            ...form.getValues(),
             customZonesUuids: value,
+        });
+    });
+    form.watch('interfaceDrawn', ({ value }) => {
+        updateObjectsFilter({
+            ...form.getValues(),
+            interfaceDrawn: value,
         });
     });
 
@@ -160,9 +145,9 @@ const Component: React.FC<ComponentProps> = ({ objectTypes, objectsFilter, geoCu
                     </div>
 
                     <Text mt="md" className="input-label">
-                        Prescription
+                        Objets prescrits
                     </Text>
-                    <Button.Group className={classes['prescription-selection-container']}>
+                    <Button.Group className={classes['multiselect-buttons-container']}>
                         <Button
                             fullWidth
                             size="xs"
@@ -170,7 +155,7 @@ const Component: React.FC<ComponentProps> = ({ objectTypes, objectsFilter, geoCu
                             type="button"
                             onClick={() => form.setFieldValue('prescripted', null)}
                         >
-                            Tous les objets
+                            Prescrits et non-prescrits
                         </Button>
                         <Button
                             fullWidth
@@ -189,6 +174,39 @@ const Component: React.FC<ComponentProps> = ({ objectTypes, objectsFilter, geoCu
                             onClick={() => form.setFieldValue('prescripted', false)}
                         >
                             Non-prescrits
+                        </Button>
+                    </Button.Group>
+
+                    <Text mt="md" className="input-label">
+                        Détections ajoutées manuellement
+                    </Text>
+                    <Button.Group className={classes['multiselect-buttons-container']}>
+                        <Button
+                            fullWidth
+                            size="xs"
+                            variant={form.getValues().interfaceDrawn === 'ALL' ? 'filled' : 'outline'}
+                            type="button"
+                            onClick={() => form.setFieldValue('interfaceDrawn', 'ALL')}
+                        >
+                            Toutes
+                        </Button>
+                        <Button
+                            fullWidth
+                            size="xs"
+                            variant={form.getValues().interfaceDrawn === 'INSIDE_SELECTED_ZONES' ? 'filled' : 'outline'}
+                            type="button"
+                            onClick={() => form.setFieldValue('interfaceDrawn', 'INSIDE_SELECTED_ZONES')}
+                        >
+                            Dans les zones à enjeux sélectionnées
+                        </Button>
+                        <Button
+                            fullWidth
+                            size="xs"
+                            variant={form.getValues().interfaceDrawn === 'NONE' ? 'filled' : 'outline'}
+                            type="button"
+                            onClick={() => form.setFieldValue('interfaceDrawn', 'NONE')}
+                        >
+                            Aucune
                         </Button>
                     </Button.Group>
 

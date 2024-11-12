@@ -53,6 +53,7 @@ const useStatistics = create<StatisticsState>()((set, get) => ({
                 detectionControlStatuses: [...detectionControlStatuses],
                 score: 0.6,
                 prescripted: null,
+                interfaceDrawn: 'ALL',
                 customZonesUuids: settings.geoCustomZones.map(({ uuid }) => uuid),
             },
             userLastPosition: settings.userLastPosition,

@@ -73,6 +73,7 @@ const useMap = create<MapState>()((set, get) => ({
                 detectionControlStatuses: [...detectionControlStatuses],
                 score: 0.6,
                 prescripted: false,
+                interfaceDrawn: 'ALL',
                 customZonesUuids: settings.geoCustomZones.map(({ uuid }) => uuid),
             },
             userLastPosition: settings.userLastPosition,

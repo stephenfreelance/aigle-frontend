@@ -38,6 +38,7 @@ const fetchData = async (
         communesUuids: formValues.communesUuids.join(','),
         departmentsUuids: formValues.departmentsUuids.join(','),
         regionsUuids: formValues.regionsUuids.join(','),
+        interfaceDrawn: objectsFilter.interfaceDrawn,
     };
 
     if (objectsFilter.prescripted !== null) {
