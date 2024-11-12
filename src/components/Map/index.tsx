@@ -4,6 +4,7 @@ import Map, { GeolocateControl, Layer, Source, ViewStateChangeEvent } from 'reac
 import { GET_CUSTOM_GEOMETRY_ENDPOINT, getDetectionListEndpoint } from '@/api-endpoints';
 import DetectionDetail from '@/components/DetectionDetail';
 import MapAddAnnotationModal from '@/components/Map/MapAddAnnotationModal';
+import MapEditMultipleDetectionsModal from '@/components/Map/MapEditMultipleDetectionsModal';
 import MapControlBackgroundSlider from '@/components/Map/controls/MapControlBackgroundSlider';
 import MapControlFilterDetection from '@/components/Map/controls/MapControlFilterDetection';
 import MapControlLayerDisplay from '@/components/Map/controls/MapControlLayerDisplay';
@@ -155,6 +156,7 @@ const Component: React.FC<ComponentProps> = ({
     const [parcelPolygonDisplayed, setParcelPolygonDisplayed] = useState<Polygon>();
 
     const [addAnnotationPolygon, setAddAnnotationPolygon] = useState<Polygon>();
+    const [multipleEditDetectionsUuids, setMultipleEditDetectionsUuids] = useState<string[] | undefined>(undefined);
 
     const { eventEmitter, objectsFilter, getTileSetsUuids, setTileSetsVisibility, settings, customZoneLayers } =
         useMap();
@@ -352,16 +354,16 @@ const Component: React.FC<ComponentProps> = ({
                     }
 
                     detectionUuids.push(feature.properties.uuid);
+                }
 
-                    if (detectionUuids.length > MULTIPLE_SELECTION_MAX) {
-                        notifications.show({
-                            title: 'Sélection multiple',
-                            message: `Vous avez sélectionné ${detectionUuids.length} objets. La sélection multiple est limitée à ${MULTIPLE_SELECTION_MAX} objets.`,
-                            color: 'red',
-                        });
-                        MAPBOX_DRAW_RECTANGLE_CONTROL.deleteAll();
-                        return;
-                    }
+                if (detectionUuids.length > MULTIPLE_SELECTION_MAX) {
+                    notifications.show({
+                        title: 'Sélection multiple',
+                        message: `Vous avez sélectionné ${detectionUuids.length} objets. La sélection multiple est limitée à ${MULTIPLE_SELECTION_MAX} objets.`,
+                        color: 'red',
+                    });
+                    MAPBOX_DRAW_RECTANGLE_CONTROL.deleteAll();
+                    return;
                 }
 
                 if (!detectionUuids.length) {
@@ -373,6 +375,8 @@ const Component: React.FC<ComponentProps> = ({
                     MAPBOX_DRAW_RECTANGLE_CONTROL.deleteAll();
                     return;
                 }
+
+                setMultipleEditDetectionsUuids(detectionUuids);
             }
 
             if (currentMode === 'draw_rectangle') {
@@ -656,6 +660,11 @@ const Component: React.FC<ComponentProps> = ({
                             isShowed={!!addAnnotationPolygon}
                             hide={() => setAddAnnotationPolygon(undefined)}
                             polygon={addAnnotationPolygon}
+                        />
+                        <MapEditMultipleDetectionsModal
+                            isShowed={!!multipleEditDetectionsUuids}
+                            hide={() => setMultipleEditDetectionsUuids(undefined)}
+                            detectionsUuids={multipleEditDetectionsUuids}
                         />
                         {isDetectionsFetching ? (
                             <div className={classes['detections-loader-container']}>
