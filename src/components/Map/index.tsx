@@ -38,12 +38,15 @@ const MAP_INITIAL_VIEW_STATE_DEFAULT = {
     zoom: 16,
 } as const;
 
-const MAPBOX_DRAW_RECTANGLE_CONTROL = new MapboxDraw({
+const DRAW_MODE_ADD_DETECTION = 'draw_rectangle';
+const DRAW_MODE_MULTIPLE_SELECTION = 'draw_polygon';
+
+const MAPBOX_DRAW_CONTROL = new MapboxDraw({
     userProperties: true,
     displayControlsDefault: false,
     styles: DrawStyles,
     modes: Object.assign(MapboxDraw.modes, {
-        draw_rectangle: DrawRectangle,
+        [DRAW_MODE_ADD_DETECTION]: DrawRectangle,
     }),
     controls: {
         point: true,
@@ -82,9 +85,9 @@ const MAP_CONTROLS: {
         }),
         position: 'bottom-right',
     },
-    // draw rectangle
+    // draw control: multiple selection and manually add detection
     {
-        control: MAPBOX_DRAW_RECTANGLE_CONTROL,
+        control: MAPBOX_DRAW_CONTROL,
         position: 'top-right',
         hideWhenNoDetection: true,
     },
@@ -229,7 +232,7 @@ const Component: React.FC<ComponentProps> = ({
         setTimeout(() => {
             for (const { querySelector, title } of [
                 {
-                    querySelector: '.mapbox-gl-draw_polygon',
+                    querySelector: `.mapbox-gl-${DRAW_MODE_MULTIPLE_SELECTION}`,
                     title: 'Sélection multiple',
                 },
                 {
@@ -297,7 +300,6 @@ const Component: React.FC<ComponentProps> = ({
         // draw control callbacks
 
         const handleModeChange = (event) => {
-            console.log('draw.modechange', event);
             const { mode } = event;
 
             if (mode === 'draw_point') {
@@ -324,12 +326,12 @@ const Component: React.FC<ComponentProps> = ({
                     title: 'Mode de dessin activé',
                     message: "L'affichage des couches a été réinitialisé",
                 });
-                MAPBOX_DRAW_RECTANGLE_CONTROL.changeMode('draw_rectangle', {
+                MAPBOX_DRAW_CONTROL.changeMode(DRAW_MODE_ADD_DETECTION, {
                     escapeKeyStopsDrawing: true,
                     allowCreateExceeded: false,
                     exceedCallsOnEachMove: false,
                 });
-            } else if (mode === 'draw_polygon') {
+            } else if (mode === DRAW_MODE_MULTIPLE_SELECTION) {
             } else {
                 setDrawMode(false);
             }
@@ -338,9 +340,9 @@ const Component: React.FC<ComponentProps> = ({
         const handleCreate = (event) => {
             const { features } = event;
 
-            const currentMode = MAPBOX_DRAW_RECTANGLE_CONTROL.getMode();
+            const currentMode = MAPBOX_DRAW_CONTROL.getMode();
 
-            if (currentMode === 'draw_polygon') {
+            if (currentMode === DRAW_MODE_MULTIPLE_SELECTION) {
                 if (!features.length) {
                     return;
                 }
@@ -362,7 +364,7 @@ const Component: React.FC<ComponentProps> = ({
                         message: `Vous avez sélectionné ${detectionUuids.length} objets. La sélection multiple est limitée à ${MULTIPLE_SELECTION_MAX} objets.`,
                         color: 'red',
                     });
-                    MAPBOX_DRAW_RECTANGLE_CONTROL.deleteAll();
+                    MAPBOX_DRAW_CONTROL.deleteAll();
                     return;
                 }
 
@@ -372,14 +374,14 @@ const Component: React.FC<ComponentProps> = ({
                         message: "Aucun objet n'a été sélectionné",
                         color: 'red',
                     });
-                    MAPBOX_DRAW_RECTANGLE_CONTROL.deleteAll();
+                    MAPBOX_DRAW_CONTROL.deleteAll();
                     return;
                 }
 
                 setMultipleEditDetectionsUuids(detectionUuids);
             }
 
-            if (currentMode === 'draw_rectangle') {
+            if (currentMode === DRAW_MODE_ADD_DETECTION) {
                 if (!features.length) {
                     return;
                 }
@@ -394,7 +396,7 @@ const Component: React.FC<ComponentProps> = ({
                 setAddAnnotationPolygon(polygon);
             }
 
-            MAPBOX_DRAW_RECTANGLE_CONTROL.deleteAll();
+            MAPBOX_DRAW_CONTROL.deleteAll();
         };
 
         mapRef.on('draw.modechange', handleModeChange);
@@ -551,7 +553,13 @@ const Component: React.FC<ComponentProps> = ({
     }, [mapRef]);
 
     const onMapClick = ({ features, target }: mapboxgl.MapLayerMouseEvent) => {
-        if (!features || !features.length) {
+        const currentDrawMode = MAPBOX_DRAW_CONTROL.getMode();
+
+        if (
+            !features ||
+            !features.length ||
+            [DRAW_MODE_ADD_DETECTION, DRAW_MODE_MULTIPLE_SELECTION].includes(currentDrawMode)
+        ) {
             closeDetectionDetail();
             return;
         }
