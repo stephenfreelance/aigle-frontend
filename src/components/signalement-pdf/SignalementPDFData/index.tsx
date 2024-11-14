@@ -25,7 +25,7 @@ const fetchParcelDetail = async (uuid: string, tileSetUuid: string, detectionObj
     const res = await api.get<ParcelDetail>(getParcelDownloadInfosEndpoint(uuid), {
         params: {
             tileSetUuid,
-            detectionObjectUuid
+            detectionObjectUuid,
         },
     });
 
@@ -107,10 +107,9 @@ const getParcelCrossCoordinates = (parcelGeometry: Polygon) => {
 
 interface ComponentProps {
     detectionObject: DetectionObjectDetail;
-    latLong: string;
     onGenerationFinished: (error?: string) => void;
 }
-const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onGenerationFinished }: ComponentProps) => {
+const Component: React.FC<ComponentProps> = ({ detectionObject, onGenerationFinished }: ComponentProps) => {
     const [previewImages, setPreviewImages] = useState<Record<string, PreviewImage>>({});
 
     const tileSetsToRender = detectionObject.tileSets.filter(({ preview }) => preview).reverse();
@@ -164,7 +163,7 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onGener
 
     return (
         <div className={classes.container}>
-            SignalementPDFdata {detectionObject.id} {latLong}
+            SignalementPDFdata {detectionObject.id}
             {tileSetsToRender.map(({ tileSet }, index) =>
                 !previewImages[tileSet.uuid] ? (
                     <DetectionTilePreview
@@ -226,7 +225,6 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, onGener
             {Object.keys(previewImages).length === tileSetsToRender.length + 1 ? (
                 <DocumentContainer
                     detectionObject={detectionObject}
-                    latLong={latLong}
                     previewImages={Object.values(previewImages).sort((a, b) => a.index - b.index)}
                     onGenerationFinished={onGenerationFinished}
                     parcel={parcel}

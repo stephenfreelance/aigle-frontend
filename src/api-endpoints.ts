@@ -124,6 +124,7 @@ export const getDetectionListEndpoint = (detail: boolean = false) => {
 export const getDetectionDetailEndpoint = (uuid: string) => `${BASE_DETECTION}${uuid}/`;
 
 const BASE_DETECTION_OBJECT = `${BASE_API}detection-object/`;
+export const DETECTION_OBJECT_LIST_ENDPOINT = `${BASE_DETECTION_OBJECT}`;
 export const DETECTION_OBJECT_POST_ENDPOINT = `${BASE_DETECTION_OBJECT}`;
 export const getDetectionObjectDetailEndpoint = (uuid: string) => `${BASE_DETECTION_OBJECT}${uuid}/`;
 export const getDetectionObjectHistoryEndpoint = (uuid: string) => `${BASE_DETECTION_OBJECT}${uuid}/history/`;

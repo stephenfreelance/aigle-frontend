@@ -135,7 +135,6 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({
                     {signalementPdfLoading ? (
                         <SignalementPDFData
                             detectionObject={detectionObject}
-                            latLong={latLong}
                             onGenerationFinished={(error?: string) => {
                                 if (error) {
                                     notifications.show({

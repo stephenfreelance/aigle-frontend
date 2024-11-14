@@ -1,7 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Map, { GeolocateControl, Layer, Source, ViewStateChangeEvent } from 'react-map-gl';
 
-import { GET_CUSTOM_GEOMETRY_ENDPOINT, getDetectionListEndpoint } from '@/api-endpoints';
+import {
+    DETECTION_OBJECT_LIST_ENDPOINT,
+    GET_CUSTOM_GEOMETRY_ENDPOINT,
+    getDetectionListEndpoint,
+} from '@/api-endpoints';
 import DetectionDetail from '@/components/DetectionDetail';
 import MapAddAnnotationModal from '@/components/Map/MapAddAnnotationModal';
 import MapEditMultipleDetectionsModal from '@/components/Map/MapEditMultipleDetectionsModal';
@@ -13,6 +17,7 @@ import MapControlPartialToggle from '@/components/Map/controls/MapControlPartial
 import MapControlSearchParcel from '@/components/Map/controls/MapControlSearchParcel';
 import { processDetections } from '@/components/Map/utils/process-detections';
 import { DetectionGeojsonData, DetectionProperties } from '@/models/detection';
+import { DetectionObjectDetail } from '@/models/detection-object';
 import { GeoCustomZoneGeojsonData } from '@/models/geo/geo-custom-zone';
 import { MapTileSetLayer } from '@/models/map-layer';
 import api from '@/utils/api';
@@ -38,8 +43,8 @@ const MAP_INITIAL_VIEW_STATE_DEFAULT = {
     zoom: 16,
 } as const;
 
-const DRAW_MODE_ADD_DETECTION = 'draw_rectangle';
-const DRAW_MODE_MULTIPLE_SELECTION = 'draw_polygon';
+const DRAW_MODE_ADD_DETECTION = 'draw_rectangle'; // draw new detection
+const DRAW_MODE_MULTIPOLYGON = 'draw_polygon'; // edit multiple detections and download multiple detections
 
 const MAPBOX_DRAW_CONTROL = new MapboxDraw({
     userProperties: true,
@@ -49,8 +54,9 @@ const MAPBOX_DRAW_CONTROL = new MapboxDraw({
         [DRAW_MODE_ADD_DETECTION]: DrawRectangle,
     }),
     controls: {
-        point: true,
-        polygon: true,
+        point: true, // draw new detection
+        polygon: true, // edit multiple detections
+        line_string: true, // download multiple detections
     },
 });
 const MAPBOX_GEOCODER = new MapboxGeocoder({
@@ -124,6 +130,13 @@ interface MapBounds {
     swLng: number;
 }
 
+type DrawMode = 'MULTIPLE_EDIT' | 'ADD_DETECTION' | 'MULTIPLE_DOWNLOAD';
+const DRAW_MODE_TITLES_MAP: Record<DrawMode, string> = {
+    MULTIPLE_EDIT: 'Edition multiple',
+    ADD_DETECTION: 'Dessiner un objet',
+    MULTIPLE_DOWNLOAD: 'Téléchargement multiple de rapports',
+};
+
 interface ComponentProps {
     layers: MapTileSetLayer[];
     displayDetections?: boolean;
@@ -154,7 +167,7 @@ const Component: React.FC<ComponentProps> = ({
         detectionUuid: string;
     } | null>(null);
     const [leftSectionShowed, setLeftSectionShowed] = useState<LeftSection>();
-    const [drawMode, setDrawMode] = useState<boolean>(false);
+    const [drawMode, setDrawMode] = useState<DrawMode | null>(null);
 
     const [parcelPolygonDisplayed, setParcelPolygonDisplayed] = useState<Polygon>();
 
@@ -232,12 +245,16 @@ const Component: React.FC<ComponentProps> = ({
         setTimeout(() => {
             for (const { querySelector, title } of [
                 {
-                    querySelector: `.mapbox-gl-${DRAW_MODE_MULTIPLE_SELECTION}`,
-                    title: 'Sélection multiple',
+                    querySelector: `.mapbox-gl-${DRAW_MODE_MULTIPOLYGON}`,
+                    title: DRAW_MODE_TITLES_MAP.MULTIPLE_EDIT,
                 },
                 {
                     querySelector: '.mapbox-gl-draw_point',
-                    title: 'Dessiner un objet',
+                    title: DRAW_MODE_TITLES_MAP.ADD_DETECTION,
+                },
+                {
+                    querySelector: '.mapbox-gl-draw_line',
+                    title: DRAW_MODE_TITLES_MAP.MULTIPLE_DOWNLOAD,
                 },
                 {
                     querySelector: '.mapboxgl-ctrl-fullscreen',
@@ -319,7 +336,7 @@ const Component: React.FC<ComponentProps> = ({
 
                 setTileSetsVisibility([...partialLayersToDisplayUuids, mostRecentBackgroundLayer.tileSet.uuid], true);
 
-                setDrawMode(true);
+                setDrawMode('ADD_DETECTION');
                 setLeftSectionShowed(undefined);
 
                 notifications.show({
@@ -331,23 +348,24 @@ const Component: React.FC<ComponentProps> = ({
                     allowCreateExceeded: false,
                     exceedCallsOnEachMove: false,
                 });
-            } else if (mode === DRAW_MODE_MULTIPLE_SELECTION) {
+            } else if (mode === 'draw_line_string') {
+                MAPBOX_DRAW_CONTROL.changeMode(DRAW_MODE_MULTIPOLYGON);
+                setDrawMode('MULTIPLE_DOWNLOAD');
+            } else if (mode === DRAW_MODE_MULTIPOLYGON) {
+                setDrawMode('MULTIPLE_EDIT');
             } else {
-                setDrawMode(false);
+                setDrawMode(null);
             }
         };
 
-        const handleCreate = (event) => {
+        const handleCreate = async (event) => {
             const { features } = event;
 
-            const currentMode = MAPBOX_DRAW_CONTROL.getMode();
-
-            if (currentMode === DRAW_MODE_MULTIPLE_SELECTION) {
-                if (!features.length) {
+            const getDetectionUuidsFromPolygon = (polygon: Polygon): string[] | undefined => {
+                if (!drawMode) {
                     return;
                 }
 
-                const polygon: Polygon = features[0].geometry;
                 const detectionUuids: string[] = [];
 
                 for (const feature of data?.features || []) {
@@ -360,8 +378,8 @@ const Component: React.FC<ComponentProps> = ({
 
                 if (detectionUuids.length > MULTIPLE_SELECTION_MAX) {
                     notifications.show({
-                        title: 'Sélection multiple',
-                        message: `Vous avez sélectionné ${detectionUuids.length} objets. La sélection multiple est limitée à ${MULTIPLE_SELECTION_MAX} objets.`,
+                        title: DRAW_MODE_TITLES_MAP[drawMode],
+                        message: `Vous avez sélectionné ${detectionUuids.length} objets. La sélection est limitée à ${MULTIPLE_SELECTION_MAX} détections.`,
                         color: 'red',
                     });
                     MAPBOX_DRAW_CONTROL.deleteAll();
@@ -370,18 +388,63 @@ const Component: React.FC<ComponentProps> = ({
 
                 if (!detectionUuids.length) {
                     notifications.show({
-                        title: 'Sélection multiple',
-                        message: "Aucun objet n'a été sélectionné",
+                        title: DRAW_MODE_TITLES_MAP[drawMode],
+                        message: "Aucune détection n'a été sélectionnée",
                         color: 'red',
                     });
                     MAPBOX_DRAW_CONTROL.deleteAll();
                     return;
                 }
 
+                return detectionUuids;
+            };
+
+            if (drawMode === 'MULTIPLE_EDIT') {
+                if (!features.length) {
+                    return;
+                }
+
+                const polygon: Polygon = features[0].geometry;
+                const detectionUuids = getDetectionUuidsFromPolygon(polygon);
+
+                if (!detectionUuids) {
+                    return;
+                }
+
                 setMultipleEditDetectionsUuids(detectionUuids);
             }
 
-            if (currentMode === DRAW_MODE_ADD_DETECTION) {
+            if (drawMode === 'MULTIPLE_DOWNLOAD') {
+                if (!features.length) {
+                    return;
+                }
+
+                const polygon: Polygon = features[0].geometry;
+                const detectionUuids = getDetectionUuidsFromPolygon(polygon);
+
+                if (!detectionUuids) {
+                    return;
+                }
+
+                MAPBOX_DRAW_CONTROL.deleteAll();
+                notifications.show({
+                    title: `Génération des fiches de signalement en cours (${detectionUuids.length} détections)`,
+                    message: 'Le téléchargement se lancera dans quelques instants',
+                });
+
+                const detectionObjectsDetailsRes = await api.get<DetectionObjectDetail[]>(
+                    DETECTION_OBJECT_LIST_ENDPOINT,
+                    {
+                        params: {
+                            detectionUuids: detectionUuids.join(','),
+                            detail: true,
+                        },
+                    },
+                );
+                const detectionObjectsDetails = detectionObjectsDetailsRes.data;
+            }
+
+            if (drawMode === 'ADD_DETECTION') {
                 if (!features.length) {
                     return;
                 }
@@ -406,7 +469,7 @@ const Component: React.FC<ComponentProps> = ({
             mapRef.off('draw.modechange', handleModeChange);
             mapRef.off('draw.create', handleCreate);
         };
-    }, [data, mapRef]);
+    }, [data, mapRef, drawMode]);
 
     const layersDisplayed = layers.filter((layer) => layer.displayed);
 
@@ -558,7 +621,7 @@ const Component: React.FC<ComponentProps> = ({
         if (
             !features ||
             !features.length ||
-            [DRAW_MODE_ADD_DETECTION, DRAW_MODE_MULTIPLE_SELECTION].includes(currentDrawMode)
+            [DRAW_MODE_ADD_DETECTION, DRAW_MODE_MULTIPOLYGON].includes(currentDrawMode)
         ) {
             closeDetectionDetail();
             return;
@@ -662,7 +725,7 @@ const Component: React.FC<ComponentProps> = ({
                                 setLeftSectionShowed(state ? 'LAYER_DISPLAY' : undefined);
                             }}
                             displayLayersSelection={displayLayersSelection}
-                            disabled={drawMode}
+                            disabled={drawMode !== null}
                         />
                         <MapAddAnnotationModal
                             isShowed={!!addAnnotationPolygon}

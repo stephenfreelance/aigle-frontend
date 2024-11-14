@@ -6,6 +6,7 @@ import { useAuth } from '@/utils/auth-context';
 import { DEFAULT_DATE_FORMAT, DETECTION_CONTROL_STATUSES_NAMES_MAP } from '@/utils/constants';
 import { formatCommune, formatParcel } from '@/utils/format';
 import { Document, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
+import { centroid } from '@turf/turf';
 import { format } from 'date-fns';
 import React, { useMemo } from 'react';
 
@@ -104,13 +105,17 @@ export interface PreviewImage {
 
 export interface ComponentProps {
     detectionObject: DetectionObjectDetail;
-    latLong: string;
     previewImages: PreviewImage[];
     parcel?: ParcelDetail | null;
 }
 
 // Create Document Component
-const Component: React.FC<ComponentProps> = ({ detectionObject, latLong, previewImages, parcel }) => {
+const Component: React.FC<ComponentProps> = ({ detectionObject, previewImages, parcel }) => {
+    const {
+        geometry: { coordinates: centerPoint },
+    } = centroid(detectionObject.detections[0].geometry);
+    const latLong = `${centerPoint[1].toFixed(5)}, ${centerPoint[0].toFixed(5)}`;
+
     const { getUserGroupType, userMe } = useAuth.getState();
     const userGroupType = useMemo(() => getUserGroupType(), [userMe]);
 

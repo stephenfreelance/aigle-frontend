@@ -1,14 +1,13 @@
-@import url('@gouvfr/dsfr/dist/dsfr.min.css');
-@import url('@gouvfr/dsfr/dist/utility/utility.min.css');
+@import url("@gouvfr/dsfr/dist/dsfr.min.css");
+@import url("@gouvfr/dsfr/dist/utility/utility.min.css");
 
+@import url("@mantine/core/styles.css");
+@import url("@mantine/dates/styles.css");
+@import url("@mantine/notifications/styles.css");
+@import url("@mantine/charts/styles.css");
 
-@import url('@mantine/core/styles.css');
-@import url('@mantine/dates/styles.css');
-@import url('@mantine/notifications/styles.css');
-@import url('@mantine/charts/styles.css');
-
-@import url('mapbox-gl/dist/mapbox-gl.css');
-@import '@/constants.scss';
+@import url("mapbox-gl/dist/mapbox-gl.css");
+@import "@/constants.scss";
 
 // css reset
 
@@ -44,8 +43,8 @@ h3 {
     font-size: 1.1rem;
 }
 
-ul[role='list'],
-ol[role='list'] {
+ul[role="list"],
+ol[role="list"] {
     list-style: none;
 }
 
@@ -197,6 +196,12 @@ header.fr-header {
     background-image: none !important;
 }
 
+@media (hover: hover) and (pointer: fine) {
+    button.mantine-Button-root:not(:disabled):hover {
+        background-color: var(--button-hover, var(--mantine-primary-color-filled-hover));
+    }
+}
+
 // mantine
 
 .mantine-Pagination-root {
@@ -274,6 +279,29 @@ header.fr-header {
     }
 }
 
+.mapboxgl-ctrl-top-right {
+    .mapboxgl-ctrl-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        background: none;
+        box-shadow: none !important;
+
+        margin-top: 20px;
+        margin-right: 20px;
+
+        .mapbox-gl-draw_ctrl-draw-btn {
+            background-color: var(--mantine-color-white);
+            border-radius: 8px;
+            box-shadow: $shadow;
+
+            &:hover {
+                background-color: #f4f4f4;
+            }
+        }
+    }
+}
+
 .mapboxgl-ctrl:not(.mapboxgl-ctrl-geocoder):not(.mapboxgl-ctrl-scale) {
     border-radius: $border-radius-small;
 
@@ -311,16 +339,20 @@ header.fr-header {
 }
 
 .mapbox-gl-draw_point {
-    background-image: url('@/assets/pencil.svg');
+    background-image: url("@/assets/pencil.svg");
 }
 
 .mapbox-gl-draw_polygon {
-    background-image: url('@/assets/select-all.svg');
+    background-image: url("@/assets/select-all.svg");
 }
 
-.crisp-client .cc-1brb6 .cc-1yy0g .cc-1m2mf[data-is-failure=false] {
-    padding-right: 24px !important;
-    padding-bottom: 24px !important;
+.mapbox-gl-draw_line {
+    background-image: url("@/assets/download.svg");
+}
+
+.crisp-client .cc-1brb6 .cc-1yy0g .cc-1m2mf[data-is-failure="false"] {
+    margin-right: 24px !important;
+    margin-bottom: 24px !important;
 }
 
 // custom
