@@ -16,6 +16,7 @@ import MapControlLegend from '@/components/Map/controls/MapControlLegend';
 import MapControlPartialToggle from '@/components/Map/controls/MapControlPartialToggle';
 import MapControlSearchParcel from '@/components/Map/controls/MapControlSearchParcel';
 import { processDetections } from '@/components/Map/utils/process-detections';
+import SignalementPDFData from '@/components/signalement-pdf/SignalementPDFData';
 import { DetectionGeojsonData, DetectionProperties } from '@/models/detection';
 import { DetectionObjectDetail } from '@/models/detection-object';
 import { GeoCustomZoneGeojsonData } from '@/models/geo/geo-custom-zone';
@@ -23,7 +24,7 @@ import { MapTileSetLayer } from '@/models/map-layer';
 import api from '@/utils/api';
 import { MAPBOX_TOKEN, PARCEL_COLOR } from '@/utils/constants';
 import { useMap } from '@/utils/context/map-context';
-import { Loader as MantineLoader } from '@mantine/core';
+import { LoadingOverlay, Loader as MantineLoader, Progress } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
@@ -179,6 +180,9 @@ const Component: React.FC<ComponentProps> = ({
 
     const [cursor, setCursor] = useState<string>();
     const [mapRef, setMapRef] = useState<mapboxgl.Map>();
+
+    const [detectionObjectsToDownload, setDetectionObjectsToDownload] = useState<DetectionObjectDetail[]>();
+    const [detectionObjectsNbrToDownloadProcessed, setDetectionObjectsNbrToDownloadProcessed] = useState(0);
 
     const customZoneLayersDisplayedUuids = (customZoneLayers || [])
         .filter(({ displayed }) => displayed)
@@ -442,6 +446,7 @@ const Component: React.FC<ComponentProps> = ({
                     },
                 );
                 const detectionObjectsDetails = detectionObjectsDetailsRes.data;
+                setDetectionObjectsToDownload(detectionObjectsDetails);
             }
 
             if (drawMode === 'ADD_DETECTION') {
@@ -927,6 +932,46 @@ const Component: React.FC<ComponentProps> = ({
                     </div>
                 ) : undefined}
             </Map>
+            {detectionObjectsToDownload ? (
+                <>
+                    <SignalementPDFData
+                        detectionObjects={detectionObjectsToDownload}
+                        onGenerationFinished={(error?: string) => {
+                            if (error) {
+                                notifications.show({
+                                    title: 'Erreur lors de la génération des fiches de signalement',
+                                    message: error,
+                                    color: 'red',
+                                });
+                            }
+
+                            setDetectionObjectsToDownload(undefined);
+                        }}
+                        setNbrDetectionObjectsProcessed={(nbr) => setDetectionObjectsNbrToDownloadProcessed(nbr)}
+                    />
+                    <LoadingOverlay
+                        zIndex={10000000}
+                        visible={true}
+                        loaderProps={{
+                            children: (
+                                <>
+                                    <h2>Génération des rapports...</h2>
+                                    <p>Cette opération peut prendre quelques minutes</p>
+                                    <p>Veuillez ne pas fermer cette fenêtre</p>
+                                    <Progress
+                                        aria-label="Uploading progress"
+                                        mt="md"
+                                        value={
+                                            100 *
+                                            (detectionObjectsNbrToDownloadProcessed / detectionObjectsToDownload.length)
+                                        }
+                                    />
+                                </>
+                            ),
+                        }}
+                    />
+                </>
+            ) : null}
         </div>
     );
 };

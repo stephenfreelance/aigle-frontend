@@ -5,7 +5,7 @@ import { ParcelDetail } from '@/models/parcel';
 import { useAuth } from '@/utils/auth-context';
 import { DEFAULT_DATE_FORMAT, DETECTION_CONTROL_STATUSES_NAMES_MAP } from '@/utils/constants';
 import { formatCommune, formatParcel } from '@/utils/format';
-import { Document, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
+import { Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import { centroid } from '@turf/turf';
 import { format } from 'date-fns';
 import React, { useMemo } from 'react';
@@ -122,72 +122,68 @@ const Component: React.FC<ComponentProps> = ({ detectionObject, previewImages, p
     const suspectObjectsCount = parcel ? countSuspectObjectsParcel(parcel, detectionObject.uuid) : null;
 
     return (
-        <Document>
-            <Page size="A4" style={styles.page}>
-                <View style={styles.topSection}>
-                    <View style={styles.topSectionLogoContainer}>
-                        <Image src={prefetHeraultImg} style={styles.topSectionLogo} />
-                    </View>
-                    <View style={styles.topSectionTextContainer}>
-                        <Text>Fiche de signalement</Text>
-                        <Text>Objet détecté #{detectionObject.id}</Text>
-                    </View>
-                    <View style={styles.topSectionLogoContainer}>
-                        <Image src={logoImg} style={styles.topSectionLogo} />
-                    </View>
+        <Page size="A4" style={styles.page}>
+            <View style={styles.topSection}>
+                <View style={styles.topSectionLogoContainer}>
+                    <Image src={prefetHeraultImg} style={styles.topSectionLogo} />
                 </View>
+                <View style={styles.topSectionTextContainer}>
+                    <Text>Fiche de signalement</Text>
+                    <Text>Objet détecté #{detectionObject.id}</Text>
+                </View>
+                <View style={styles.topSectionLogoContainer}>
+                    <Image src={logoImg} style={styles.topSectionLogo} />
+                </View>
+            </View>
 
-                <View style={styles.subTitleContainer}>
-                    <Text style={styles.subTitle}>
-                        Potentielle infraction au code de l&apos;urbanisme et/ou de l&apos;environnement
-                    </Text>
-                </View>
+            <View style={styles.subTitleContainer}>
+                <Text style={styles.subTitle}>
+                    Potentielle infraction au code de l&apos;urbanisme et/ou de l&apos;environnement
+                </Text>
+            </View>
 
-                <View style={styles.mainSection}>
+            <View style={styles.mainSection}>
+                <Text>
+                    Commune de{' '}
+                    {detectionObject.parcel?.commune
+                        ? formatCommune(detectionObject.parcel.commune, 'CODE_AFTER_NAME')
+                        : 'Commune non-spécifiée'}
+                </Text>
+                <Text>
+                    Parcelle :{' '}
+                    {detectionObject.parcel ? formatParcel(detectionObject.parcel) : 'Parcelle non-spécifiée'}
+                </Text>
+                <Text>Coordonnées GPS : {latLong}</Text>
+                <Text>Objet signalé : {detectionObject.objectType.name}</Text>
+                <Text>Zones à enjeux : {parcel?.customGeoZones.map((zone) => zone.name).join(', ')}</Text>
+                <Text>
+                    Statut:{' '}
+                    {
+                        DETECTION_CONTROL_STATUSES_NAMES_MAP[userGroupType][
+                            detectionObject.detections[0].detectionData.detectionControlStatus
+                        ]
+                    }
+                </Text>
+                <Text>Date de la dernière modification : {format(detectionObject.updatedAt, DEFAULT_DATE_FORMAT)}</Text>
+                {suspectObjectsCount ? (
                     <Text>
-                        Commune de{' '}
-                        {detectionObject.parcel?.commune
-                            ? formatCommune(detectionObject.parcel.commune, 'CODE_AFTER_NAME')
-                            : 'Commune non-spécifiée'}
+                        Autre objets suspects sur la parcelle :{' '}
+                        {Object.keys(suspectObjectsCount)
+                            .map((key) => `${key} : ${suspectObjectsCount[key]}`)
+                            .join(', ')}
                     </Text>
-                    <Text>
-                        Parcelle :{' '}
-                        {detectionObject.parcel ? formatParcel(detectionObject.parcel) : 'Parcelle non-spécifiée'}
-                    </Text>
-                    <Text>Coordonnées GPS : {latLong}</Text>
-                    <Text>Objet signalé : {detectionObject.objectType.name}</Text>
-                    <Text>Zones à enjeux : {parcel?.customGeoZones.map((zone) => zone.name).join(', ')}</Text>
-                    <Text>
-                        Statut:{' '}
-                        {
-                            DETECTION_CONTROL_STATUSES_NAMES_MAP[userGroupType][
-                                detectionObject.detections[0].detectionData.detectionControlStatus
-                            ]
-                        }
-                    </Text>
-                    <Text>
-                        Date de la dernière modification : {format(detectionObject.updatedAt, DEFAULT_DATE_FORMAT)}
-                    </Text>
-                    {suspectObjectsCount ? (
-                        <Text>
-                            Autre objets suspects sur la parcelle :{' '}
-                            {Object.keys(suspectObjectsCount)
-                                .map((key) => `${key} : ${suspectObjectsCount[key]}`)
-                                .join(', ')}
-                        </Text>
-                    ) : null}
-                </View>
+                ) : null}
+            </View>
 
-                <View style={styles.tilePreviews}>
-                    {previewImages.map(({ src, title }, index) => (
-                        <View key={index} style={styles.tilePreviewContainer}>
-                            <Image src={src} style={styles.tilePreviewImg} />
-                            <Text style={styles.tilePreviewTitle}>{title}</Text>
-                        </View>
-                    ))}
-                </View>
-            </Page>
-        </Document>
+            <View style={styles.tilePreviews}>
+                {previewImages.map(({ src, title }, index) => (
+                    <View key={index} style={styles.tilePreviewContainer}>
+                        <Image src={src} style={styles.tilePreviewImg} />
+                        <Text style={styles.tilePreviewTitle}>{title}</Text>
+                    </View>
+                ))}
+            </View>
+        </Page>
     );
 };
 
