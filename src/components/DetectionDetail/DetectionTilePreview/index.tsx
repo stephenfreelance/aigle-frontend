@@ -46,6 +46,7 @@ interface ComponentProps {
     imageLayer?: ImageLayer;
     onIdle?: () => void;
     marker?: React.ReactNode;
+    reuseMaps?: boolean;
 }
 
 const Component: React.FC<ComponentProps> = ({
@@ -61,6 +62,7 @@ const Component: React.FC<ComponentProps> = ({
     id,
     imageLayer,
     onIdle,
+    reuseMaps = true
 }) => {
     const mapRef = useRef<MapRef>();
     const [currentExtendedLevel, setCurrentExtendedLevel] = useState(extendedLevel);
@@ -118,7 +120,7 @@ const Component: React.FC<ComponentProps> = ({
                         style={{ width: '100%', height: '100%' }}
                         mapStyle="mapbox://styles/mapbox/streets-v11"
                         interactive={false}
-                        reuseMaps={true}
+                        reuseMaps={reuseMaps}
                         maxBounds={bounds_}
                         {...(id ? { id } : {})}
                         {...(onIdle ? { onIdle } : {})}

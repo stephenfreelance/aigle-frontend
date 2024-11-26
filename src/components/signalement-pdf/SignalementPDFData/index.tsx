@@ -229,9 +229,13 @@ const PreviewImages: React.FC<PreviewImagesProps> = ({ detectionObject, setFinal
                         main: classes['detection-tile-preview-detail'],
                         inner: classes['detection-tile-preview-inner'],
                     }}
+                    key={getPreviewId(PLAN_URL_TILESET.uuid, detectionObject.uuid)}
                     id={getPreviewId(PLAN_URL_TILESET.uuid, detectionObject.uuid)}
                     displayName={false}
-                    onIdle={() => getPreviewImage(PLAN_URL_TILESET.uuid, 'Plan', tileSetsToRender.length)}
+                    onIdle={() =>
+                        setTimeout(() => getPreviewImage(PLAN_URL_TILESET.uuid, 'Plan', tileSetsToRender.length), 3000)
+                    }
+                    reuseMaps={false}
                     imageLayer={
                         parcel
                             ? {

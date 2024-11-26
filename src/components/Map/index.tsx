@@ -946,6 +946,7 @@ const Component: React.FC<ComponentProps> = ({
                             }
 
                             setDetectionObjectsToDownload(undefined);
+                            setDetectionObjectsNbrToDownloadProcessed(0);
                         }}
                         setNbrDetectionObjectsProcessed={(nbr) => setDetectionObjectsNbrToDownloadProcessed(nbr)}
                     />
