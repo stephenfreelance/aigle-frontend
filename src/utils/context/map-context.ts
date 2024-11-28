@@ -70,7 +70,7 @@ const useMap = create<MapState>()((set, get) => ({
             objectsFilter: {
                 objectTypesUuids: Array.from(objectTypesUuids),
                 detectionValidationStatuses: ['DETECTED_NOT_VERIFIED', 'SUSPECT'] as DetectionValidationStatus[],
-                detectionControlStatuses: [...detectionControlStatuses],
+                detectionControlStatuses: detectionControlStatuses.filter((status) => status !== 'REHABILITATED'),
                 score: 0.6,
                 prescripted: false,
                 interfaceDrawn: 'ALL',
