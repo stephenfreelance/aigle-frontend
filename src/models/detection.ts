@@ -6,20 +6,18 @@ import { FeatureCollection, Polygon } from 'geojson';
 
 export const detectionControlStatuses = [
     'NOT_CONTROLLED',
-    'SIGNALED_INTERNALLY',
     'SIGNALED_COLLECTIVITY',
+    'SIGNALED_COMMUNE',
+    'CONTROLLED_FIELD',
+    'PRIOR_LETTER_SENT',
+    'OFFICIAL_REPORT_DRAWN_UP',
+    'OBSERVARTION_REPORT_REDACTED',
     'VERBALIZED',
     'REHABILITATED',
 ] as const;
 export type DetectionControlStatus = (typeof detectionControlStatuses)[number];
 
-export const detectionValidationStatuses = [
-    'DETECTED_NOT_VERIFIED',
-    'SUSPECT',
-    'LEGITIMATE',
-    'INVALIDATED',
-    'DISAPPEARED',
-] as const;
+export const detectionValidationStatuses = ['DETECTED_NOT_VERIFIED', 'SUSPECT', 'LEGITIMATE', 'INVALIDATED'] as const;
 export type DetectionValidationStatus = (typeof detectionValidationStatuses)[number];
 
 export const detectionPrescriptionStatuses = ['PRESCRIBED', 'NOT_PRESCRIBED'] as const;

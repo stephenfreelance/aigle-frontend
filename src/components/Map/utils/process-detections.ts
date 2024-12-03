@@ -16,7 +16,5 @@ export const processDetections = (detectionGeojsonData: DetectionGeojsonData) =>
         );
     });
 
-    console.log({ detectionGeojsonData });
-
     return detectionGeojsonData;
 };
