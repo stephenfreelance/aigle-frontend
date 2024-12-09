@@ -20,7 +20,8 @@ interface ComponentInnerProps {
 }
 
 const ComponentInner: React.FC<ComponentInnerProps> = ({ layers, customZoneLayers, displayLayersSelection }) => {
-    const { setTileSetVisibility, setCustomZoneVisibility } = useMap();
+    const { setTileSetVisibility, setCustomZoneVisibility, annotationLayerVisible, setAnnotationLayerVisibility } =
+        useMap();
 
     const layersMap: LayersMap = useMemo(
         () =>
@@ -43,75 +44,92 @@ const ComponentInner: React.FC<ComponentInnerProps> = ({ layers, customZoneLayer
     return (
         <>
             <h2>{CONTROL_LABEL}</h2>
-            {displayLayersSelection ? (
-                <>
-                    {layersMap.BACKGROUND.length ? (
-                        <div className={classes['layers-section']}>
-                            <h3 className={classes['layers-section-title']}>{TILE_SET_TYPES_NAMES_MAP.BACKGROUND}</h3>
-                            <Radio.Group
-                                value={backgroundTileSetUuidDisplayed}
-                                onChange={(uuid) => setTileSetVisibility(uuid, true)}
-                            >
-                                <Stack className={classes['layers-section-group']} gap="xs">
-                                    {layersMap.BACKGROUND.map((layer) => (
-                                        <Radio
-                                            key={layer.tileSet.uuid}
-                                            label={layer.tileSet.name}
-                                            value={layer.tileSet.uuid}
-                                        />
-                                    ))}
-                                </Stack>
-                            </Radio.Group>
-                        </div>
-                    ) : null}
-                    {tileSetTypes
-                        .filter((type) => type !== 'BACKGROUND')
-                        .map((type) =>
-                            layersMap[type].length ? (
-                                <div key={type} className={classes['layers-section']}>
-                                    <h3 className={classes['layers-section-title']}>
-                                        {TILE_SET_TYPES_NAMES_MAP[type]}
-                                    </h3>
+            <div className={classes['layers-sections-container']}>
+                {displayLayersSelection ? (
+                    <>
+                        {layersMap.BACKGROUND.length ? (
+                            <div className={classes['layers-section']}>
+                                <h3 className={classes['layers-section-title']}>
+                                    {TILE_SET_TYPES_NAMES_MAP.BACKGROUND}
+                                </h3>
+                                <Radio.Group
+                                    value={backgroundTileSetUuidDisplayed}
+                                    onChange={(uuid) => setTileSetVisibility(uuid, true)}
+                                >
                                     <Stack className={classes['layers-section-group']} gap="xs">
-                                        {layersMap[type].map((layer) => (
-                                            <Checkbox
+                                        {layersMap.BACKGROUND.map((layer) => (
+                                            <Radio
                                                 key={layer.tileSet.uuid}
-                                                checked={layer.displayed}
                                                 label={layer.tileSet.name}
-                                                onChange={(event) =>
-                                                    setTileSetVisibility(
-                                                        layer.tileSet.uuid,
-                                                        event.currentTarget.checked,
-                                                    )
-                                                }
+                                                value={layer.tileSet.uuid}
                                             />
                                         ))}
                                     </Stack>
-                                </div>
-                            ) : null,
-                        )}
-                </>
-            ) : null}
-            <div className={classes['layers-section']}>
-                <h3 className={classes['layers-section-title']}>Contours des zones à enjeux</h3>
-                <Stack className={classes['layers-section-group']} gap="xs">
-                    {customZoneLayers.map((customZoneLayer) => (
+                                </Radio.Group>
+                            </div>
+                        ) : null}
+                        {tileSetTypes
+                            .filter((type) => type !== 'BACKGROUND')
+                            .map((type) =>
+                                layersMap[type].length ? (
+                                    <div key={type} className={classes['layers-section']}>
+                                        <h3 className={classes['layers-section-title']}>
+                                            {TILE_SET_TYPES_NAMES_MAP[type]}
+                                        </h3>
+                                        <Stack className={classes['layers-section-group']} gap="xs">
+                                            {layersMap[type].map((layer) => (
+                                                <Checkbox
+                                                    key={layer.tileSet.uuid}
+                                                    checked={layer.displayed}
+                                                    label={layer.tileSet.name}
+                                                    onChange={(event) =>
+                                                        setTileSetVisibility(
+                                                            layer.tileSet.uuid,
+                                                            event.currentTarget.checked,
+                                                        )
+                                                    }
+                                                />
+                                            ))}
+                                        </Stack>
+                                    </div>
+                                ) : null,
+                            )}
+                    </>
+                ) : null}
+                <div className={classes['layers-section']}>
+                    <h3 className={classes['layers-section-title']}>Contours des zones à enjeux</h3>
+                    <Stack className={classes['layers-section-group']} gap="xs">
+                        {customZoneLayers.map((customZoneLayer) => (
+                            <Checkbox
+                                key={customZoneLayer.geoCustomZone.uuid}
+                                checked={customZoneLayer.displayed}
+                                label={
+                                    <div className={classes['checkbox-label']}>
+                                        {customZoneLayer.geoCustomZone.name}
+                                    </div>
+                                }
+                                color={customZoneLayer.geoCustomZone.color}
+                                onChange={async (event) => {
+                                    setCustomZoneVisibility(
+                                        customZoneLayer.geoCustomZone.uuid,
+                                        event.currentTarget.checked,
+                                    );
+                                }}
+                            />
+                        ))}
+                    </Stack>
+                </div>
+                <div className={classes['layers-section']}>
+                    <h3 className={classes['layers-section-title']}>Annotation</h3>
+                    <Stack className={classes['layers-section-group']} gap="xs">
                         <Checkbox
-                            key={customZoneLayer.geoCustomZone.uuid}
-                            checked={customZoneLayer.displayed}
-                            label={
-                                <div className={classes['checkbox-label']}>{customZoneLayer.geoCustomZone.name}</div>
-                            }
-                            color={customZoneLayer.geoCustomZone.color}
-                            onChange={async (event) => {
-                                setCustomZoneVisibility(
-                                    customZoneLayer.geoCustomZone.uuid,
-                                    event.currentTarget.checked,
-                                );
-                            }}
+                            key="annotation"
+                            checked={annotationLayerVisible}
+                            label="Grille d'annotation"
+                            onChange={(event) => setAnnotationLayerVisibility(event.currentTarget.checked)}
                         />
-                    ))}
-                </Stack>
+                    </Stack>
+                </div>
             </div>
         </>
     );
