@@ -892,7 +892,7 @@ const Component: React.FC<ComponentProps> = ({
                             'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
                             'text-size': 12,
                             'text-anchor': 'center',
-                            'symbol-placement': 'point'
+                            'symbol-placement': 'point',
                         }}
                         paint={{
                             'text-color': '#000000', // Text color
