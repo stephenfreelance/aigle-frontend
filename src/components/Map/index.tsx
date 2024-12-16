@@ -3,6 +3,7 @@ import Map, { GeolocateControl, Layer, Source, ViewStateChangeEvent } from 'reac
 
 import {
     DETECTION_OBJECT_LIST_ENDPOINT,
+    GET_ANNOTATION_GRID_ENDPOINT,
     GET_CUSTOM_GEOMETRY_ENDPOINT,
     getDetectionListEndpoint,
 } from '@/api-endpoints';
@@ -18,6 +19,7 @@ import MapControlSearchParcel from '@/components/Map/controls/MapControlSearchPa
 import { processDetections } from '@/components/Map/utils/process-detections';
 import SignalementPDFData from '@/components/signalement-pdf/SignalementPDFData';
 import { DetectionGeojsonData, DetectionProperties } from '@/models/detection';
+import { ObjectsFilter } from '@/models/detection-filter';
 import { DetectionObjectDetail } from '@/models/detection-object';
 import { GeoCustomZoneGeojsonData } from '@/models/geo/geo-custom-zone';
 import { MapTileSetLayer } from '@/models/map-layer';
@@ -38,6 +40,7 @@ import DrawRectangle, { DrawStyles } from 'mapbox-gl-draw-rectangle-restrict-are
 import classes from './index.module.scss';
 
 const ZOOM_LIMIT_TO_DISPLAY_DETECTIONS = 9;
+const ZOOM_LIMIT_TO_DISPLAY_ANNOTATION_GRID = 13;
 const MAP_INITIAL_VIEW_STATE_DEFAULT = {
     longitude: 3.95657,
     latitude: 43.61951,
@@ -112,6 +115,8 @@ const GEOJSON_DETECTIONS_LAYER_OUTLINE_ID = 'detections-geojson-layer-outline';
 const GEOJSON_LAYER_EXTRA_ID = 'geojson-layer-data-extra';
 const GEOJSON_LAYER_EXTRA_BOUNDINGS_ID = 'geojson-layer-data-extra-boundings';
 const GEOJSON_PARCEL_LAYER_ID = 'parcel-geojson-layer';
+const GEOJSON_ANNOTATION_GRID_LAYER_ID = 'annotation-grid-geojson-layer';
+const GEOJSON_ANNOTATION_GRID_LABEL_LAYER_ID = 'annotation-grid-label-geojson-layer';
 
 const GEOJSON_LAYER_EXTRA_COLOR = '#FF0000';
 
@@ -136,6 +141,12 @@ const DRAW_MODE_TITLES_MAP: Record<DrawMode, string> = {
     MULTIPLE_EDIT: 'Edition multiple',
     ADD_DETECTION: 'Dessiner un objet',
     MULTIPLE_DOWNLOAD: 'Téléchargement multiple de rapports',
+};
+
+const getAnnotationGridFilters = (objectsFilter: ObjectsFilter) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { detectionValidationStatuses, ...annotationFilter } = objectsFilter;
+    return annotationFilter;
 };
 
 interface ComponentProps {
@@ -175,8 +186,15 @@ const Component: React.FC<ComponentProps> = ({
     const [addAnnotationPolygon, setAddAnnotationPolygon] = useState<Polygon>();
     const [multipleEditDetectionsUuids, setMultipleEditDetectionsUuids] = useState<string[] | undefined>(undefined);
 
-    const { eventEmitter, objectsFilter, getTileSetsUuids, setTileSetsVisibility, settings, customZoneLayers } =
-        useMap();
+    const {
+        eventEmitter,
+        objectsFilter,
+        getTileSetsUuids,
+        setTileSetsVisibility,
+        settings,
+        customZoneLayers,
+        annotationLayerVisible,
+    } = useMap();
 
     const [cursor, setCursor] = useState<string>();
     const [mapRef, setMapRef] = useState<mapboxgl.Map>();
@@ -505,6 +523,42 @@ const Component: React.FC<ComponentProps> = ({
         return processDetections(res.data);
     };
 
+    // annotation grid fetching
+
+    const annotationGridFilters = objectsFilter ? getAnnotationGridFilters(objectsFilter) : undefined;
+
+    const fetchAnnotationGrid = async (signal: AbortSignal, mapBounds?: MapBounds) => {
+        if (!displayDetections || !mapBounds || !objectsFilter || !annotationLayerVisible) {
+            return null;
+        }
+
+        if (mapRef && mapRef.getZoom() <= ZOOM_LIMIT_TO_DISPLAY_ANNOTATION_GRID) {
+            return null;
+        }
+
+        const res = await api.get<DetectionGeojsonData>(GET_ANNOTATION_GRID_ENDPOINT, {
+            params: {
+                ...mapBounds,
+                ...annotationGridFilters,
+                tileSetsUuids: tileSetsUuidsDetection,
+            },
+            signal,
+        });
+
+        return res.data;
+    };
+    const { data: annotationGrid, refetch: refetchAnnotationGrid } = useQuery({
+        queryKey: [
+            GET_ANNOTATION_GRID_ENDPOINT,
+            ...Object.values(mapBounds || {}),
+            ...Object.values(annotationGridFilters || {}),
+            ...tileSetsUuidsDetection,
+        ],
+        queryFn: ({ signal }) => fetchAnnotationGrid(signal, mapBounds),
+        placeholderData: keepPreviousData,
+        enabled: annotationLayerVisible && !!mapBounds,
+    });
+
     // custom zones fetching
 
     const fetchCustomZoneGeometries = async (signal: AbortSignal, mapBounds?: MapBounds) => {
@@ -530,15 +584,20 @@ const Component: React.FC<ComponentProps> = ({
         ],
         queryFn: ({ signal }) => fetchCustomZoneGeometries(signal, mapBounds),
         placeholderData: keepPreviousData,
-        enabled: !!mapBounds,
+        enabled: !!customZoneLayersDisplayedUuids.length && !!mapBounds,
     });
 
     // event that makes detections to be reloaded
     useEffect(() => {
-        eventEmitter.on('UPDATE_DETECTIONS', refetch);
+        const updateDetections = () => {
+            refetchAnnotationGrid();
+            refetch();
+        };
+
+        eventEmitter.on('UPDATE_DETECTIONS', updateDetections);
 
         return () => {
-            eventEmitter.off('UPDATE_DETECTIONS', refetch);
+            eventEmitter.off('UPDATE_DETECTIONS', updateDetections);
         };
     }, []);
     useEffect(() => {
@@ -686,6 +745,7 @@ const Component: React.FC<ComponentProps> = ({
                 onMouseEnter={onPolygonMouseEnter}
                 onMouseLeave={onPolygonMouseLeave}
                 cursor={cursor}
+                mapStyle="mapbox://styles/mapbox/streets-v11"
                 {...(settings?.globalGeometry ? { maxBounds: bbox(settings.globalGeometry) } : {})}
             >
                 <GeolocateControl
@@ -807,10 +867,44 @@ const Component: React.FC<ComponentProps> = ({
                         </Source>
                     </>
                 ) : null}
+
+                <Source
+                    id="annotation-grid-data"
+                    type="geojson"
+                    data={annotationGrid || EMPTY_GEOJSON_FEATURE_COLLECTION}
+                >
+                    <Layer
+                        id={GEOJSON_ANNOTATION_GRID_LAYER_ID}
+                        beforeId={displayLayersGeometry ? GEOJSON_LAYER_EXTRA_ID : undefined}
+                        type="line"
+                        paint={{
+                            'line-color': '#ff0000',
+                            'line-width': 2,
+                            'line-opacity': 0.75,
+                        }}
+                    />
+                    <Layer
+                        id={GEOJSON_ANNOTATION_GRID_LABEL_LAYER_ID}
+                        beforeId={GEOJSON_ANNOTATION_GRID_LAYER_ID}
+                        type="symbol"
+                        layout={{
+                            'text-field': ['get', 'text'],
+                            'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+                            'text-size': 12,
+                            'text-anchor': 'center',
+                            'symbol-placement': 'point',
+                        }}
+                        paint={{
+                            'text-color': '#000000', // Text color
+                            'text-halo-color': '#ffffff', // Add a halo for better readability
+                            'text-halo-width': 2,
+                        }}
+                    />
+                </Source>
                 <Source id="detections-geojson-data" type="geojson" data={data || EMPTY_GEOJSON_FEATURE_COLLECTION}>
                     <Layer
                         id={GEOJSON_DETECTIONS_LAYER_ID}
-                        beforeId={displayLayersGeometry ? GEOJSON_LAYER_EXTRA_ID : undefined}
+                        beforeId={GEOJSON_ANNOTATION_GRID_LABEL_LAYER_ID}
                         type="fill"
                         paint={{
                             'fill-opacity': 0,

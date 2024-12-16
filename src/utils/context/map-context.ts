@@ -40,6 +40,7 @@ interface MapState {
     objectsFilter?: ObjectsFilter;
     settings?: MapSettings;
     userLastPosition?: GeoJSON.Position | null;
+    annotationLayerVisible?: boolean;
 
     setMapSettings: (settings: MapSettings) => void;
     resetLayers: () => void;
@@ -48,6 +49,7 @@ interface MapState {
     setTileSetVisibility: (uuid: string, visible: boolean) => void;
     setTileSetsVisibility: (uuids: string[], visible: boolean) => void;
     setCustomZoneVisibility: (uuid: string, visible: boolean) => void;
+    setAnnotationLayerVisibility: (visible: boolean) => void;
     getTileSets: (tileSetTypes: TileSetType[], tileSetStatuses: TileSetStatus[], displayed?: boolean) => TileSet[];
     getTileSetsUuids: (tileSetTypes: TileSetType[], tileSetStatuses: TileSetStatus[], displayed?: boolean) => string[];
     eventEmitter: EventEmitter<MapEventType>;
@@ -62,6 +64,7 @@ const useMap = create<MapState>()((set, get) => ({
         set(() => ({
             settings,
             layers,
+            annotationLayerVisible: false,
             customZoneLayers: settings.geoCustomZones.map((geoCustomZone) => ({
                 geoCustomZone,
                 displayed: false,
@@ -82,6 +85,11 @@ const useMap = create<MapState>()((set, get) => ({
             '--nbr-background-layers',
             get().getTileSets(['BACKGROUND'], ['VISIBLE', 'HIDDEN']).length.toString(),
         );
+    },
+    setAnnotationLayerVisibility: (visible: boolean) => {
+        set({
+            annotationLayerVisible: visible,
+        });
     },
     resetLayers: () => {
         const settings = get().settings;

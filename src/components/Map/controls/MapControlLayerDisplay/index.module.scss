@@ -2,8 +2,6 @@
 
 .content {
     z-index: 100;
-    
-    width: 400px;
 
     top: 58px; // 10px margin of searchar bar + 48px total size of search bar
 
@@ -25,17 +23,26 @@
     border-radius: $border-radius-small;
 }
 
-.layers-section {
-    .layers-section-title {
-        margin-top: var(--mantine-spacing-sm);
+.layers-sections-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 16px;
+        white-space: nowrap;
+    
 
-        &:first-letter {
-            text-transform: uppercase;
+    .layers-section {
+
+        .layers-section-title {
+            margin-top: var(--mantine-spacing-sm);
+    
+            &:first-letter {
+                text-transform: uppercase;
+            }
         }
-    }
-
-    .layers-section-group {
-        margin-top: var(--mantine-spacing-xs);
+    
+        .layers-section-group {
+            margin-top: var(--mantine-spacing-xs);
+        }
     }
 }
 
